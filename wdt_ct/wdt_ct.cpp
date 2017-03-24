@@ -251,7 +251,7 @@ int main(int argc, char * argv[])
 		ret = LPFUNC_execution(&wdt_dev, &exec_param);
 
 	if (exec_param.argus & OPTION_UPDATE) {
-		if (!(exec_param.argus & OPTION_NO_REBIND)) {
+		if (!(exec_param.argus & OPTION_NO_REBIND) && ret) {
 			if (!rebind_driver(&wdt_dev)) {
 				printf("Faild to rebind driver !\n");
 				return 0;

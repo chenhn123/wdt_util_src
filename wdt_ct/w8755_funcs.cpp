@@ -195,6 +195,7 @@ int	wh_w8755_dev_flash_write_data_page(WDT_DEV* pdev, BYTE* data, UINT32 address
 		if (!wh_w8755_dev_exec_report_type_write(pdev, W8755_ISP_SET_FLASH,
 							 psource_data, packet_size)) {
 			printf("can't set flash: 0x%x\n", addr_start);
+			retval = 0;
 			break;			
 		}
 
@@ -609,11 +610,11 @@ int wh_w8755_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChu
 		for (retry_count = 0; retry_count < RETRY_COUNT; retry_count ++) {
 			retval = wh_w8755_dev_send_commands(pdev, WH_CMD_FLASH_ERASE4K, start_addr);
 			if (!retval)
-				break;
+				continue;
 
 			retval = wh_w8755_dev_flash_write_data(pdev, (BYTE*) pdata, start_addr, page_size);
 			if (!retval)
-				break;
+				continue;
 
 			calc_checksum = misr_for_bytes(0, (BYTE*) pdata, 0, page_size);
 			retval = wh_w8755_dev_flash_get_checksum(pdev, &read_checksum, start_addr, page_size);

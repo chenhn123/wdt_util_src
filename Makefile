@@ -9,32 +9,22 @@ AP	= wdt_util
 
 all: $(AP)
 
-CC       ?= gcc
-CFLAGS   ?= -Wall -g
+CPP		= g++
+CPPFLAGS	= -Wall -g
 
-CXX      ?= g++
-CXXFLAGS ?= -Wall -g
+LDFLAGS		= 
 
-LDFLAGS	 ?= 
+CPPOBJS  	= wdt_ct/wdt_ct.o wdt_ct/w8755_funcs.o \
+		  wdt_ct/wdt_dev_api.o wdt_ct/func_i2c.o
 
-COBJS     = 
-CPPOBJS   = 	wdt_ct/wdt_ct.o wdt_ct/w8755_funcs.o \
-		wdt_ct/wdt_dev_api.o wdt_ct/func_i2c.o
-
-OBJS      = $(COBJS) $(CPPOBJS)
-LIBS	= -pthread -lrt 
+OBJS      	= $(CPPOBJS)
+LIBS		= -pthread -lrt 
 	  
-INCLUDES   = 
-
-
 $(AP): $(OBJS)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ $(LIBS) -o $(AP)
-
-$(COBJS): %.o: %.c
-	$(CC) $(CFLAGS) -c $(INCLUDES) $< -o $@
+	$(CPP) $(CPPFLAGS) $(LDFLAGS) $^ $(LIBS) -o $(AP)
 
 $(CPPOBJS): %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $(INCLUDES) $< -o $@
+	$(CPP) $(CPPFLAGS) -c $(INCLUDES) $< -o $@
 
 clean:
 	rm -f $(OBJS) $(AP)

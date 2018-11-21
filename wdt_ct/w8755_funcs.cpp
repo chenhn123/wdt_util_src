@@ -564,7 +564,8 @@ int wh_w8755_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChu
 	int size;
 	int start_addr = 0;
 	int page_size;
-	int	retry_count = 0;
+	int retry_count = 0;
+	int is_first_page = 0;
 	char*	pdata;
 	UINT32	calc_checksum, read_checksum;
 	CHUNK_INFO_EX	*pChunk = pInputChunk;
@@ -597,6 +598,13 @@ int wh_w8755_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChu
 	size = pChunk->chuckInfo.length;	
 	start_addr = pChunk->chuckInfo.targetStartAddr;
 	pdata =	(char*) pChunk->pData;
+
+	if (size > WDT_PAGE_SIZE) {
+		is_first_page = 1;
+		size = size - WDT_PAGE_SIZE;
+		start_addr = start_addr + WDT_PAGE_SIZE;
+		pdata = pdata + WDT_PAGE_SIZE;
+	}
 
 	while (size) {
 		if (size > (int) WDT_PAGE_SIZE)	{
@@ -632,6 +640,14 @@ int wh_w8755_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChu
 
 		start_addr = start_addr + page_size;
 		pdata =	pdata + page_size;
+
+		// keep the first page to write to the flash in the last loop
+		if (size == 0 && is_first_page) {		
+			size = WDT_PAGE_SIZE;
+			start_addr = pChunk->chuckInfo.targetStartAddr;
+			pdata = (char*) pChunk->pData;
+			is_first_page = 0;		
+		}
 	}
 
 	retval = wh_w8755_dev_send_commands(pdev, WH_CMD_FLASH_LOCK, 0);

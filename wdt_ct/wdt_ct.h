@@ -37,19 +37,19 @@
 #define		OPTION_HW_ID			0x4000
 
 #define		TOOL_TITLE_STR			"Weida Update Utility"
-#define		TOOL_VERSION_STR		"V0.9.3"
+#define		TOOL_VERSION_STR		"V0.9.4"
 
-int				load_lib_func_address(WDT_DEV*, EXEC_PARAM*);
-int				image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pParam);
-int				image_file_isp_burn_data(WDT_DEV *pdev, EXEC_PARAM *pParam);
-int				get_raw_data(WDT_DEV *pdev, EXEC_PARAM *pParam);
-int 			show_wif_info(WDT_DEV *pdev, EXEC_PARAM *pparam);
-int				show_info(WDT_DEV *pdev, EXEC_PARAM *pParam);
-int		 		rebind_driver(WDT_DEV *pdev);
+int		load_lib_func_address(WDT_DEV*, EXEC_PARAM*);
+int		image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pParam);
+int		image_file_isp_burn_data(WDT_DEV *pdev, EXEC_PARAM *pParam);
+int		get_raw_data(WDT_DEV *pdev, EXEC_PARAM *pParam);
+int 		show_wif_info(WDT_DEV *pdev, EXEC_PARAM *pparam);
+int		show_info(WDT_DEV *pdev, EXEC_PARAM *pParam);
+int		rebind_driver(WDT_DEV *pdev);
 
-void 			wh_printf(const char *fmt, ...);
-void 			wh_sleep(int ms);
-void 			wh_udelay(int us);
+void 		wh_printf(const char *fmt, ...);
+void 		wh_sleep(int ms);
+void 		wh_udelay(int us);
 unsigned long 	get_current_ms();
 
 

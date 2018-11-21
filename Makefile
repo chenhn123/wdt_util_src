@@ -9,7 +9,7 @@ AP	= wdt_util
 
 all: $(AP)
 
-CXXFLAGS	?= -Wall -g
+CXXFLAGS	?= -Wall -Os
 
 CPPOBJS  	= wdt_ct/wdt_ct.o wdt_ct/w8755_funcs.o \
 		  wdt_ct/wdt_dev_api.o wdt_ct/func_i2c.o

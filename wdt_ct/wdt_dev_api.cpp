@@ -425,25 +425,31 @@ int image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pparam)
 		 * it will program a backup parameters to 0x58000 in general
 		 * just specify OPTION_NO_RPARAM if don't want this backup
 		 */
-		if (!(pdev->pparam->argus & OPTION_NO_RPARAM)) {		
+		if (!(pdev->pparam->argus & OPTION_NO_RPARAM)) {
 			chunk_info_cfg.chuckInfo.targetStartAddr = 0x58000;
 			err = program_one_chunk(pdev, "r_config", CHUNK_ID_CNFG, OPTION_4K_VERIFY, &chunk_info_cfg);
-		
+
 			if (!err)
 				goto exit_burn;
 		}
-				
+
 		chunk_info_cfg.chuckInfo.targetStartAddr = tempStartAddr;
 
 		/* fw should be reprogramed when parameters have been programmed */
 		chunk_info_cfg.chuckInfo.temp = chunk_info_fw.chuckInfo.targetStartAddr;
 		err = program_one_chunk(pdev, "config", CHUNK_ID_CNFG, OPTION_4K_VERIFY | OPTION_ERASE_TEMP,
 								&chunk_info_cfg);
-				
-		if (!err)
-			goto exit_burn; 		
 
-		is_fw_update = 1;		
+		if (!err)
+			goto exit_burn;
+	
+		if (!program_one_chunk(pdev, "ext bin", CHUNK_ID_EXTB, OPTION_4K_VERIFY, NULL))
+			goto exit_burn;
+
+		if (!err)
+			goto exit_burn;
+
+		is_fw_update = 1;
 	}
 
 	if (is_fw_update && (chunk_info_fw.chuckInfo.versionNumber && chunk_info_fw.chuckInfo.targetStartAddr)) {

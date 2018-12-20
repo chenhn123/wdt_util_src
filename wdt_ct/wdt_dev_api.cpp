@@ -518,8 +518,12 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 	if (pparam->argus & OPTION_HW_ID) {
 		if (pdev->is_legacy)
 			printf("%04x%04x", pinfo->vid, pinfo->pid);
-		else
+		else {
+			// to fix the temporary HWID issue, only happened in early build of Fleex.
+			if (pinfo->hardware_id == 0x01027401)
+				pinfo->hardware_id = 0x01017402;
 			printf("%08x", pinfo->hardware_id);
+		}
 	}
 
 	if (pparam->argus & OPTION_FW_VER) {

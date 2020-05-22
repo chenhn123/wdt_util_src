@@ -37,7 +37,7 @@
 #define		OPTION_HW_ID			0x4000
 
 #define		TOOL_TITLE_STR			"Weida Update Utility"
-#define		TOOL_VERSION_STR		"V0.9.6"
+#define		TOOL_VERSION_STR		"V0.9.7"
 
 int		load_lib_func_address(WDT_DEV*, EXEC_PARAM*);
 int		image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pParam);

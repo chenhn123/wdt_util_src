@@ -44,11 +44,9 @@
 #define		SUPPORT_RETRY	1
 #define		MAX_RETRIES		3
 
-/* proprietary driver */
-#define		ACPI_NAME		"i2c-WDHT0001"
+/* i2c-hid driver for weida's controller */
+#define		ACPI_NAME_HID	"i2c-WDHT"
 
-/* i2c-hid driver */
-#define		ACPI_NAME_HID	"i2c-WDHT0002"
 
 #define		NO_DEV_CHK		16
 
@@ -106,10 +104,6 @@ int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 			wh_printf("scan %s\n", dev_path);
 			sprintf(slave_dev, "%d-002c", adp_no);		
 			while ((dir = readdir(d)) != NULL) {
-				if (memcmp(dir->d_name, ACPI_NAME, strlen(ACPI_NAME)) == 0) {
-					found = 1;
-					break;	
-				}
 				if (memcmp(dir->d_name, ACPI_NAME_HID, strlen(ACPI_NAME_HID)) == 0) {
 					found = 1;
 					break;	

@@ -699,6 +699,52 @@ int wh_w8755_dev_verify_chunk_by_read_checksum(WDT_DEV* pdev, CHUNK_INFO_EX* pCh
 }
 
 
+int wh_w8755_dev_program_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int option)
+{
+	int retval = 0;
+	int ret = 0;
+
+	CHUNK_INFO_EX	*pChunk = pInputChunk;
+	FUNC_PTR_STRUCT_DEV_OPERATION funcs;
+
+	memset(&funcs, 0, sizeof(FUNC_PTR_STRUCT_DEV_OPERATION));	
+
+	retval = wh_w8755_dev_send_commands(pdev, WH_CMD_ALGO_STOP, 0);
+	if (!retval)
+		return retval;
+		
+	retval = wh_w8755_dev_send_commands(pdev, WH_CMD_FLASH_UNLOCK, 0);
+	if (!retval)
+		return retval;
+
+	retval = wh_w8755_dev_flash_erase(pdev, pChunk->chuckInfo.targetStartAddr, pChunk->chuckInfo.length);
+	if (!retval)
+		goto chunk_exit;
+		
+	printf("Chunk program begin ...\n");
+	retval = wh_w8755_dev_flash_write_data(pdev, pChunk->pData, pChunk->chuckInfo.targetStartAddr, pChunk->chuckInfo.length);
+	if (!retval)
+		goto chunk_exit;
+	printf("Chunk program end...\n");
+
+	if (wh_w8755_dev_verify_chunk(pdev, pInputChunk) <= 0) {
+		printf("Checksum failed\n");
+		goto chunk_exit;
+	}
+		
+chunk_exit:
+	ret = wh_w8755_dev_send_commands(pdev, WH_CMD_FLASH_LOCK, 0);
+	if (!ret)
+		return ret;
+	
+	ret = wh_w8755_dev_send_commands(pdev, WH_CMD_ALGO_START, 0);
+	if (!ret)
+		return ret;
+		
+	return retval;
+
+}
+
 int  wh_w8755_dev_verify_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pChunk)
 {
 	if (!pdev)
@@ -707,24 +753,46 @@ int  wh_w8755_dev_verify_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pChunk)
 	return wh_w8755_dev_verify_chunk_by_read_checksum(pdev, pChunk);
 }
 
-int wh_w8755_dev_set_feature(WDT_DEV* pdev, BYTE* buf, UINT32 buf_size)
+int wh_w8755_dev_program_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int option)
 {
 	if (!pdev)
 		return 0;
+	
+	if (pdev->pparam->argus & OPTION_BLOCK)
+		return wh_w8755_dev_program_chunk_verify(pdev, pInputChunk, option);
+	else
+		return wh_w8755_dev_program_4k_chunk_verify(pdev, pInputChunk, option);
 
-	if (pdev->intf_index == INTERFACE_I2C)
-		return wh_i2c_set_feature(pdev, buf, buf_size);
+	return 1;
+}
+
+
+int wh_w8755_dev_set_feature(WDT_DEV* pdev, BYTE* buf, UINT32 buf_size)
+{
+	int ret = 0;
+	
+	if (!pdev)
+		return 0;
+
+	if (pdev->intf_index == INTERFACE_I2C) {
+		ret = wh_i2c_set_feature(pdev, buf, buf_size);	
+		return ret;
+	}
 
 	return 0;
 }
 
 int wh_w8755_dev_get_feature(WDT_DEV* pdev, BYTE* buf, UINT32 buf_size)
 {
+	int ret = 0;
+
 	if (!pdev)
 		return 0;
 
-	if (pdev->intf_index == INTERFACE_I2C)
-		return wh_i2c_get_feature(pdev, buf, buf_size);
+	if (pdev->intf_index == INTERFACE_I2C) {
+		ret = wh_i2c_get_feature(pdev, buf, buf_size);		
+		return ret;
+	}
 
 	return 0;
 }

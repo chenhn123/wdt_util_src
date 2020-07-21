@@ -18,16 +18,46 @@
 #ifndef	__W8755_DEF_H__
 #define	__W8755_DEF_H__
 
+/* w8755 supports */
+#define		WH_CMD_ENTER_FACTORY		0x80
+#define		WH_CMD_ENTER_DEBUG		0x81
+
+#define		WH_SOURCE_RAWIMG  		0
+#define		WH_SOURCE_PROCESSEDIMG 		1
+#define		WH_SOURCE_REFIMG		2
+
+#define		WH_FILE_ENCP			0x1
+#define		WH_FILE_XML			0x2
+#define		WH_FILE_GUI_CNFG		0x3
+#define		WH_FILE_PTOOL_CNFG		0x4
+#define		WH_FILE_ECB			0x5
+
+#define		EXEC_I2C_NO_REPEAT_START	0x100
+#define		EXEC_I2C_REDUNDANT		0x200
+#define		EXEC_EXT_PATH			0x1000
+#define		EXEC_CHECK_FW_NEWER		0x2000
+#define		EXEC_SHOW_EXTRA_INFO		0x10000
+#define		EXEC_SHOW_DBG_INFO		0x20000
+
+#define		EXEC_INTF_MASK			0xFF
+#define		EXEC_OPTION_MASK		0xFFFFFF00
+
+#define		FLAG_RESET_CALIBRATION		0x01
+
+#define		SCAN_DO_RESCAN			0x01
+#define		SCAN_USE_LPATH			0x02
+
+
 typedef struct WeidaDeviceInfoNew
 {
 	UINT32		protocol_version;
 	UINT32		firmware_id;
 	UINT32 		status;
-	int			config_size;
+	int		config_size;
 	UINT32		parameter_map_sum;
 	UINT32		firmware_revision;
-	int			max_points;
-	int			bytes_per_point;
+	int		max_points;
+	int		bytes_per_point;
 	UINT32		customer_config_id;
 } W8755_DEV_INFO_NEW;
 
@@ -53,12 +83,29 @@ typedef struct WeidaDeviceStatus
 	UINT32		flash_buff_address;
 } W8755_DEV_STATUS; 
 
+typedef struct SectionAddressType
+{
+	UINT32		fastboot_addr;
+	UINT32		library_addr;
+	UINT32		firmware_image_addr;
+	UINT32		parameter_addr;
+	UINT32		ate_firmware_addr;
+	UINT32		recovery_addr;
+	UINT32		param_clone_addr;
+	UINT32		reserved2_addr;
+	UINT32		firmware_addr;
+	UINT32		overlay_addr;
+	UINT32		parameter_map_addr;
+	char 		device_id[10];
+	char 		tracking_info[16];
+} W8755_SEC_ADDR_TYPE;
+
 typedef struct SectionHeader
 {
 	UINT32		checksum;
-	int			size;
-	int			parameter0;
-	int			parameter1;
+	int		size;
+	int		parameter0;
+	int		parameter1;
 } W8755_SEC_HEADER;
 
 
@@ -69,10 +116,10 @@ typedef struct SectionHeader
  * W8755_FLASH_32K_DELAY: 300ms typical, 2500ms max
  * W8755_FLASH_4K_DELAY: 100ms typical, 500ms max
  */
-#define 	W8755_FLASH_CHIP_DELAY	7500
-#define 	W8755_FLASH_64K_DELAY	3000
-#define 	W8755_FLASH_32K_DELAY	2500
-#define 	W8755_FLASH_4K_DELAY	500
+#define 	W8755_FLASH_CHIP_DELAY		7500
+#define 	W8755_FLASH_64K_DELAY		3000
+#define 	W8755_FLASH_32K_DELAY		2500
+#define 	W8755_FLASH_4K_DELAY		500
 
 /* 
  * definition of Device Mode 
@@ -84,7 +131,7 @@ typedef struct SectionHeader
  * W8755_DM_COMMAND: STANDBY mode will be renamed to COMMAND mode.
  * W8755_DM_ATE: a special mode for IC production
  */
-#define		W8755_DM_BOOTLOADER 	0
+#define		W8755_DM_BOOTLOADER 		0
 #define		W8755_DM_SENSING		1
 #define		W8755_DM_DOZE			2
 #define 	W8755_DM_SLEEP			3
@@ -97,16 +144,16 @@ typedef struct SectionHeader
 
 /* definition of Image Source ID */
 #define		W8755_SOURCE_RAW		0
-#define		W8755_SOURCE_PROCESSED	1
-#define		W8755_SOURCE_REFERENCE	2
+#define		W8755_SOURCE_PROCESSED		1
+#define		W8755_SOURCE_REFERENCE		2
 #define 	W8755_SOURCE_REGION		3
 #define		W8755_SOURCE_WATER		4
 #define		W8755_SOURCE_GAIN		5
-#define		W8755_SOURCE_TP_DEFECT	6
-#define		W8755_SOURCE_DEBUG_0	16
-#define		W8755_SOURCE_DEBUG_1	17
-#define		W8755_SOURCE_DEBUG_2	18
-#define		W8755_SOURCE_DEBUG_3	19
+#define		W8755_SOURCE_TP_DEFECT		6
+#define		W8755_SOURCE_DEBUG_0		16
+#define		W8755_SOURCE_DEBUG_1		17
+#define		W8755_SOURCE_DEBUG_2		18
+#define		W8755_SOURCE_DEBUG_3		19
 #define		W8755_SOURCE_PEN		32
 
 /* definition of Flash Memory Block */
@@ -115,16 +162,16 @@ typedef struct SectionHeader
 #define		W8755_FMB_FLS_BLK64		2
 #define		W8755_FMB_FLS_DEV		3
 
-#define		FLS_SZ 					512 * 1024
+#define		FLS_SZ 				512 * 1024
 #define		FLS_BLK32_SZ			32 * 1024
 #define		FLS_BLK64_SZ			64 * 1024
-#define		FLS_SEC_SZ 				4 * 1024
+#define		FLS_SEC_SZ 			4 * 1024
 
-#define		TYPE_READ_OFFSET_SET	0x10000
+#define		TYPE_READ_OFFSET_SET		0x10000
 #define		W8755_PACKET_SIZE		60
 
 #define		DELAY_REAL_SLEEP		0x100000
-#define		DELAY_REAL_SLEEP_MASK	0xFFFFF
+#define		DELAY_REAL_SLEEP_MASK		0xFFFFF
 
 enum W8755_VendorCommandId
 {
@@ -175,7 +222,7 @@ enum W8755_WDTCommand
 
 	/* support in FW only */
 	W8755_SET_CMD_IMAGE_CAPTURE = 0x80,
-    W8755_SET_CMD_IMAGE_SOURCE = 0x81,
+    	W8755_SET_CMD_IMAGE_SOURCE = 0x81,
 	W8755_SET_CMD_DEVICE_MODE = 0x82,
 };
 

@@ -27,7 +27,7 @@
 #include "wdt_dev_api.h"
 #include "wdt_ct.h"
 
-#define WDT_UTIL_GETOPTS	"hd:u:fbrsw:vcix"
+#define WDT_UTIL_GETOPTS	"hd:u:fbrsw:vcixk"
 
 static struct option long_options[] = {
 	{"help", 0, NULL, 'h'},
@@ -42,6 +42,7 @@ static struct option long_options[] = {
 	{"cfg-cksum", 0, NULL, 'c'},
 	{"hw-id", 0, NULL, 'i'},	
 	{"ext-info", 0, NULL, 'x'},
+	{"block", 0, NULL, 'k'},
 	{0, 0, 0, 0},
 };
 
@@ -68,7 +69,8 @@ void print_help(const char *prog_name)
 	printf("\t-v, --fw-ver\tRead the fw version from the device.\n");	
 	printf("\t-c, --cfg-cksum\tRead the cfg chksum from the device\n");		
 	printf("\t-i, --hw-id\tRead the hardware id from the device\n");			
-	printf("\t-x, --ext-info\tShow more information.\n");
+	printf("\t-x, --ext-info\tShow more information\n");
+	printf("\t-k, --block\tUpdate fw by block\n");
 }
 
 void wh_printf(const char *fmt, ...)
@@ -185,6 +187,9 @@ int parse_args(int argc, char* argv[], EXEC_PARAM* pparam)
 			case 'x':
 				pparam->argus |= OPTION_EXTRA_INFO;		
 				g_show_extra_info = 1;
+			case 'k':
+				pparam->argus |= OPTION_BLOCK;
+				break;			
 			default:
 				break;
 

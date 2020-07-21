@@ -20,17 +20,18 @@
 
 #include	"whiff.h"
 #include 	"w8755_def.h"
+#include 	"w8760_def.h"
 #include	"dev_def.h"
 
-#define		API_VERSION				0x00090000
+#define		API_VERSION			0x00090000
 
 #define		INTERFACE_USB			0x1
 #define		INTERFACE_I2C			0x2
-#define		INTERFACE_SPI			0x3
+#define		INTERFACE_HIDRAW		0x3
 
-#define		RETRY_COUNT				3
+#define		RETRY_COUNT			3
 
-#define		OPTION_DES				0x1
+#define		OPTION_DES			0x1
 #define		OPTION_4K_VERIFY		0x2
 #define		OPTION_ERR_RTN			0x4
 #define		OPTION_ISP_MODE			0x8
@@ -39,14 +40,14 @@
 #define		OPTION_ERASE_TEMP		0x400
 
 /* standard commands */
-#define		WH_CMD_RESET				0x01
-#define		WH_CMD_ALGO_STOP			0x02
-#define		WH_CMD_ALGO_START			0x03
-#define		WH_CMD_ALGO_RESTART			0x04
-#define		WH_CMD_SET_DEV_MODE			0x05
+#define		WH_CMD_RESET			0x01
+#define		WH_CMD_ALGO_STOP		0x02
+#define		WH_CMD_ALGO_START		0x03
+#define		WH_CMD_ALGO_RESTART		0x04
+#define		WH_CMD_SET_DEV_MODE		0x05
 
-#define		WH_CMD_FLASH_LOCK			0x10
-#define		WH_CMD_FLASH_UNLOCK			0x11
+#define		WH_CMD_FLASH_LOCK		0x10
+#define		WH_CMD_FLASH_UNLOCK		0x11
 #define		WH_CMD_FLASH_ERASEALL		0x12
 #define		WH_CMD_FLASH_ERASE4K		0x13
 #define		WH_CMD_FLASH_ERASE64K		0x14
@@ -58,89 +59,61 @@
 #define		WH_CMD_CHECKSUM_LENGTH		0x31
 
 #define		WH_SET_SHORTCHECK_CS		0x40
-#define		WH_TEST_END					0x41
-#define		WH_SET_MASK					0x42
-#define		WH_REMOVE_MASK				0x43
-#define		WH_POWER_ON_PALM			0x44
+#define		WH_TEST_END			0x41
+#define		WH_SET_MASK			0x42
+#define		WH_REMOVE_MASK			0x43
+#define		WH_POWER_ON_PALM		0x44
 #define		WH_SET_SHORTCHECK_CD_1		0x45
 #define		WH_SET_INTEGRATION_TIME		0x46
 #define		WH_DISABLE_PIN_CS_RATIO		0x47
 #define		WH_SET_SHORTCHECK_CD_2		0x48
 
-/* w8755 supports */
-#define		WH_CMD_ENTER_FACTORY		0x80
-#define		WH_CMD_ENTER_DEBUG			0x81
-
-#define		WH_SOURCE_RAWIMG  			0
-#define		WH_SOURCE_PROCESSEDIMG 		1
-#define		WH_SOURCE_REFIMG			2
-
-#define		WH_FILE_ENCP				0x1
-#define		WH_FILE_XML					0x2
-#define		WH_FILE_GUI_CNFG			0x3
-#define		WH_FILE_PTOOL_CNFG			0x4
-#define		WH_FILE_ECB					0x5
-
-#define		EXEC_I2C_NO_REPEAT_START	0x100
-#define		EXEC_I2C_REDUNDANT			0x200
-#define		EXEC_EXT_PATH				0x1000
-#define		EXEC_CHECK_FW_NEWER			0x2000
-#define		EXEC_SHOW_EXTRA_INFO		0x10000
-#define		EXEC_SHOW_DBG_INFO			0x20000
-
-#define		EXEC_INTF_MASK				0xFF
-#define		EXEC_OPTION_MASK			0xFFFFFF00
-
-#define		FLAG_RESET_CALIBRATION		0x01
-
-#define		SCAN_DO_RESCAN				0x01
-#define		SCAN_USE_LPATH				0x02
 
 /* forward declaration */
 struct WdtDevice;
-typedef	struct WdtDevice					WDT_DEV;	
+typedef	struct WdtDevice			WDT_DEV;	
 typedef struct FuncPtrStructDevAccess 		FUNC_PTR_STRUCT_DEV_ACCESS; 
 typedef struct FuncPtrStructDevOperation 	FUNC_PTR_STRUCT_DEV_OPERATION; 
 typedef struct 	FuncPtrStructDevBasic 		FUNC_PTR_STRUCT_DEV_BASIC; 
 
 /* Device Access Function Pointer typedef */
-typedef		int			(* LPFUNC_wh_scan_device)(WDT_DEV*);   
-typedef		int			(* LPFUNC_wh_get_device) (WDT_DEV*, void*, int);  
-typedef		int			(* LPFUNC_wh_open_device) (WDT_DEV*);
-typedef		int			(* LPFUNC_wh_close_device) (WDT_DEV*);	
-typedef		int 		(* LPFUNC_wh_program_chunk) (WDT_DEV*, CHUNK_INFO_EX*, int);
-typedef		int 		(* LPFUNC_wh_verify_chunk) (WDT_DEV*, CHUNK_INFO_EX*);
+typedef	int		(* LPFUNC_wh_scan_device)(WDT_DEV*);   
+typedef	int		(* LPFUNC_wh_get_device) (WDT_DEV*, void*, int);  
+typedef	int		(* LPFUNC_wh_open_device) (WDT_DEV*);
+typedef	int		(* LPFUNC_wh_close_device) (WDT_DEV*);	
+typedef	int	 	(* LPFUNC_wh_program_chunk) (WDT_DEV*, CHUNK_INFO_EX*, int);
+typedef	int	 	(* LPFUNC_wh_verify_chunk) (WDT_DEV*, CHUNK_INFO_EX*);
 
 /* Private Device Access Function Pointer typedef */
-typedef		int			(* LPFUNC_wh_flash_read_data) (WDT_DEV*, BYTE*, UINT32, int); 
-typedef		int			(* LPFUNC_wh_flash_write_data) (WDT_DEV*, BYTE*, UINT32, int);
-typedef		int			(* LPFUNC_wh_flash_get_checksum) (WDT_DEV*, UINT32*, UINT32, int);
-typedef		int			(* LPFUNC_wh_mem_read_data) (WDT_DEV*, BYTE*, UINT32, int);
-typedef		int			(* LPFUNC_wh_mem_write_data) (WDT_DEV*, BYTE*, UINT32, int);
-typedef		int			(* LPFUNC_wh_wait_calibration_done) (WDT_DEV* , BYTE*, int); 
-typedef		int			(* LPFUNC_wh_send_commands) (WDT_DEV*, int, UINT32);
-typedef		int			(* LPFUNC_wh_prepare_data) (WDT_DEV*, BOARD_INFO*);
+typedef	int		(* LPFUNC_wh_flash_read_data) (WDT_DEV*, BYTE*, UINT32, int); 
+typedef	int		(* LPFUNC_wh_flash_write_data) (WDT_DEV*, BYTE*, UINT32, int);
+typedef	int		(* LPFUNC_wh_flash_get_checksum) (WDT_DEV*, UINT32*, UINT32, int);
+typedef	int		(* LPFUNC_wh_mem_read_data) (WDT_DEV*, BYTE*, UINT32, int);
+typedef	int		(* LPFUNC_wh_mem_write_data) (WDT_DEV*, BYTE*, UINT32, int);
+typedef	int		(* LPFUNC_wh_wait_calibration_done) (WDT_DEV* , BYTE*, int); 
+typedef	int		(* LPFUNC_wh_send_commands) (WDT_DEV*, int, UINT32);
+typedef	int		(* LPFUNC_wh_prepare_data) (WDT_DEV*, BOARD_INFO*);
 
 /* Basic Device Access Function Pointer typedef */
-typedef		int 		(* LPFUNC_wh_set_feature) (WDT_DEV*, BYTE*, UINT32);
-typedef		int 		(* LPFUNC_wh_get_feature) (WDT_DEV*, BYTE*, UINT32);
-typedef		int 		(* LPFUNC_wh_get_index_string) (WDT_DEV*, UINT32, BYTE*, UINT32);
-typedef		int 		(* LPFUNC_wh_read_report) (WDT_DEV*, BYTE*, UINT32);
+typedef	int	 	(* LPFUNC_wh_set_feature) (WDT_DEV*, BYTE*, UINT32);
+typedef	int	 	(* LPFUNC_wh_get_feature) (WDT_DEV*, BYTE*, UINT32);
+typedef	int	 	(* LPFUNC_wh_get_index_string) (WDT_DEV*, UINT32, BYTE*, UINT32);
+typedef	int	 	(* LPFUNC_wh_read_report) (WDT_DEV*, BYTE*, UINT32);
 
 /* Basic Bus Access Function Pointer typedef */
-typedef		int 		(* LPFUNC_wh_bus_set_feature) (WDT_DEV*, BYTE*, UINT32);
-typedef		int 		(* LPFUNC_wh_bus_get_feature) (WDT_DEV*, BYTE*, UINT32);
-typedef		int 		(* LPFUNC_wh_bus_get_index_string) (WDT_DEV*, UINT32, BYTE*, UINT32);
-typedef		int 		(* LPFUNC_wh_bus_read_report) (WDT_DEV*, BYTE*, UINT32);
+typedef	int	 	(* LPFUNC_wh_bus_set_feature) (WDT_DEV*, BYTE*, UINT32);
+typedef	int	 	(* LPFUNC_wh_bus_get_feature) (WDT_DEV*, BYTE*, UINT32);
+typedef	int	 	(* LPFUNC_wh_bus_get_index_string) (WDT_DEV*, UINT32, BYTE*, UINT32);
+typedef	int	 	(* LPFUNC_wh_bus_read_report) (WDT_DEV*, BYTE*, UINT32);
 
-typedef		unsigned int	(* LPFUNC_wh_get_api_version)();  
-typedef		WH_HANDLE		(* LPFUNC_wh_open_whiff)(char*);  
-typedef		int				(* LPFUNC_wh_close_whiff)(WH_HANDLE);
-typedef		int				(* LPFUNC_wh_get_chunk_info)(WH_HANDLE, UINT32, CHUNK_INFO_EX*);	
-typedef		int				(* LPFUNC_wh_get_device_access_func)(int, FUNC_PTR_STRUCT_DEV_ACCESS* );   
-typedef		int				(* LPFUNC_wh_get_device_private_access_func)(WDT_DEV*, UINT32, FUNC_PTR_STRUCT_DEV_OPERATION*);   
-typedef		int				(* LPFUNC_wh_get_device_basic_access_func)(WDT_DEV*, UINT32, FUNC_PTR_STRUCT_DEV_BASIC*);   
-typedef		int				(* LPFUNC_net_bridge_server_start)(void *wdt_dev_access, WH_HANDLE handle);
+typedef	unsigned int	(* LPFUNC_wh_get_api_version)();  
+typedef	WH_HANDLE	(* LPFUNC_wh_open_whiff)(char*);  
+typedef	int		(* LPFUNC_wh_close_whiff)(WH_HANDLE);
+typedef	int		(* LPFUNC_wh_get_chunk_info)(WH_HANDLE, UINT32, CHUNK_INFO_EX*);	
+typedef	int		(* LPFUNC_wh_get_device_access_func)(int, FUNC_PTR_STRUCT_DEV_ACCESS* );   
+typedef	int		(* LPFUNC_wh_get_device_private_access_func)(WDT_DEV*, UINT32, FUNC_PTR_STRUCT_DEV_OPERATION*);   
+typedef	int		(* LPFUNC_wh_get_device_basic_access_func)(WDT_DEV*, UINT32, FUNC_PTR_STRUCT_DEV_BASIC*);   
+typedef	int		(* LPFUNC_net_bridge_server_start)(void *wdt_dev_access, WH_HANDLE handle);
 
 typedef struct FuncPtrStructDevAccess { 
 	LPFUNC_wh_scan_device		p_wh_scan_device;	 
@@ -152,20 +125,20 @@ typedef struct FuncPtrStructDevAccess {
 
 
 typedef struct	FuncPtrStructDevOperation { 
-	LPFUNC_wh_program_chunk			p_wh_program_chunk;
-	LPFUNC_wh_verify_chunk			p_wh_verify_chunk;
+	LPFUNC_wh_program_chunk		p_wh_program_chunk;
+	LPFUNC_wh_verify_chunk		p_wh_verify_chunk;
 	
-	LPFUNC_wh_flash_read_data		p_wh_flash_read_data;
-	LPFUNC_wh_flash_write_data		p_wh_flash_write_data;
+	LPFUNC_wh_flash_read_data	p_wh_flash_read_data;
+	LPFUNC_wh_flash_write_data	p_wh_flash_write_data;
 	LPFUNC_wh_flash_get_checksum	p_wh_flash_get_checksum;
-	LPFUNC_wh_send_commands			p_wh_send_commands;
+	LPFUNC_wh_send_commands		p_wh_send_commands;
 } FUNC_PTR_STRUCT_DEV_OPERATION; 
 
 typedef struct 	FuncPtrStructDevBasic {
-	LPFUNC_wh_set_feature			p_wh_set_feature;
-	LPFUNC_wh_set_feature			p_wh_get_feature;
-	LPFUNC_wh_get_index_string		p_wh_get_index_string;
-	LPFUNC_wh_read_report			p_wh_read_report;
+	LPFUNC_wh_set_feature		p_wh_set_feature;
+	LPFUNC_wh_set_feature		p_wh_get_feature;
+	LPFUNC_wh_get_index_string	p_wh_get_index_string;
+	LPFUNC_wh_read_report		p_wh_read_report;
 } FUNC_PTR_STRUCT_DEV_BASIC; 
 
 typedef	struct ExecParam
@@ -192,7 +165,7 @@ typedef enum tagDevState
 typedef struct WifAccess {
 	char				wif_path[256];
 	WH_HANDLE			wif_handle;
-	CHUNK_INFO_EX		wif_chunk_info;
+	CHUNK_INFO_EX			wif_chunk_info;
 } WIF_ACCESS;
 
 typedef struct WdtDevice {
@@ -206,43 +179,43 @@ typedef struct WdtDevice {
 	DEV_STATE			dev_state;
 	EXEC_PARAM			*pparam;	
 
-	FUNC_PTR_STRUCT_DEV_ACCESS					funcs_device;
-	FUNC_PTR_STRUCT_DEV_OPERATION				funcs_device_private;
-	FUNC_PTR_STRUCT_DEV_BASIC					funcs_device_basic;
+	FUNC_PTR_STRUCT_DEV_ACCESS		funcs_device;
+	FUNC_PTR_STRUCT_DEV_OPERATION		funcs_device_private;
+	FUNC_PTR_STRUCT_DEV_BASIC		funcs_device_basic;
 
-	LPFUNC_wh_get_api_version					func_wh_get_api_version;
-	LPFUNC_wh_open_whiff						func_wh_open_whiff;
-	LPFUNC_wh_close_whiff						func_wh_close_whiff;
+	LPFUNC_wh_get_api_version		func_wh_get_api_version;
+	LPFUNC_wh_open_whiff			func_wh_open_whiff;
+	LPFUNC_wh_close_whiff			func_wh_close_whiff;
 
-	LPFUNC_wh_get_chunk_info					func_wh_get_chunk_info;
-	LPFUNC_wh_get_device_access_func			func_wh_get_device_access_func;
+	LPFUNC_wh_get_chunk_info		func_wh_get_chunk_info;
+	LPFUNC_wh_get_device_access_func	func_wh_get_device_access_func;
 	LPFUNC_wh_get_device_private_access_func	func_wh_get_device_private_access_func;
 	LPFUNC_wh_get_device_basic_access_func		func_wh_get_device_basic_access_func;
 
 } WDT_DEV;
 
-UINT32			wh_get_api_version();
-WH_HANDLE		wh_open_whiff_file(char *path);
-int				wh_close_whiff_file(WH_HANDLE handle);
-int				wh_get_chunk_info(WH_HANDLE handle, UINT32 chunk_index, CHUNK_INFO_EX *pChunkInfoEx);
+UINT32		wh_get_api_version();
+WH_HANDLE	wh_open_whiff_file(char *path);
+int		wh_close_whiff_file(WH_HANDLE handle);
+int		wh_get_chunk_info(WH_HANDLE handle, UINT32 chunk_index, CHUNK_INFO_EX *pChunkInfoEx);
 
-int				wh_get_device_access_func(int interfaceIndex, FUNC_PTR_STRUCT_DEV_ACCESS *pFuncs );   
-int				wh_get_device_private_access_func(WDT_DEV *pdev, UINT32 key, FUNC_PTR_STRUCT_DEV_OPERATION *pFuncs );   
-int				wh_get_device_basic_access_func(WDT_DEV *pdev, UINT32 key, FUNC_PTR_STRUCT_DEV_BASIC *pFuncs );
+int		wh_get_device_access_func(int interfaceIndex, FUNC_PTR_STRUCT_DEV_ACCESS *pFuncs );   
+int		wh_get_device_private_access_func(WDT_DEV *pdev, UINT32 key, FUNC_PTR_STRUCT_DEV_OPERATION *pFuncs );   
+int		wh_get_device_basic_access_func(WDT_DEV *pdev, UINT32 key, FUNC_PTR_STRUCT_DEV_BASIC *pFuncs );
 
-int				wh_i2c_scan_device(WDT_DEV *pdev);
-int				wh_i2c_get_device(WDT_DEV *pdev, WDT_DEVICE_INFO *pDevInfo, int flag);
-int 			wh_i2c_open_device(WDT_DEV *pdev);
-int				wh_i2c_close_device(WDT_DEV *pdev);
-int				wh_i2c_prepare_data(WDT_DEV *pDev, BOARD_INFO *pboard_info);
+int		wh_i2c_scan_device(WDT_DEV *pdev);
+int		wh_i2c_get_device(WDT_DEV *pdev, WDT_DEVICE_INFO *pDevInfo, int flag);
+int 		wh_i2c_open_device(WDT_DEV *pdev);
+int		wh_i2c_close_device(WDT_DEV *pdev);
+int		wh_i2c_prepare_data(WDT_DEV *pDev, BOARD_INFO *pboard_info);
 
-UINT16 			get_unaligned_le16(const void *p);
-UINT32 			get_unaligned_le32(const void *p);
-void 			put_unaligned_le16(UINT16 val, BYTE *p);
-void 			put_unaligned_le32(UINT32 val, BYTE *p);
+UINT16 		get_unaligned_le16(const void *p);
+UINT32 		get_unaligned_le32(const void *p);
+void 		put_unaligned_le16(UINT16 val, BYTE *p);
+void 		put_unaligned_le32(UINT32 val, BYTE *p);
 
-int 			check_firmware_id(WDT_DEV *pdev, UINT32 fwid);
-UINT16 			misr_for_bytes(UINT16 current_value, BYTE *bytes, int start, int size);
+int 		check_firmware_id(WDT_DEV *pdev, UINT32 fwid);
+UINT16 		misr_for_bytes(UINT16 current_value, BYTE *bytes, int start, int size);
 
 /* __WDT_DEV_API_H__ */
 #endif

@@ -31,6 +31,7 @@
 #include "wdt_dev_api.h"
 #include "dev_def.h"
 #include "w8755_funcs.h"
+#include "w8760_funcs.h"
 #include "wdt_ct.h"
 
 UINT32	wh_get_api_version()
@@ -61,13 +62,23 @@ int	wh_get_device_private_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT
 		return 0;
 
 	if (pdev->board_info.dev_type & FW_WDT8755) {
-		pFuncs->p_wh_program_chunk = (LPFUNC_wh_program_chunk) wh_w8755_dev_program_4k_chunk_verify;
+		pFuncs->p_wh_program_chunk = (LPFUNC_wh_program_chunk) wh_w8755_dev_program_chunk;
 		pFuncs->p_wh_verify_chunk	= (LPFUNC_wh_verify_chunk) wh_w8755_dev_verify_chunk;
 		pFuncs->p_wh_flash_write_data = (LPFUNC_wh_flash_write_data) wh_w8755_dev_flash_write_data;
 		pFuncs->p_wh_flash_get_checksum = (LPFUNC_wh_flash_get_checksum) wh_w8755_dev_flash_get_checksum;
  		pFuncs->p_wh_send_commands = (LPFUNC_wh_send_commands) wh_w8755_dev_send_commands;
 
 		return wh_w8755_dev_set_basic_op(pdev);
+	}
+
+	if (pdev->board_info.dev_type & FW_WDT8760_2) {
+		pFuncs->p_wh_program_chunk = (LPFUNC_wh_program_chunk) wh_w8760_dev_program_chunk;
+		pFuncs->p_wh_verify_chunk	= (LPFUNC_wh_verify_chunk) wh_w8760_dev_verify_chunk;
+		pFuncs->p_wh_flash_write_data = (LPFUNC_wh_flash_write_data) wh_w8760_dev_flash_write_data;
+		pFuncs->p_wh_flash_get_checksum = (LPFUNC_wh_flash_get_checksum) wh_w8760_dev_flash_get_checksum;
+ 		pFuncs->p_wh_send_commands = (LPFUNC_wh_send_commands) wh_w8760_dev_send_commands;
+
+		return wh_w8760_dev_set_basic_op(pdev);
 	}
 
 	return 0;
@@ -90,6 +101,15 @@ int	wh_get_device_basic_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT_D
 
 		return 1;
 	}
+	
+	if (pdev->board_info.dev_type & FW_WDT8760_2) {
+		pFuncs->p_wh_get_feature = (LPFUNC_wh_get_feature) wh_w8760_dev_get_feature;
+		pFuncs->p_wh_set_feature = (LPFUNC_wh_set_feature) wh_w8760_dev_set_feature;
+		pFuncs->p_wh_get_index_string = (LPFUNC_wh_get_index_string) wh_w8760_dev_get_indexed_string;
+		pFuncs->p_wh_read_report = (LPFUNC_wh_read_report) wh_w8760_dev_read_report;
+
+		return 1;
+	}
 
 	return 0;
 }
@@ -107,6 +127,12 @@ int check_firmware_id(WDT_DEV *pdev, UINT32 fwid)
 			printf("It is WDT8752 recovery fw !\n");	
 		return FW_WDT8755;
 	}	
+
+	if ((fwid & 0xF0000000) == 0x40000000) {
+		if (pdev->pparam->argus & OPTION_INFO)	
+			printf("It is WDT8760 alike !\n");	
+		return FW_WDT8760;
+	}
 	
 	return FW_WITH_CMD;
 }
@@ -281,9 +307,21 @@ int fw_version_check(EXEC_PARAM *pparam, BOARD_INFO *pinfo, CHUNK_INFO_EX *pchun
 	char	chip_id = ((pinfo->firmware_id >> 12) & 0xF);
 	
 	if (fw_id != chip_id) {
-		wh_printf("This firmware is not matching this chip");
+		printf("This firmware is not matched with this chip, fwid(%x), chip_id(%x)\n", fw_id, chip_id);
 		return 0;
 	} 
+
+	if (pinfo->dev_type & FW_WDT8760) {
+		if ((pchunk_info->chuckInfo.temp & 0xFF000000) != 0x31000000) {			
+			printf("The device type is not matched with this firmware (%x)\n", pchunk_info->chuckInfo.temp);
+			return 0;
+		}
+	} else if (pinfo->dev_type & FW_WDT8762) {
+		if ((pchunk_info->chuckInfo.temp & 0xFF000000) != 0x32000000) { 		
+			printf("The device type is not matched with this firmware (%x)\n", pchunk_info->chuckInfo.temp);
+			return 0;
+		}
+	}
 
 	wh_printf("The firmware vession: dev %x, wif %x\n", pinfo->firmware_id,
 			  pchunk_info->chuckInfo.versionNumber); 
@@ -362,7 +400,7 @@ int image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pparam)
 	if (!pdev || !pparam)
 		return 0;
 
-	if (pinfo->dev_type & FW_WDT8755_ISP)
+	if (pinfo->dev_type & (FW_MAYBE_ISP | FW_WDT8755_ISP | FW_WDT8760_2_ISP))
 		return 0;	
 
 	if (!load_wif(pdev, (char*)pparam->image_file))
@@ -390,19 +428,18 @@ int image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pparam)
 		goto exit_burn;
 	}
 
+	if (!chunk_info_fw.chuckInfo.versionNumber) {
+		printf("Wif fw version is null!\n");
+		goto exit_burn;
+	}
+		
+	err = fw_version_check(pparam, pinfo, &chunk_info_fw);
+	/* fw is not matching */
+	if (err == 0)	
+		goto exit_burn;
+
 	if (pdev->pparam->argus & OPTION_NO_FORCE) {
 		printf("Version checking ....\n");
-
-		if (!chunk_info_fw.chuckInfo.versionNumber) {
-			printf("Wif fw version is null!\n");
-			goto exit_burn;
-		}
-			
-		err = fw_version_check(pparam, pinfo, &chunk_info_fw);
-
-		/* fw is not matching */
-		if (err == 0)	
-			goto exit_burn;
 		
 		/* fw is most updated */
 		if (err == 2)	{
@@ -426,11 +463,13 @@ int image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pparam)
 		 * just specify OPTION_NO_RPARAM if don't want this backup
 		 */
 		if (!(pdev->pparam->argus & OPTION_NO_RPARAM)) {
-			chunk_info_cfg.chuckInfo.targetStartAddr = 0x58000;
-			err = program_one_chunk(pdev, "r_config", CHUNK_ID_CNFG, OPTION_4K_VERIFY, &chunk_info_cfg);
+			if (pdev->board_info.dev_type & FW_WDT8755) {
+				chunk_info_cfg.chuckInfo.targetStartAddr = 0x58000;
+				err = program_one_chunk(pdev, "r_config", CHUNK_ID_CNFG, OPTION_4K_VERIFY, &chunk_info_cfg);
 
-			if (!err)
-				goto exit_burn;
+				if (!err)
+					goto exit_burn;
+			}
 		}
 
 		chunk_info_cfg.chuckInfo.targetStartAddr = tempStartAddr;
@@ -452,7 +491,19 @@ int image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pparam)
 		is_fw_update = 1;
 	}
 
-	if (is_fw_update && (chunk_info_fw.chuckInfo.versionNumber && chunk_info_fw.chuckInfo.targetStartAddr)) {
+	if (pdev->board_info.dev_type & FW_WDT8755) {
+		if (chunk_info_fw.chuckInfo.targetStartAddr == 0) {
+			printf("Address can not be %d \n", chunk_info_fw.chuckInfo.targetStartAddr);
+			goto exit_burn;
+		}			
+	} else if (pdev->board_info.dev_type & FW_WDT8760_2) {
+		if (chunk_info_fw.chuckInfo.targetStartAddr >= 0x60000) {
+			printf("Address can not be %d \n", chunk_info_fw.chuckInfo.targetStartAddr);
+			goto exit_burn;
+		}			
+	}
+
+	if (is_fw_update && (chunk_info_fw.chuckInfo.versionNumber)) {
 		err = program_one_chunk(pdev, "firmware", CHUNK_ID_FRWR, OPTION_4K_VERIFY, &chunk_info_fw);
 
 		if (!err)
@@ -501,8 +552,8 @@ unsigned int cal_checksum(unsigned char *buffer, int length)
 
 int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 {
-	BOARD_INFO			*pinfo = &pdev->board_info;	
-	int 	ret = 0;
+	BOARD_INFO	*pinfo = &pdev->board_info;	
+	int ret = 0;
 
 	if (!pdev || !pparam)
 		return 0;
@@ -510,7 +561,7 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 	if (!init_n_scan_device(pdev, pparam, 0))
 		return 0;
 
-	ret = !(pinfo->dev_type & (FW_MAYBE_ISP | FW_WDT8755_ISP));	
+	ret = !(pinfo->dev_type & (FW_MAYBE_ISP | FW_WDT8755_ISP | FW_WDT8760_2_ISP));	
 
 	if (!ret)
 		goto info_exit;
@@ -563,15 +614,35 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 		printf("Scale Factor: %d, USB dbg: 0x%x, I2C dbg: 0x%x\n", pinfo->sys_param.scale_factor, pinfo->sys_param.usb_dbg_cfg, pinfo->sys_param.i2c_dbg_cfg);
 	} 
 
-	if (pinfo->dev_type & FW_WDT8755 && pparam->argus & OPTION_EXTRA_INFO) {
-		printf("\n\nprotocol_version 0x%x\n", pinfo->dev_info_new.protocol_version);
-		printf("firmware_id 0x%x\n", pinfo->dev_info_new.firmware_id);
-		printf("config_size 0x%x\n", pinfo->dev_info_new.config_size);
-		printf("parameter_map_sum 0x%x\n", pinfo->dev_info_new.parameter_map_sum);
-		printf("firmware_revision 0x%x\n", pinfo->dev_info_new.firmware_revision);
-		printf("max_points 0x%x\n", pinfo->dev_info_new.max_points); 
-		printf("bytes_per_point 0x%x\n", pinfo->dev_info_new.bytes_per_point);	
-		printf("customer_config_id 0x%x\n", pinfo->dev_info_new.customer_config_id); 		
+	if (pparam->argus & OPTION_EXTRA_INFO) {
+		if (pinfo->dev_type & FW_WDT8755) {
+			printf("\n\nprotocol_version 0x%x\n", pinfo->dev_info.w8755_dev_info.protocol_version);
+			printf("firmware_id 0x%x\n", pinfo->dev_info.w8755_dev_info.firmware_id);
+			printf("config_size 0x%x\n", pinfo->dev_info.w8755_dev_info.config_size);
+			printf("parameter_map_sum 0x%x\n", pinfo->dev_info.w8755_dev_info.parameter_map_sum);
+			printf("firmware_revision 0x%x\n", pinfo->dev_info.w8755_dev_info.firmware_revision);
+			printf("max_points 0x%x\n", pinfo->dev_info.w8755_dev_info.max_points); 
+			printf("bytes_per_point 0x%x\n", pinfo->dev_info.w8755_dev_info.bytes_per_point);	
+			printf("customer_config_id 0x%x\n", pinfo->dev_info.w8755_dev_info.customer_config_id); 		
+		} else if (pinfo->dev_type & FW_WDT8760_2) {
+			char str[16];	
+
+			printf("\nMax_points 0x%X\n", pinfo->dev_info.w8760_feature_devinfo.n_touches_usb);
+			printf("Bytes_per_point 0x%X\n", pinfo->dev_info.w8760_feature_devinfo.n_bytes_touch);		
+			memset(str, 0, 16);
+			memcpy(str, pinfo->dev_info.w8760_feature_devinfo.platform_id, 8);
+			printf("Platform id %s\n", str);
+			printf("Hardware id 0x%X\n", pinfo->dev_info.w8760_feature_devinfo.hardware_id);
+			printf("Firmware id 0x%X\n", pinfo->dev_info.w8760_feature_devinfo.firmware_id);
+			memset(str, 0, 16);
+			memcpy(str, pinfo->dev_info.w8760_feature_devinfo.program_name_fourcc, 4);
+			printf("ProgramFourcc %s\n", str);
+			printf("ProtocolRevision 0x%X\n", pinfo->dev_info.w8760_feature_devinfo.protocol_version);
+			printf("FirmwareRevisionExt 0x%X\n", pinfo->dev_info.w8760_feature_devinfo.firmware_rev_ext);
+			memset(str, 0, 16);
+			memcpy(str, pinfo->dev_info.w8760_feature_devinfo.part_number_ext, 8);		
+			printf("PartNumberExt %s\n", str);
+		}
 	}
 
 info_exit:	

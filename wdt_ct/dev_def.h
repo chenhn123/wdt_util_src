@@ -18,22 +18,37 @@
 #ifndef	__DEV_DEF_H__
 #define	__DEV_DEF_H__
 
+#include "w8755_def.h"
+#include "w8760_def.h"
+
 /* what version FW is running in the device */
-#define		FW_MAYBE_ISP			0x01
-#define		FW_WITH_CMD				0x02
-#define		FW_LEGACY				0x04
-#define		FW_WDT8755				0x20
-#define		FW_WDT8755_ISP			0x40
+#define		FW_MAYBE_ISP		0x01
+#define		FW_WITH_CMD		0x02
+#define		FW_LEGACY		0x04
+#define		FW_WDT8755		0x20
+#define		FW_WDT8755_ISP		0x40
+#define		FW_WDT8760		0x800
+#define		FW_WDT8760_ISP		0x1000
+#define		FW_WDT8762		0x2000
+#define		FW_WDT8762_ISP		0x4000
+#define		FW_WDT8760_2		(FW_WDT8760 | FW_WDT8762)
+#define		FW_WDT8760_2_ISP	(FW_WDT8760_ISP | FW_WDT8762_ISP)
+
 
 /* compatibility to the usb descriptor */
-#define 	GD_DEVICE          		0x01
-#define 	GD_STRING          		0x03
+#define 	GD_DEVICE          	0x01
+#define 	GD_STRING          	0x03
 
 #define		STRIDX_IDENTIFICATION	0x3C
-#define		STRIDX_PLATFORM_ID		0x80
-#define		STRIDX_PARAMETERS	    0x81
+#define		STRIDX_PLATFORM_ID	0x80
+#define		STRIDX_PARAMETERS	0x81
 
-#define		WDT_PAGE_SIZE			0x1000
+#define 	VND_REQ_DEV_INFO	0xF2
+
+#define		WDT_PAGE_SIZE		0x1000
+
+#define		GET_DEVICE_BY_PATH	0x100
+#define		GET_DEVICE_BY_LPATH	0x200
 
 typedef	union
 {
@@ -88,6 +103,18 @@ typedef struct i2c_hid_desc
 	UINT16 reserved;
 } I2C_HID_DESC;
 
+typedef union u_dev_info {
+	W8755_DEV_INFO_NEW	w8755_dev_info;
+	W8760_REPORT_FEATURE_DEVINFO	w8760_feature_devinfo;
+} U_DEV_INFO;
+
+typedef union sec_header {
+	/* this is only available in WDT8752 or WDT8755 */
+	W8755_SEC_ADDR_TYPE 	w8755_sec_header;
+	W8760_SECTION_MAP_ADDR	w8760_sec_addr;
+} U_SEC_HEADER;
+
+
 typedef	struct BoardInfo
 {
 	UINT32			dev_type;
@@ -100,8 +127,10 @@ typedef	struct BoardInfo
 	
 	SYS_PARAM		sys_param;
 	BYTE			platform_id[12];
-	I2C_HID_DESC			dev_hid_desc;
-	W8755_DEV_INFO_NEW		dev_info_new;
+
+	I2C_HID_DESC	dev_hid_desc;
+	U_DEV_INFO		dev_info;
+	U_SEC_HEADER	sec_header;
 } BOARD_INFO;
 
 typedef	struct UsbDeviceDesc
@@ -122,9 +151,6 @@ typedef	struct UsbDeviceDesc
 	BYTE	bNumConfigurations;
 } USB_DEVICE_DESC;
 
-#define		GET_DEVICE_BY_PATH			0x100
-#define		GET_DEVICE_BY_LPATH			0x200
-
 typedef struct	WdtDeviceInfo
 {
 	UINT32	vid;
@@ -132,6 +158,25 @@ typedef struct	WdtDeviceInfo
 	char	path[256];
 	char 	l_path[256];
 } WDT_DEVICE_INFO;
+
+/* forward declaration */
+struct WdtDevice;
+typedef	struct WdtDevice	WDT_DEV;	
+
+int wh_i2c_tx(WDT_DEV *pdev, BYTE slave_addr, BYTE* pbuf, UINT32 buf_size);
+int wh_i2c_rx(WDT_DEV *pdev, BYTE slave_addr, BYTE* pbuf, UINT32 buf_size);
+int wh_i2c_xfer(WDT_DEV *pdev, BYTE slave_addr, BYTE* txbuf, UINT32 tx_len, BYTE* rxbuf, UINT32 rx_len);
+
+int wh_i2c_set_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size);
+int wh_i2c_get_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size);
+int wh_i2c_get_indexed_string(WDT_DEV *pdev, UINT32 index, BYTE* buf, UINT32 buf_size);
+int wh_i2c_read(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size);
+int wh_i2c_get_desc(WDT_DEV *pdev, BYTE desc_type, BYTE string_idx, BYTE* target_buf, UINT32 buf_size);
+
+int wh_hidraw_set_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size);
+int wh_hidraw_get_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size);
+int wh_hidraw_get_indexed_string(WDT_DEV *pdev, UINT32 index, BYTE* buf, UINT32 buf_size);
+int wh_hidraw_read(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size);
 
 /* __DEV_DEF_H__ */
 #endif

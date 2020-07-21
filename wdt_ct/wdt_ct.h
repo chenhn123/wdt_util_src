@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-
 #ifndef	__WDT_CT_H__
 #define	__WDT_CT_H__
 
@@ -23,10 +22,11 @@
 #define		OPTION_UPDATE			0x1
 #define		OPTION_ISP_UPDATE		0x2
 #define		OPTION_NO_FORCE			0x4
-#define		OPTION_INFO				0x8
+#define		OPTION_INFO			0x8
 #define		OPTION_EXTRA_INFO		0x10
 #define 	OPTION_NO_RPARAM		0x20
 #define		OPTION_NO_REBIND		0x40
+#define 	OPTION_BLOCK			0x80
 
 /* define for wif file */
 #define		OPTION_WIF_INFO			0x100
@@ -37,7 +37,7 @@
 #define		OPTION_HW_ID			0x4000
 
 #define		TOOL_TITLE_STR			"Weida Update Utility"
-#define		TOOL_VERSION_STR		"V0.9.7"
+#define		TOOL_VERSION_STR		"V0.9.8"
 
 int		load_lib_func_address(WDT_DEV*, EXEC_PARAM*);
 int		image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pParam);

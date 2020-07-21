@@ -29,28 +29,17 @@
 #include "wdt_ct.h"
 #include "w8755_def.h"
 #include "w8755_funcs.h"
+#include "w8760_def.h"
+#include "w8760_funcs.h"
 
-
-#define		USE_UDELAY		1
 
 #define		MAX_DEV			16
 
-#define		MODE_ACTIVE		0x01
-#define		MODE_READY		0x02
-#define		MODE_IDLE		0x03
-#define		MODE_SLEEP		0x04
-#define		MODE_STOP		0xFF
-
-#define		SUPPORT_RETRY	1
-#define		MAX_RETRIES		3
-
 /* i2c-hid driver for weida's controller */
-#define		ACPI_NAME_HID	"i2c-WDHT"
-
-
+#define		ACPI_NAME_HID		"i2c-WDHT"
 #define		NO_DEV_CHK		16
 
-char		g_dev_path[64];
+static char		g_dev_path[64];
 
 int wh_i2c_scan_driver_path(WDT_DEV* pdev, int *adaptor_no)
 {
@@ -271,7 +260,7 @@ int wh_i2c_get_param_hid(WDT_DEV *pdev, BOARD_INFO *pinfo)
 int wh_w8755_i2c_delay(WDT_DEV* pdev, unsigned long delay)
 {
 	/* if the fw version is not supported,  just delay the max period and return */
-	if (pdev->board_info.dev_info_new.protocol_version < 0x01000006) 
+	if (pdev->board_info.dev_info.w8755_dev_info.protocol_version < 0x01000006) 
 		wh_sleep(delay);
 	else {
 		BYTE rc = W8755_ISP_RSP_BUSY;
@@ -317,7 +306,7 @@ int wh_w8755_i2c_delay(WDT_DEV* pdev, unsigned long delay)
 int	wh_w8755_i2c_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp)
 {
 
-	if (!wh_w8755_dev_parse_new_dev_info(pdev, &pboard_info->dev_info_new)) {
+	if (!wh_w8755_dev_parse_new_dev_info(pdev, &pboard_info->dev_info.w8755_dev_info)) {
 		printf("Can't get new device info!\n");
 		return 0;
 	}
@@ -327,14 +316,14 @@ int	wh_w8755_i2c_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_
 	return 1;
 }
 
-
-
 int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 {
 	BYTE				buf[80];
 	BOARD_INFO			board_info;	
 	USB_DEVICE_DESC	 	usb_dev_desc;
-	int					ret_size;
+	int		ret_size;
+	int 	ret = 0;
+	int 	fw_id = 0;
 
 	if (!pdev || !pdev->dev_handle || !pboard_info) {
 		printf("device ptr is null !\n");
@@ -345,25 +334,46 @@ int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 
 	pdev->dev_state = DS_GET_INFO;
 
-	buf[0] = 0xf2;
-	if (!wh_i2c_get_feature(pdev, buf, 16))	{
+	buf[0] = VND_REQ_DEV_INFO;
+	ret = wh_i2c_get_feature(pdev, buf, 64);	
+	fw_id = get_unaligned_le32(buf + 1);
+
+	if (ret <= 0 || fw_id == 0) {
 		pboard_info->dev_type = FW_MAYBE_ISP;	
 		printf("Can't get fw id, should be in ISP mode !\n");
-	
+
+		if ((buf[0x26] == 0x49 && buf[0x27] == 0x53 && buf[0x28] == 0x50)) {
+			printf("It is maybe WDT8760 ISP\n");
+			board_info.dev_type = FW_WDT8760_2_ISP;
+		} 
 		return 0;
 	}
 
-	if (buf[0] != 0xf2) {
+	if (buf[0] != VND_REQ_DEV_INFO) {
 		pboard_info->dev_type = FW_MAYBE_ISP;	
 		printf("Firmware id packet error !\n");
 		return 0;
 	}
 
-	board_info.firmware_id = get_unaligned_le32(buf + 1);
+	board_info.firmware_id = fw_id;
 	board_info.hardware_id = get_unaligned_le32(buf + 5);
 	board_info.serial_no = get_unaligned_le32(buf + 9);
 
 	board_info.dev_type = check_firmware_id(pdev, board_info.firmware_id);
+
+	if (board_info.dev_type & (FW_WDT8760_2 | FW_WDT8760_2_ISP)) {
+		wh_w8760_get_feature_devinfo(&board_info.dev_info.w8760_feature_devinfo, buf);	
+		
+		memcpy(&pdev->board_info.dev_info.w8760_feature_devinfo, &board_info.dev_info.w8760_feature_devinfo, 
+			sizeof(W8760_REPORT_FEATURE_DEVINFO));
+
+        if (wh_i2c_get_param_hid(pdev, &board_info)) {		
+			if (wh_w8760_prepare_data(pdev, &board_info)) {			
+				memcpy(pboard_info, &board_info, sizeof(BOARD_INFO));
+				return 1;
+			}
+		}
+	}
 
 	buf[0] = 0xf4;
 	if (!wh_i2c_get_feature(pdev, buf, 56)) 
@@ -437,8 +447,9 @@ int wh_i2c_tx(WDT_DEV *pdev, BYTE slave_addr, BYTE* pbuf, UINT32 buf_size)
 		wh_printf("%s: ioctl operation failed: (%d)\n", __func__, err);
 		return 0;
 	}
+
 	
-	wh_udelay(I2C_OPERATION_DELAY_US);
+	//wh_udelay(I2C_OPERATION_DELAY_US);
 
 	return buf_size;
 }
@@ -469,7 +480,7 @@ int wh_i2c_rx(WDT_DEV *pdev, BYTE slave_addr, BYTE* pbuf, UINT32 buf_size)
 		return 0;
 	}
 	
-	wh_udelay(I2C_OPERATION_DELAY_US);
+//	wh_udelay(I2C_OPERATION_DELAY_US);
 	return buf_size;
 }
 
@@ -505,7 +516,7 @@ int wh_i2c_xfer(WDT_DEV *pdev, BYTE slave_addr, BYTE* txbuf, UINT32 tx_len,
 		return 0;
 	}
 	
-	wh_udelay(I2C_OPERATION_DELAY_US);
+//	wh_udelay(I2C_OPERATION_DELAY_US);
 	return 2;
 }
 
@@ -515,8 +526,10 @@ int wh_i2c_set_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 
 	REQ_DATA*	p_req_data = (REQ_DATA*) buf;
 	int		data_len = 0;
-	BYTE 		cmd;
-	BYTE		tx_buffer[80];
+	BYTE 	cmd;
+	BYTE	tx_buffer[80];
+	bool    retryflag = true;	
+	int 	retval = 0;
 
 	if (buf_size > 64)
 		buf_size = 64;
@@ -526,25 +539,31 @@ int wh_i2c_set_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 		return 0;
 	}
 
+retry:
+	data_len = 0;
 	cmd = buf[0];
-
 	tx_buffer[data_len++] = 0x22;
 	tx_buffer[data_len++] = 0x00;
 
 	if (p_req_data->DD.report_id > 0xF) {
-		tx_buffer[data_len++] = 0x30;
+		if(retryflag == true)
+			tx_buffer[data_len++] = 0x3F;
+		else 
+			tx_buffer[data_len++] = 0x30;
 		tx_buffer[data_len++] = 0x03;
 		tx_buffer[data_len++] = cmd;
+		
 	} else {
 		tx_buffer[data_len++] = 0x30 | cmd;
 		tx_buffer[data_len++] = 0x03;
 	}
+	
 
 	tx_buffer[data_len++] = 0x23;
 	tx_buffer[data_len++] = 0x00;
 
 	if ((pdev->board_info.dev_type & FW_WDT8755 &&
-		 pdev->board_info.dev_info_new.protocol_version >= 0x01000007) ||
+		 pdev->board_info.dev_info.w8755_dev_info.protocol_version >= 0x01000007) ||
 		 (pdev->dev_state != DS_PROGRAM) )
 	{
 		int xfer_size = buf_size + 2;
@@ -557,8 +576,16 @@ int wh_i2c_set_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 
 	memcpy(&tx_buffer[data_len], buf, buf_size);
 
-	return wh_i2c_tx(pdev, 0x2C, tx_buffer,
+	retval = wh_i2c_tx(pdev, 0x2C, tx_buffer,
 			 data_len + buf_size);	
+
+	
+	if( (buf[2] != cmd) && (retryflag == true) && (p_req_data->DD.report_id > 0xF) ) {
+		retryflag = false;
+		goto  retry;
+	}
+
+	return retval;
 }
 
 int wh_i2c_get_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
@@ -566,9 +593,10 @@ int wh_i2c_get_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 	int 		retval;
 	REQ_DATA*	p_req_data = (REQ_DATA*) buf;
 	int		data_len = 0;
-	BYTE		cmd;
-	BYTE		tx_buffer[10]; 
-	BYTE		rx_buffer[80];
+	BYTE	cmd;
+	BYTE	tx_buffer[10]; 
+	BYTE	rx_buffer[80];
+	bool    retryflag = true;
 
 	if (buf_size > 64)
 		buf_size = 64;
@@ -578,6 +606,8 @@ int wh_i2c_get_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 		return 0;
 	}
 
+retry:
+	data_len = 0;
 	cmd = buf[0];
 
 	tx_buffer[data_len++] = 0x22;
@@ -585,7 +615,10 @@ int wh_i2c_get_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 
 	if (p_req_data->DD.report_id > 0xF)
 	{
-		tx_buffer[data_len++] = 0x30;
+		if(retryflag == true)
+			tx_buffer[data_len++] = 0x3F;
+		else 
+			tx_buffer[data_len++] = 0x30;
 		tx_buffer[data_len++] = 0x02;
 		tx_buffer[data_len++] = cmd;
 	}
@@ -614,6 +647,12 @@ int wh_i2c_get_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 		xfer_length = buf_size;
 
 	memcpy(buf, &rx_buffer[2], xfer_length);
+
+	if( (rx_buffer[2] != cmd) && (retryflag == true) &&
+		(p_req_data->DD.report_id > 0xF) ) {
+		retryflag = false;
+		goto  retry;
+	}	
 
 	return 1;
 }

@@ -580,10 +580,17 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 	if (pparam->argus & OPTION_FW_VER) {
 		if (pparam->argus & OPTION_HW_ID)
 			printf("_");
-		
-		printf("%04x", pinfo->firmware_id & 0xFFFF);
-	}
 
+		if (pdev->board_info.dev_type & FW_WDT8755) {
+			printf("%04x", pinfo->firmware_id & 0xFFFF);
+        } else if (pdev->board_info.dev_type & FW_WDT8760_2) {
+            int fwrev = pinfo->dev_info.w8760_feature_devinfo.firmware_id & 0x0FFF;
+            int fwrexext = pinfo->dev_info.w8760_feature_devinfo.firmware_rev_ext & 0x000F;
+            int versionOuput = (fwrev<<4|fwrexext);
+			printf("%04x", versionOuput);
+		}
+	}	
+		
 	if (pparam->argus & OPTION_CFG_CHKSUM) {
 		if (pparam->argus & (OPTION_FW_VER | OPTION_HW_ID))
 			printf("_");

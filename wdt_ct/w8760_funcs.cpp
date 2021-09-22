@@ -32,9 +32,9 @@
 
 static FUNC_PTR_STRUCT_DEV_BASIC	g_func_dev_basic = { 0, 0, 0, 0 };
 
-BYTE W8760_RomSignatureVerB[8] = { 0xa6, 0x97, 0x53, 0x11, 0xde, 0x7f, 0x2e, 0xd7, };
-BYTE W8762_RomSignatureVerA[8] = { 0x7F, 0xD0, 0x20, 0x00, 0xB8, 0x1D, 0xCA, 0x54, };
-BYTE W8762_RomSignatureVerC[8] = { 0x6B, 0x6B, 0xA2, 0x08, 0xC6, 0x4C, 0x4D, 0xDD, };
+static BYTE W8760_RomSignatureVerB[8] = { 0xa6, 0x97, 0x53, 0x11, 0xde, 0x7f, 0x2e, 0xd7, };
+static BYTE W8762_RomSignatureVerA[8] = { 0x7F, 0xD0, 0x20, 0x00, 0xB8, 0x1D, 0xCA, 0x54, };
+static BYTE W8762_RomSignatureVerC[8] = { 0x6B, 0x6B, 0xA2, 0x08, 0xC6, 0x4C, 0x4D, 0xDD, };
 
 int check_is_all_ff(BYTE* data, int length)
 {
@@ -249,6 +249,16 @@ int wh_w8760_dev_reboot(WDT_DEV* pdev)
 	return wh_w8760_dev_command_write(pdev, cmd, 0, sizeof(cmd));	
 }
 
+int wh_w8760_dev_run_program_from_background(WDT_DEV* pdev, UINT32 program_address)
+{
+    BYTE cmd[2 + 4 + 4];
+	cmd[0] = W8760_COMMAND63;
+	cmd[1] = W8760_RUN_PROGRAM_FORM_BACKGROUND;
+	put_unaligned_le32(program_address, &cmd[2]);
+	put_unaligned_le32(0, &cmd[6]);
+	return wh_w8760_dev_command_write(pdev, cmd, 0, sizeof(cmd));	
+}
+
 int wh_w8760_dev_get_hid_descriptor_register(WDT_DEV* pdev, UINT16* pvalue)
 {
 	BYTE cmd[] = { W8760_COMMAND9, W8760_GET_HID_DESCRIPTOR_REGISTER };
@@ -333,6 +343,19 @@ int wh_w8760_dev_set_address(WDT_DEV* pdev, BYTE type, UINT32 address)
 		cmd[5] = 0;
 
 	return wh_w8760_dev_command_write(pdev, cmd, 0, 6);
+}
+
+int wh_w8760_dev_write_men_halfword(WDT_DEV* pdev, UINT16 hwords)
+{
+	BYTE buf[2];
+	put_unaligned_le16(hwords, &buf[0]);
+
+	return wh_w8760_dev_write_array(pdev, W8760_WRITE_HALFWORDS, buf, 0, sizeof(BYTE), 2);
+}
+
+int wh_w8760_dev_set_men_address(WDT_DEV* pdev, UINT32 address)
+{
+	return wh_w8760_dev_set_address(pdev, W8760_SET_MEMORY_ADDRESS, address);
 }
 
 int wh_w8760_dev_set_flash_address(WDT_DEV* pdev, UINT32 address)
@@ -761,12 +784,22 @@ int wh_w8760_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChu
 	retval = wh_w8760_dev_set_n_check_device_mode(pdev, W8760_MODE_FLASH_PROGRAM, 0, 0);
 	if (!retval)
 		return retval;
-
+		
 	UINT32 value = (pInputChunk->length + 255) >> 8;
 	value |= (((pChunk->chuckInfo.targetStartAddr >> 8) << 16) & 0xFFFF0000);
 	retval = wh_w8760_dev_send_commands(pdev, WH_CMD_FLASH_UNLOCK, value);
 	if (!retval)
 		return retval;
+	if(pdev->board_info.dev_type == FW_WDT8762)
+	{
+		if(pChunk->chuckInfo.targetStartAddr == 0x5d000)
+		{
+			printf("Erase Sector 0x0000 \n");
+			retval = wh_w8760_dev_flash_erase(pdev, 0x0000, 0x1000);
+			if (!retval)
+		        return retval;
+		}
+	}
 
 	size = pChunk->chuckInfo.length;	
 	start_addr = pChunk->chuckInfo.targetStartAddr;
@@ -855,6 +888,17 @@ int wh_w8760_dev_program_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk,
 	retval = wh_w8760_dev_send_commands(pdev, WH_CMD_FLASH_UNLOCK, 0);
 	if (!retval)
 		return retval;
+	
+	if(pdev->board_info.dev_type == FW_WDT8762)
+	{
+		if(pChunk->chuckInfo.targetStartAddr == 0x5d000)
+		{
+			printf("Erase Sector 0x0000 \n");
+			retval = wh_w8760_dev_flash_erase(pdev, 0x0000, 0x1000);
+			if (!retval)
+		        return retval;
+		}
+	}
 
 	retval = wh_w8760_dev_flash_erase(pdev, pChunk->chuckInfo.targetStartAddr, pChunk->chuckInfo.length);
 	if (!retval)
@@ -892,6 +936,31 @@ int wh_w8760_dev_program_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int op
 		return wh_w8760_dev_program_4k_chunk_verify(pdev, pInputChunk, option);
 
 	return 1;
+}
+
+int wh_w8760_get_rom_signature(int type, BYTE* buf)
+{
+	if(type == 0)
+	{
+		memcpy(buf, W8760_RomSignatureVerB, sizeof(W8760_RomSignatureVerB));
+		return 1;
+	}
+	else if(type == 1)
+	{
+		memcpy(buf, W8762_RomSignatureVerA, sizeof(W8762_RomSignatureVerA));
+		return 1;
+	}
+	else if(type == 2)
+	{
+		memcpy(buf, W8762_RomSignatureVerC, sizeof(W8762_RomSignatureVerC));
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+
+
 }
 
 

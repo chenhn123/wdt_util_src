@@ -36,12 +36,17 @@ int	wh_w8760_dev_flash_write_data(WDT_DEV* pdev, BYTE* data, UINT32 address, int
 int	wh_w8760_dev_flash_get_checksum(WDT_DEV* pdev, UINT32* pchecksum, UINT32 address, int size);
 int	wh_w8760_dev_flash_erase(WDT_DEV*, UINT32 address, int size);
 int	wh_w8760_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value);
+int wh_w8760_dev_set_men_address(WDT_DEV* pdev, UINT32 address);
+int wh_w8760_dev_write_men_halfword(WDT_DEV* pdev, UINT16 hwords);
+int wh_w8760_dev_run_program_from_background(WDT_DEV* pdev, UINT32 program_address);
 int	wh_w8760_dev_verify_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pChunk);
 int	wh_w8760_dev_program_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int option);
 int	wh_w8760_dev_compare_fw_checksum(WDT_DEV*, int*);
 
 int	wh_w8760_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int option);
 int	wh_w8760_dev_program_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int option);
+
+int wh_w8760_get_rom_signature(int type, BYTE* buf);
 
 /* __w8760_FUNCS_H__ */
 #endif		

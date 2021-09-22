@@ -316,6 +316,26 @@ int	wh_w8755_i2c_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_
 	return 1;
 }
 
+int wh_w8762_isp_rerun_recovery(WDT_DEV *pdev)
+{
+	wh_printf("It is maybe WDT8762 ISP\n");
+	wh_w8760_dev_set_men_address(pdev, 0xA022750A);            
+	wh_w8760_dev_write_men_halfword(pdev, 0);
+	wh_w8760_dev_run_program_from_background(pdev, 0x061000);
+	wh_printf("Rerun Recovery fw \n");	
+	return 1;
+}
+
+int wh_w8760_isp_rerun_recovery(WDT_DEV *pdev)
+{
+	wh_printf("It is maybe WDT8760 ISP\n");
+    wh_w8760_dev_run_program_from_background(pdev, 0x061000);
+    wh_printf("Rerun Recovery fw \n");	
+	return 1;
+}
+
+
+
 int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 {
 	BYTE				buf[80];
@@ -324,6 +344,7 @@ int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 	int		ret_size;
 	int 	ret = 0;
 	int 	fw_id = 0;
+	int     retryF2 = 3;
 
 	if (!pdev || !pdev->dev_handle || !pboard_info) {
 		printf("device ptr is null !\n");
@@ -335,19 +356,52 @@ int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 	pdev->dev_state = DS_GET_INFO;
 
 	buf[0] = VND_REQ_DEV_INFO;
-	ret = wh_i2c_get_feature(pdev, buf, 64);	
-	fw_id = get_unaligned_le32(buf + 1);
+	while (retryF2 && ret <= 0 || fw_id == 0)
+	{
+		ret = wh_i2c_get_feature(pdev, buf, 64);	
+	    fw_id = get_unaligned_le32(buf + 1);
+		retryF2 --;
 
-	if (ret <= 0 || fw_id == 0) {
-		pboard_info->dev_type = FW_MAYBE_ISP;	
-		printf("Can't get fw id, should be in ISP mode !\n");
+	    if (ret <= 0 || fw_id == 0) {
+		    pboard_info->dev_type = FW_MAYBE_ISP;	
+		    wh_printf("Can't get fw id, should be in ISP mode !\n");
 
-		if ((buf[0x26] == 0x49 && buf[0x27] == 0x53 && buf[0x28] == 0x50)) {
-			printf("It is maybe WDT8760 ISP\n");
-			board_info.dev_type = FW_WDT8760_2_ISP;
-		} 
-		return 0;
+		    if ((buf[0x26] == 0x49 && buf[0x27] == 0x53 && buf[0x28] == 0x50)) {
+
+		        BYTE romSig[8];
+			    memset(romSig, 0, sizeof(romSig));
+			    wh_w8760_get_rom_signature(2, romSig);
+			    if(memcmp(&buf[0 + 0x18], romSig, sizeof(romSig)) == 0)
+			    {	
+				    board_info.dev_type = FW_WDT8760_2_ISP;
+				    wh_w8762_isp_rerun_recovery(pdev);		
+			    }
+			    memset(romSig, 0, sizeof(romSig));
+			    wh_w8760_get_rom_signature(1, romSig);
+			    if(memcmp(&buf[0 + 0x18], romSig, sizeof(romSig)) == 0)
+			    {
+				    board_info.dev_type = FW_WDT8760_2_ISP;
+				    wh_w8762_isp_rerun_recovery(pdev);			
+			    }
+			    memset(romSig, 0, sizeof(romSig));
+			    wh_w8760_get_rom_signature(0, romSig);
+			    if(memcmp(&buf[0 + 0x18], romSig, sizeof(romSig)) == 0)
+			    {
+				    board_info.dev_type = FW_WDT8760_2_ISP;
+			        wh_w8760_isp_rerun_recovery(pdev);
+			    }	
+			
+		    } 
+
+			if(retryF2 == 0){
+				printf("Can't get fw id, should be in ISP mode !\n");
+				return 0;
+
+			}
+	    }
 	}
+	
+
 
 	if (buf[0] != VND_REQ_DEV_INFO) {
 		pboard_info->dev_type = FW_MAYBE_ISP;	

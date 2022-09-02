@@ -451,6 +451,11 @@ int wh_w8760_dev_write_flash(WDT_DEV* pdev, int addr, BYTE* buf, int start, int 
 		addr += max_payload_size;
 	}
 
+	if (cur_addr != addr) {
+		if (!wh_w8760_dev_set_flash_address(pdev, addr))
+			return 0;
+	}
+
 	if (byte_count > 0) 
 		return wh_w8760_dev_batch_write_flash(pdev, buf, offset, byte_count);
 

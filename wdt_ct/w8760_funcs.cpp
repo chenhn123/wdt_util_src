@@ -830,11 +830,11 @@ int wh_w8760_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChu
 			retval = wh_w8760_dev_send_commands(pdev, WH_CMD_FLASH_ERASE4K, start_addr);
 			
 			if (!retval)
-				break;
+				continue;
 
 			retval = wh_w8760_dev_flash_write_data(pdev, (BYTE*) pdata, start_addr, page_size);
 			if (!retval)
-				break;
+				continue;
 
 			calc_checksum = misr_for_bytes(0, (BYTE*) pdata, 0, page_size);
 

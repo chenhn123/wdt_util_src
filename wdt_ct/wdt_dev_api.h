@@ -31,7 +31,7 @@
 
 #define		RETRY_COUNT			3
 
-#define		OPTION_DES			0x1
+#define		OPTION_DES			    0x1
 #define		OPTION_4K_VERIFY		0x2
 #define		OPTION_ERR_RTN			0x4
 #define		OPTION_ISP_MODE			0x8
@@ -55,18 +55,8 @@
 #define		WH_CMD_FLASH_PROTECTION_ON	0x16
 #define		WH_CMD_FLASH_PROTECTION_OFF	0x17
 
-#define		WH_CMD_CHECKSUM_CALC		0x30
-#define		WH_CMD_CHECKSUM_LENGTH		0x31
 
-#define		WH_SET_SHORTCHECK_CS		0x40
-#define		WH_TEST_END			0x41
-#define		WH_SET_MASK			0x42
-#define		WH_REMOVE_MASK			0x43
-#define		WH_POWER_ON_PALM		0x44
-#define		WH_SET_SHORTCHECK_CD_1		0x45
-#define		WH_SET_INTEGRATION_TIME		0x46
-#define		WH_DISABLE_PIN_CS_RATIO		0x47
-#define		WH_SET_SHORTCHECK_CD_2		0x48
+
 
 
 /* forward declaration */
@@ -113,7 +103,6 @@ typedef	int		(* LPFUNC_wh_get_chunk_info)(WH_HANDLE, UINT32, CHUNK_INFO_EX*);
 typedef	int		(* LPFUNC_wh_get_device_access_func)(int, FUNC_PTR_STRUCT_DEV_ACCESS* );   
 typedef	int		(* LPFUNC_wh_get_device_private_access_func)(WDT_DEV*, UINT32, FUNC_PTR_STRUCT_DEV_OPERATION*);   
 typedef	int		(* LPFUNC_wh_get_device_basic_access_func)(WDT_DEV*, UINT32, FUNC_PTR_STRUCT_DEV_BASIC*);   
-typedef	int		(* LPFUNC_net_bridge_server_start)(void *wdt_dev_access, WH_HANDLE handle);
 
 typedef struct FuncPtrStructDevAccess { 
 	LPFUNC_wh_scan_device		p_wh_scan_device;	 
@@ -205,7 +194,7 @@ int		wh_get_device_basic_access_func(WDT_DEV *pdev, UINT32 key, FUNC_PTR_STRUCT_
 
 int		wh_i2c_scan_device(WDT_DEV *pdev);
 int		wh_i2c_get_device(WDT_DEV *pdev, WDT_DEVICE_INFO *pDevInfo, int flag);
-int 		wh_i2c_open_device(WDT_DEV *pdev);
+int 	wh_i2c_open_device(WDT_DEV *pdev);
 int		wh_i2c_close_device(WDT_DEV *pdev);
 int		wh_i2c_prepare_data(WDT_DEV *pDev, BOARD_INFO *pboard_info);
 

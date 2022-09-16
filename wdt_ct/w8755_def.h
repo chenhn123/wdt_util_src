@@ -20,32 +20,12 @@
 
 /* w8755 supports */
 #define		WH_CMD_ENTER_FACTORY		0x80
-#define		WH_CMD_ENTER_DEBUG		0x81
 
-#define		WH_SOURCE_RAWIMG  		0
-#define		WH_SOURCE_PROCESSEDIMG 		1
-#define		WH_SOURCE_REFIMG		2
-
-#define		WH_FILE_ENCP			0x1
-#define		WH_FILE_XML			0x2
-#define		WH_FILE_GUI_CNFG		0x3
-#define		WH_FILE_PTOOL_CNFG		0x4
-#define		WH_FILE_ECB			0x5
 
 #define		EXEC_I2C_NO_REPEAT_START	0x100
 #define		EXEC_I2C_REDUNDANT		0x200
-#define		EXEC_EXT_PATH			0x1000
-#define		EXEC_CHECK_FW_NEWER		0x2000
-#define		EXEC_SHOW_EXTRA_INFO		0x10000
-#define		EXEC_SHOW_DBG_INFO		0x20000
 
-#define		EXEC_INTF_MASK			0xFF
-#define		EXEC_OPTION_MASK		0xFFFFFF00
 
-#define		FLAG_RESET_CALIBRATION		0x01
-
-#define		SCAN_DO_RESCAN			0x01
-#define		SCAN_USE_LPATH			0x02
 
 
 typedef struct WeidaDeviceInfoNew
@@ -139,22 +119,6 @@ typedef struct SectionHeader
 #define		W8755_DM_COMMAND		0x90
 #define		W8755_DM_ATE			0xA0
 
-/* id of the old way to request the raw image of pen */
-#define		SOURCE_PENIMG			9
-
-/* definition of Image Source ID */
-#define		W8755_SOURCE_RAW		0
-#define		W8755_SOURCE_PROCESSED		1
-#define		W8755_SOURCE_REFERENCE		2
-#define 	W8755_SOURCE_REGION		3
-#define		W8755_SOURCE_WATER		4
-#define		W8755_SOURCE_GAIN		5
-#define		W8755_SOURCE_TP_DEFECT		6
-#define		W8755_SOURCE_DEBUG_0		16
-#define		W8755_SOURCE_DEBUG_1		17
-#define		W8755_SOURCE_DEBUG_2		18
-#define		W8755_SOURCE_DEBUG_3		19
-#define		W8755_SOURCE_PEN		32
 
 /* definition of Flash Memory Block */
 #define		W8755_FMB_FLS_SEC		0

@@ -712,7 +712,7 @@ int find_hid_dev_name(int bus, int vid, int pid, char *device_name)
 	return ret;
 }
 
-int find_device_name(char *hid_dev_name, char *driver_name)
+int find_device_name(char *hid_dev_name, char *driver_name, char *driver_path)
 {
 	char dev_path[] = "/sys/bus/i2c/devices/";
 
@@ -727,9 +727,10 @@ int find_device_name(char *hid_dev_name, char *driver_name)
 
 	devs_dir = opendir(dev_path);
 	if (!devs_dir) {
-		printf("can open device path: %s\n", dev_path);
+		printf("can not open device path: %s\n", dev_path);
 		return 0;
 	}
+
 
 	while((devs_dir_entry = readdir(devs_dir)) != NULL) {
 		if (devs_dir_entry->d_type != DT_LNK)
@@ -742,6 +743,7 @@ int find_device_name(char *hid_dev_name, char *driver_name)
 		tmp_buf[sz] = 0;
 
 		sprintf(tmp_path, "%s%s", dev_path, tmp_buf);
+
 		dev_dir = opendir(tmp_path);
 		if (!dev_dir) 
 			continue;
@@ -755,8 +757,27 @@ int find_device_name(char *hid_dev_name, char *driver_name)
 		}
 		closedir(dev_dir);
 
-		if (device_found)
-			break;
+		if (device_found){
+			strcat(tmp_path, "/uevent");
+			FILE *stream;
+            char line[64];
+
+            stream = fopen(tmp_path, "r");
+            if (stream == NULL) {
+            	printf("can not open driver path: %s\n", tmp_path);
+		        return 0;
+            }
+
+            if(fgets (line, 64, stream)!=NULL) {
+            	line[strcspn(line, "\n")] = 0;
+                char *modulename;
+                modulename = strchr(line, '=') +1;
+                strcat(driver_path, modulename);
+                strcat(driver_path, "/");
+            }
+            fclose(stream);
+            break;
+		}
 	}
 	closedir(devs_dir);
 
@@ -790,6 +811,8 @@ int write_devname_to_sys_attr(const char *attr, const char *action)
 	return (size == (ssize_t) strlen(action));
 }
 
+
+
 int rebind_driver(WDT_DEV *pdev)
 {
 	int 	bus = 0x18;
@@ -807,12 +830,15 @@ int rebind_driver(WDT_DEV *pdev)
 		return 0;
 	}
 
-	strcpy(driver_path, "/sys/bus/i2c/drivers/i2c_hid/");
 
-	if (!find_device_name(hid_dev_name, i2c_dev_name)) {
+
+	strcpy(driver_path, "/sys/bus/i2c/drivers/");
+
+	if (!find_device_name(hid_dev_name, i2c_dev_name, driver_path)) {
 		printf("find device name failed %s\n", hid_dev_name);
 		return 0;
 	}
+
 
 	sprintf(attr_str, "%s%s", driver_path, "unbind");
 

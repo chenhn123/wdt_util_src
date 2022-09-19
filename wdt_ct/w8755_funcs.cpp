@@ -25,7 +25,6 @@
 #include "dev_def.h"
 #include "w8755_funcs.h"
 
-#define	SHORT_RETRY_COUNT		500
 
 #define		WRITE_FLASH_PAGE(__WRITE_BASE_SIZE__)	\
 	if (size > (int) __WRITE_BASE_SIZE__) {		\

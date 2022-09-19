@@ -25,7 +25,7 @@ int	wh_w8760_dev_get_indexed_string(WDT_DEV* pdev, UINT32 index, BYTE* buf, UINT
 int	wh_w8760_dev_read_report(WDT_DEV* pdev, BYTE* buf, UINT32 buf_size);
 int	wh_w8760_dev_set_basic_op(WDT_DEV *pdev);
 int	wh_w8760_get_feature_devinfo(W8760_REPORT_FEATURE_DEVINFO* report_feature_devinfo, BYTE* buf);
-int	wh_w8760_dev_identify_platform(WDT_DEV* pdev);
+int	wh_w8760_dev_identify_platform(WDT_DEV* pdev, BOARD_INFO* pboardInfo);
 int	wh_w8760_dev_set_device_mode(WDT_DEV* pdev, BYTE mode);
 int	wh_w8760_dev_read_buf_response(WDT_DEV* pdev, BYTE* data, int size);
 int	wh_w8760_dev_get_device_info(WDT_DEV* pdev, BYTE* buf, int offset, int size);

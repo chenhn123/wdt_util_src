@@ -758,7 +758,7 @@ int	wh_w8760_prepare_data(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 	return 1;
 }
 
-int wh_w8760_dev_flash_erase(WDT_DEV* pdev, unsigned int address, int size)
+int wh_w8760_dev_flash_erase(WDT_DEV* pdev, UINT32 address, int size)
 {
 	int ret = wh_w8760_dev_erase_flash(pdev, address, size);
 

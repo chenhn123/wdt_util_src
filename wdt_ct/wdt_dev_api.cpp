@@ -21,7 +21,6 @@
 #include <malloc.h>
 #include <time.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
@@ -723,7 +722,7 @@ int find_device_name(char *hid_dev_name, char *driver_name, char *driver_path)
 	int 	device_found = 0;
 	ssize_t sz;
 	char	tmp_buf[256];
-	char	tmp_path[256];
+	char	tmp_path[277];
 
 	devs_dir = opendir(dev_path);
 	if (!devs_dir) {
@@ -821,7 +820,7 @@ int rebind_driver(WDT_DEV *pdev)
 	char	hid_dev_name[64];
 	char	driver_path[64];
 	char	i2c_dev_name[64];
-	char	attr_str[64];
+	char	attr_str[70];
 
 	printf("Start to rebind driver !\n");
 

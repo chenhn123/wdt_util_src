@@ -37,7 +37,6 @@
 
 /* i2c-hid driver for weida's controller */
 #define		ACPI_NAME_HID		"i2c-WDHT"
-#define		NO_DEV_CHK		16
 
 static char		g_dev_path[64];
 
@@ -356,7 +355,7 @@ int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 	pdev->dev_state = DS_GET_INFO;
 
 	buf[0] = VND_REQ_DEV_INFO;
-	while (retryF2 && ret <= 0 || fw_id == 0)
+	while ((retryF2 && ret <= 0) || fw_id == 0)
 	{
 		ret = wh_i2c_get_feature(pdev, buf, 64);	
 	    fw_id = get_unaligned_le32(buf + 1);

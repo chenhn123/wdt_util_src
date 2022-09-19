@@ -48,7 +48,6 @@
 #define		WDT_PAGE_SIZE		0x1000
 
 #define		GET_DEVICE_BY_PATH	0x100
-#define		GET_DEVICE_BY_LPATH	0x200
 
 typedef	union
 {
@@ -156,7 +155,6 @@ typedef struct	WdtDeviceInfo
 	UINT32	vid;
 	UINT32	pid;
 	char	path[256];
-	char 	l_path[256];
 } WDT_DEVICE_INFO;
 
 /* forward declaration */

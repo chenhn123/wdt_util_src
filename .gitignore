@@ -2,3 +2,4 @@
 
 # Object files
 *.o
+wdt_util

@@ -66,8 +66,6 @@
 #define	W8760_MP_STATUS_BUSY	0xFE
 #define W8760_MP_STATUS_OK		0x80
 
-#define W8760_MIN(a,b) (((a)<(b))?(a):(b))
-#define W8760_MAX(a,b) (((a)>(b))?(a):(b))
 
 
 #pragma pack(push, 1)

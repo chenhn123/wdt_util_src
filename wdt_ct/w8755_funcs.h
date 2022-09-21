@@ -41,7 +41,7 @@ int 	wh_w8755_dev_get_indexed_string(WDT_DEV*, UINT32, BYTE*, UINT32);
 int 	wh_w8755_dev_read_report(WDT_DEV*, BYTE*, UINT32);
 
 
-int	    wh_w8755_dev_set_basic_op(WDT_DEV *pdev);
+int	wh_w8755_dev_set_basic_op(WDT_DEV *pdev);
 int 	wh_w8755_dev_identify_platform(WDT_DEV* pdev);
 int 	wh_w8755_dev_parse_new_dev_info(WDT_DEV* pdev, W8755_DEV_INFO_NEW *pdev_info_new);
 int 	wh_w8755_dev_set_device_mode(WDT_DEV* pdev, BYTE mode);

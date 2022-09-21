@@ -759,27 +759,26 @@ int find_device_name(char *hid_dev_name, char *driver_name, char *driver_path)
 		if (device_found){
 			strcat(tmp_path, "/uevent");
 			FILE *stream;
-            char line[64];
+                        char line[64];
 
-            stream = fopen(tmp_path, "r");
-            if (stream == NULL) {
-            	printf("can not open driver path: %s\n", tmp_path);
-		        return 0;
-            }
+                      stream = fopen(tmp_path, "r");
+                      if (stream == NULL) {
+            	          printf("can not open driver path: %s\n", tmp_path);
+		          return 0;
+                      }
 
-            if(fgets (line, 64, stream)!=NULL) {
-            	line[strcspn(line, "\n")] = 0;
-                char *modulename;
-                modulename = strchr(line, '=') +1;
-                strcat(driver_path, modulename);
-                strcat(driver_path, "/");
-            }
-            fclose(stream);
-            break;
+                     if(fgets (line, 64, stream)!=NULL) {
+            	         line[strcspn(line, "\n")] = 0;
+                         char *modulename;
+                         modulename = strchr(line, '=') +1;
+                        strcat(driver_path, modulename);
+                        strcat(driver_path, "/");
+                     }
+                     fclose(stream);
+                     break;
 		}
 	}
 	closedir(devs_dir);
-
 	return device_found;
 }
 

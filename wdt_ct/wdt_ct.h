@@ -22,7 +22,7 @@
 #define		OPTION_UPDATE			0x1
 #define		OPTION_ISP_UPDATE		0x2
 #define		OPTION_NO_FORCE			0x4
-#define		OPTION_INFO			    0x8
+#define		OPTION_INFO			0x8
 #define		OPTION_EXTRA_INFO		0x10
 #define 	OPTION_NO_RPARAM		0x20
 #define		OPTION_NO_REBIND		0x40
@@ -43,7 +43,7 @@ int		load_lib_func_address(WDT_DEV*, EXEC_PARAM*);
 int		image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pParam);
 int		image_file_isp_burn_data(WDT_DEV *pdev, EXEC_PARAM *pParam);
 int		get_raw_data(WDT_DEV *pdev, EXEC_PARAM *pParam);
-int 	show_wif_info(WDT_DEV *pdev, EXEC_PARAM *pparam);
+int 	        show_wif_info(WDT_DEV *pdev, EXEC_PARAM *pparam);
 int		show_info(WDT_DEV *pdev, EXEC_PARAM *pParam);
 int		rebind_driver(WDT_DEV *pdev);
 

@@ -31,7 +31,7 @@
 
 #define		RETRY_COUNT			3
 
-#define		OPTION_DES			    0x1
+#define		OPTION_DES			0x1
 #define		OPTION_4K_VERIFY		0x2
 #define		OPTION_ERR_RTN			0x4
 #define		OPTION_ISP_MODE			0x8
@@ -64,7 +64,7 @@ struct WdtDevice;
 typedef	struct WdtDevice			WDT_DEV;	
 typedef struct FuncPtrStructDevAccess 		FUNC_PTR_STRUCT_DEV_ACCESS; 
 typedef struct FuncPtrStructDevOperation 	FUNC_PTR_STRUCT_DEV_OPERATION; 
-typedef struct 	FuncPtrStructDevBasic 		FUNC_PTR_STRUCT_DEV_BASIC; 
+typedef struct FuncPtrStructDevBasic 		FUNC_PTR_STRUCT_DEV_BASIC; 
 
 /* Device Access Function Pointer typedef */
 typedef	int		(* LPFUNC_wh_scan_device)(WDT_DEV*);   
@@ -194,7 +194,7 @@ int		wh_get_device_basic_access_func(WDT_DEV *pdev, UINT32 key, FUNC_PTR_STRUCT_
 
 int		wh_i2c_scan_device(WDT_DEV *pdev);
 int		wh_i2c_get_device(WDT_DEV *pdev, WDT_DEVICE_INFO *pDevInfo, int flag);
-int 	wh_i2c_open_device(WDT_DEV *pdev);
+int 	        wh_i2c_open_device(WDT_DEV *pdev);
 int		wh_i2c_close_device(WDT_DEV *pdev);
 int		wh_i2c_prepare_data(WDT_DEV *pDev, BOARD_INFO *pboard_info);
 

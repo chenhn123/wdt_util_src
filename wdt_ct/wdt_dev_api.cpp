@@ -771,8 +771,8 @@ int find_device_name(char *hid_dev_name, char *driver_name, char *driver_path)
             	         line[strcspn(line, "\n")] = 0;
                          char *modulename;
                          modulename = strchr(line, '=') +1;
-                        strcat(driver_path, modulename);
-                        strcat(driver_path, "/");
+                         strcat(driver_path, modulename);
+                         strcat(driver_path, "/");
                      }
                      fclose(stream);
                      break;

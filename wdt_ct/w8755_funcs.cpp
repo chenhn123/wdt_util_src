@@ -210,7 +210,7 @@ int	wh_w8755_dev_flash_write_data_page(WDT_DEV* pdev, BYTE* data, UINT32 address
 	return retval; 
 }
 
-int wh_w8755_dev_flash_write_data(WDT_DEV* pdev, BYTE* pdata, unsigned int start_addr, int size)
+int wh_w8755_dev_flash_write_data(WDT_DEV* pdev, BYTE* pdata, UINT32 start_addr, int size)
 {
 	int retval = 0;
 	unsigned int	write_base;

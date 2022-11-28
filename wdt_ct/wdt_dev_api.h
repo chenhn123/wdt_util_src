@@ -194,7 +194,7 @@ int		wh_get_device_basic_access_func(WDT_DEV *pdev, UINT32 key, FUNC_PTR_STRUCT_
 
 int		wh_i2c_scan_device(WDT_DEV *pdev);
 int		wh_i2c_get_device(WDT_DEV *pdev, WDT_DEVICE_INFO *pDevInfo, int flag);
-int 	wh_i2c_open_device(WDT_DEV *pdev);
+int 		wh_i2c_open_device(WDT_DEV *pdev);
 int		wh_i2c_close_device(WDT_DEV *pdev);
 int		wh_i2c_prepare_data(WDT_DEV *pDev, BOARD_INFO *pboard_info);
 

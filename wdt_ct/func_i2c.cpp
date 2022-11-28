@@ -390,11 +390,11 @@ int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 				}	
 			
 			} 
-		if(retryF2 == 0){
-			printf("Can't get fw id, should be in ISP mode !\n");
-			return 0;
+			if(retryF2 == 0){
+				printf("Can't get fw id, should be in ISP mode !\n");
+				return 0;
+			}
 		}
-	    }
 	}
 	
 

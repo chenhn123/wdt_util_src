@@ -340,7 +340,7 @@ int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 	BYTE				buf[80];
 	BOARD_INFO			board_info;	
 	USB_DEVICE_DESC	 	usb_dev_desc;
-	int		ret_size;
+	int	ret_size;
 	int 	ret = 0;
 	int 	fw_id = 0;
 	int     retryF2 = 3;
@@ -358,43 +358,41 @@ int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 	while ((retryF2 && ret <= 0) || fw_id == 0)
 	{
 		ret = wh_i2c_get_feature(pdev, buf, 64);	
-	    fw_id = get_unaligned_le32(buf + 1);
+		fw_id = get_unaligned_le32(buf + 1);
 		retryF2 --;
 
-	    if (ret <= 0 || fw_id == 0) {
-		pboard_info->dev_type = FW_MAYBE_ISP;	
-		wh_printf("Can't get fw id, should be in ISP mode !\n");
+		if (ret <= 0 || fw_id == 0) {
+			pboard_info->dev_type = FW_MAYBE_ISP;	
+			wh_printf("Can't get fw id, should be in ISP mode !\n");
 
-		if ((buf[0x26] == 0x49 && buf[0x27] == 0x53 && buf[0x28] == 0x50)) {
-
-		        BYTE romSig[8];
-			memset(romSig, 0, sizeof(romSig));
-			wh_w8760_get_rom_signature(2, romSig);
-			if(memcmp(&buf[0 + 0x18], romSig, sizeof(romSig)) == 0)
-			{	
-				board_info.dev_type = FW_WDT8760_2_ISP;
-				wh_w8762_isp_rerun_recovery(pdev);		
-			}
-			memset(romSig, 0, sizeof(romSig));
-			wh_w8760_get_rom_signature(1, romSig);
-			if(memcmp(&buf[0 + 0x18], romSig, sizeof(romSig)) == 0)
-			{
-				board_info.dev_type = FW_WDT8760_2_ISP;
-				wh_w8762_isp_rerun_recovery(pdev);			
-			}
-			memset(romSig, 0, sizeof(romSig));
-			wh_w8760_get_rom_signature(0, romSig);
-			if(memcmp(&buf[0 + 0x18], romSig, sizeof(romSig)) == 0)
-			{
-				board_info.dev_type = FW_WDT8760_2_ISP;
-				wh_w8760_isp_rerun_recovery(pdev);
-			}	
+			if ((buf[0x26] == 0x49 && buf[0x27] == 0x53 && buf[0x28] == 0x50)) {
+				BYTE romSig[8];
+				memset(romSig, 0, sizeof(romSig));
+				wh_w8760_get_rom_signature(2, romSig);
+				if(memcmp(&buf[0 + 0x18], romSig, sizeof(romSig)) == 0)
+				{	
+					board_info.dev_type = FW_WDT8760_2_ISP;
+					wh_w8762_isp_rerun_recovery(pdev);		
+				}
+				memset(romSig, 0, sizeof(romSig));
+				wh_w8760_get_rom_signature(1, romSig);
+				if(memcmp(&buf[0 + 0x18], romSig, sizeof(romSig)) == 0)
+				{
+					board_info.dev_type = FW_WDT8760_2_ISP;
+					wh_w8762_isp_rerun_recovery(pdev);			
+				}
+				memset(romSig, 0, sizeof(romSig));
+				wh_w8760_get_rom_signature(0, romSig);
+				if(memcmp(&buf[0 + 0x18], romSig, sizeof(romSig)) == 0)
+				{
+					board_info.dev_type = FW_WDT8760_2_ISP;
+					wh_w8760_isp_rerun_recovery(pdev);
+				}	
 			
-		} 
+			} 
 		if(retryF2 == 0){
 			printf("Can't get fw id, should be in ISP mode !\n");
 			return 0;
-
 		}
 	    }
 	}

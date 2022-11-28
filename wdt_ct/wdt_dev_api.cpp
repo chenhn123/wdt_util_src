@@ -89,8 +89,6 @@ int	wh_get_device_basic_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT_D
 	if (!pFuncs || !pdev)
 		return 0;
 
-	if (key != 0x25758753)
-		return 0;
 
 	if (pdev->board_info.dev_type & FW_WDT8755) {
 		pFuncs->p_wh_get_feature = (LPFUNC_wh_get_feature) wh_w8755_dev_get_feature;

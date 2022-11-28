@@ -251,7 +251,7 @@ int wh_w8760_dev_reboot(WDT_DEV* pdev)
 
 int wh_w8760_dev_run_program_from_background(WDT_DEV* pdev, UINT32 program_address)
 {
-    BYTE cmd[2 + 4 + 4];
+	BYTE cmd[2 + 4 + 4];
 	cmd[0] = W8760_COMMAND63;
 	cmd[1] = W8760_RUN_PROGRAM_FORM_BACKGROUND;
 	put_unaligned_le32(program_address, &cmd[2]);
@@ -401,7 +401,7 @@ int wh_w8760_dev_erase_flash(WDT_DEV* pdev, UINT32 address, UINT32 size)
 	cmd[2] = (BYTE) (address >> 12);
 	cmd[3] = (BYTE)(((address & 0x0FFF) + size + 4095) >> 12);
 
-    if (wh_w8760_dev_command_write(pdev, cmd, 0, sizeof(cmd)) > 0)
+	if (wh_w8760_dev_command_write(pdev, cmd, 0, sizeof(cmd)) > 0)
 		return wh_w8760_dev_wait_cmd_end(pdev, 0, 0);
 
 	return 0;
@@ -519,7 +519,7 @@ int wh_w8760_dev_protect_flash(WDT_DEV* pdev, UINT16 protect_mask)
 
 	return wh_w8760_dev_command_write(pdev, cmd, 0, sizeof(cmd));
 }
-        
+		
 int wh_w8760_dev_checksum_flash(WDT_DEV* pdev, UINT32* pchksum, UINT32 flash_address,
 	int size, UINT32 init_sum)
 {
@@ -606,13 +606,13 @@ int wh_w8760_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
 			
 			if (addr < 128 * 1024 && addr + size <= 128 * 1024)
 				ret = wh_w8760_dev_protect_flash(pdev, W8760_UnprotectLower128k);
-            		else if (addr < 256 * 1024 && addr + size <= 256 * 1024)
+					else if (addr < 256 * 1024 && addr + size <= 256 * 1024)
 				ret = wh_w8760_dev_protect_flash(pdev, W8760_UnprotectLower256k);
 			else if (addr < 384 * 1024 && addr + size <= 384 * 1024)
 				ret = wh_w8760_dev_protect_flash(pdev, W8760_UnprotectLower384k);
 	  		else if (addr < 508 * 1024 && addr + size <= 508 * 1024)
 				ret = wh_w8760_dev_protect_flash(pdev, W8760_UnprotectLower508k);
-          		else if (addr == 0 && addr + size > 508 * 1024 && addr + size <= 512*1024)
+		  		else if (addr == 0 && addr + size > 508 * 1024 && addr + size <= 512*1024)
 				ret = wh_w8760_dev_protect_flash(pdev, W8760_UnprotectAll512k);
 
 			return ret;
@@ -802,7 +802,7 @@ int wh_w8760_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChu
 			printf("Erase Sector 0x0000 \n");
 			retval = wh_w8760_dev_flash_erase(pdev, 0x0000, 0x1000);
 			if (!retval)
-		        return retval;
+				return retval;
 		}
 	}
 
@@ -901,7 +901,7 @@ int wh_w8760_dev_program_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk,
 			printf("Erase Sector 0x0000 \n");
 			retval = wh_w8760_dev_flash_erase(pdev, 0x0000, 0x1000);
 			if (!retval)
-		        return retval;
+				return retval;
 		}
 	}
 

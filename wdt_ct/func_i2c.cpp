@@ -252,6 +252,10 @@ int wh_i2c_get_param_hid(WDT_DEV *pdev, BOARD_INFO *pinfo)
 
 	pinfo->vid = pinfo->dev_hid_desc.wVendorID;
 	pinfo->pid = pinfo->dev_hid_desc.wProductID;
+	pdev->board_info.vid = pinfo->vid;
+	pdev->board_info.pid = pinfo->pid;
+	pdev->board_info.dev_hid_desc = pinfo->dev_hid_desc;
+
 
 	return 1;
 }
@@ -353,6 +357,7 @@ int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 	memset(&board_info, 0, sizeof(BOARD_INFO));
 
 	pdev->dev_state = DS_GET_INFO;
+	wh_i2c_get_param_hid(pdev, &board_info);
 
 	buf[0] = VND_REQ_DEV_INFO;
 	while ((retryF2 && ret <= 0) || fw_id == 0)
@@ -592,8 +597,10 @@ int wh_i2c_set_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 retry:
 	data_len = 0;
 	cmd = buf[0];
-	tx_buffer[data_len++] = 0x22;
-	tx_buffer[data_len++] = 0x00;
+	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wCommandRegister; //0x22;
+	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wCommandRegister >> 8; //0x00;
+
+
 
 	if (p_req_data->DD.report_id > 0xF) {
 		if(retryflag == true)
@@ -609,8 +616,9 @@ retry:
 	}
 	
 
-	tx_buffer[data_len++] = 0x23;
-	tx_buffer[data_len++] = 0x00;
+	
+	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wDataRegister; //0x23;
+	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wDataRegister >> 8; //0x00;
 
 	if ((pdev->board_info.dev_type & FW_WDT8755 &&
 		 pdev->board_info.dev_info.w8755_dev_info.protocol_version >= 0x01000007) ||
@@ -659,9 +667,11 @@ int wh_i2c_get_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 retry:
 	data_len = 0;
 	cmd = buf[0];
+	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wCommandRegister; //0x22;
+	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wCommandRegister>>8; //0x00;
 
-	tx_buffer[data_len++] = 0x22;
-	tx_buffer[data_len++] = 0x00;
+
+
 
 	if (p_req_data->DD.report_id > 0xF)
 	{
@@ -678,8 +688,9 @@ retry:
 		tx_buffer[data_len++] = 0x02;
 	}
 
-	tx_buffer[data_len++] = 0x23;
-	tx_buffer[data_len++] = 0x00;
+        tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wDataRegister;//0x23;
+        tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wDataRegister>>8;//0x00;	
+
 
 	if (pdev->pparam->options & EXEC_I2C_REDUNDANT) {
 		tx_buffer[data_len++] = 0x00;
@@ -711,8 +722,11 @@ int wh_i2c_get_desc(WDT_DEV *pdev, BYTE desc_type, BYTE string_idx, BYTE* target
 {
 	int	retval;
 	int	ret_size = 0;
-	char	str_txdata[10] = { 0x22, 0x00, 0x13, 0x0E, 0x00, 0x23, 0x00, 0x00, 0x00, 0x00 };
-	char	desc_txdata[10] = { 0x22, 0x00, 0x10, 0x0E, 0x23, 0x00, 0x00, 0x00, 0x00, 0x00 };
+	UINT16 cmd_reg = pdev->board_info.dev_hid_desc.wCommandRegister;
+        UINT16 data_reg = pdev->board_info.dev_hid_desc.wDataRegister;
+        char    str_txdata[10] = { (BYTE)cmd_reg, (BYTE)(cmd_reg>>8), 0x13, 0x0E, 0x00, (BYTE)data_reg, (BYTE)(data_reg>>8), 0x00, 0x00, 0x00 };
+        char    desc_txdata[10] = { (BYTE)cmd_reg, (BYTE)(cmd_reg>>8), 0x10, 0x0E, (BYTE)data_reg, (BYTE)(data_reg>>8), 0x00, 0x00, 0x00, 0x00 };
+	
 	BYTE*	txbuf;
 	int 	txlen, rxlen;
 	BYTE	xfer_buffer[80]; 

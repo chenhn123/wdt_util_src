@@ -99,7 +99,7 @@ typedef struct i2c_hid_desc
 	UINT16 wVendorID;
 	UINT16 wProductID;
 	UINT16 wVersionID;
-	UINT16 reserved;
+	UINT32 reserved;
 } I2C_HID_DESC;
 
 typedef union u_dev_info {

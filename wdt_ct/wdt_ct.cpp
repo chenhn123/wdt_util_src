@@ -212,10 +212,10 @@ int parse_args(int argc, char* argv[], EXEC_PARAM* pparam)
 
 int main(int argc, char * argv[]) 
 {
-	int				ret = 0;
-	int				info_mask = OPTION_FW_VER | OPTION_CFG_CHKSUM | OPTION_HW_ID;
-	EXEC_PARAM		exec_param;
-	WDT_DEV			wdt_dev;
+	int		ret = 0;
+	int		info_mask = OPTION_FW_VER | OPTION_CFG_CHKSUM | OPTION_HW_ID;
+	EXEC_PARAM	exec_param;
+	WDT_DEV		wdt_dev;
 	unsigned long	start_tick;
 	int (*LPFUNC_execution)(WDT_DEV*, EXEC_PARAM*);
 

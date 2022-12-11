@@ -20,6 +20,7 @@
 
 #include "w8755_def.h"
 #include "w8760_def.h"
+#include "w8790_def.h"
 
 /* what version FW is running in the device */
 #define		FW_MAYBE_ISP		0x01
@@ -27,6 +28,8 @@
 #define		FW_LEGACY		0x04
 #define		FW_WDT8755		0x20
 #define		FW_WDT8755_ISP		0x40
+#define		FW_WDT8790		0x200
+#define		FW_WDT8790_ISP		(FW_WDT8790 |FW_MAYBE_ISP)
 #define		FW_WDT8760		0x800
 #define		FW_WDT8760_ISP		0x1000
 #define		FW_WDT8762		0x2000
@@ -105,12 +108,15 @@ typedef struct i2c_hid_desc
 typedef union u_dev_info {
 	W8755_DEV_INFO_NEW	w8755_dev_info;
 	W8760_REPORT_FEATURE_DEVINFO	w8760_feature_devinfo;
+	W8790_DEV_INFO	w8790_feature_devinfo;
 } U_DEV_INFO;
 
 typedef union sec_header {
-	/* this is only available in WDT8752 or WDT8755 */
-	W8755_SEC_ADDR_TYPE 	w8755_sec_header;
+
+	W8755_SEC_ADDR_TYPE	w8755_sec_header;
 	W8760_SECTION_MAP_ADDR	w8760_sec_addr;
+	W8790_FLASH_MAP		w8790_sec_addr;
+
 } U_SEC_HEADER;
 
 
@@ -132,23 +138,6 @@ typedef	struct BoardInfo
 	U_SEC_HEADER	sec_header;
 } BOARD_INFO;
 
-typedef	struct UsbDeviceDesc
-{
-	BYTE 	bLength;
-	BYTE	bDescriptorType;
-	UINT16  bcdUSB;
-	BYTE 	bDeviceClass;
-	BYTE	bDeviceSubClass;
-	BYTE	bDeviceProtocol;
-	BYTE 	bMaxPacketSize0;
-	UINT16	idVendor;
-	UINT16	idProduct;
-	UINT16  bcdDevice;
-	BYTE	iManufacturer;
-	BYTE 	iProduct;
-	BYTE 	iSerialNumber;
-	BYTE	bNumConfigurations;
-} USB_DEVICE_DESC;
 
 typedef struct	WdtDeviceInfo
 {

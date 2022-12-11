@@ -36,18 +36,6 @@ static BYTE W8760_RomSignatureVerB[8] = { 0xa6, 0x97, 0x53, 0x11, 0xde, 0x7f, 0x
 static BYTE W8762_RomSignatureVerA[8] = { 0x7F, 0xD0, 0x20, 0x00, 0xB8, 0x1D, 0xCA, 0x54, };
 static BYTE W8762_RomSignatureVerC[8] = { 0x6B, 0x6B, 0xA2, 0x08, 0xC6, 0x4C, 0x4D, 0xDD, };
 
-int check_is_all_ff(BYTE* data, int length)
-{
-	if (data == 0)
-		return 0;
-
-	int idx;
-
-	for (idx=0; idx<length; idx++)
-		if (data[idx] != 0xFF)
-			return 0;
-	return 1;
-}
 
 int  wh_w8760_get_feature_devinfo(W8760_REPORT_FEATURE_DEVINFO* report_feature_devinfo, BYTE* buf)
 {

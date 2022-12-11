@@ -31,6 +31,7 @@
 #include "w8755_funcs.h"
 #include "w8760_def.h"
 #include "w8760_funcs.h"
+#include "w8790_funcs.h"
 
 
 #define		MAX_DEV			16
@@ -343,7 +344,6 @@ int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 {
 	BYTE				buf[80];
 	BOARD_INFO			board_info;	
-	USB_DEVICE_DESC	 	usb_dev_desc;
 	int	ret_size;
 	int 	ret = 0;
 	int 	fw_id = 0;
@@ -357,7 +357,12 @@ int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 	memset(&board_info, 0, sizeof(BOARD_INFO));
 
 	pdev->dev_state = DS_GET_INFO;
-	wh_i2c_get_param_hid(pdev, &board_info);
+	int get_param_hid_ret = wh_i2c_get_param_hid(pdev, &board_info);
+	if(get_param_hid_ret == 0) {
+		printf("i2c_get_param_hid fail !");
+	}
+		
+	
 
 	buf[0] = VND_REQ_DEV_INFO;
 	while ((retryF2 && ret <= 0) || fw_id == 0)
@@ -416,17 +421,29 @@ int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 
 	board_info.dev_type = check_firmware_id(pdev, board_info.firmware_id);
 
+	if (board_info.dev_type & FW_WDT8790) {
+		wh_w8790_parse_device_info(&board_info.dev_info.w8790_feature_devinfo, buf);
+
+		memcpy(&pdev->board_info.dev_info.w8790_feature_devinfo, &board_info.dev_info.w8790_feature_devinfo,
+			sizeof(W8790_DEV_INFO));
+		if (wh_w8790_prepare_data(pdev, &board_info)){
+			memcpy(pboard_info, &board_info, sizeof(BOARD_INFO));
+                        return 1;
+
+		}
+	}
+
+
+
 	if (board_info.dev_type & (FW_WDT8760_2 | FW_WDT8760_2_ISP)) {
 		wh_w8760_get_feature_devinfo(&board_info.dev_info.w8760_feature_devinfo, buf);	
 		
 		memcpy(&pdev->board_info.dev_info.w8760_feature_devinfo, &board_info.dev_info.w8760_feature_devinfo, 
 			sizeof(W8760_REPORT_FEATURE_DEVINFO));
 
-        if (wh_i2c_get_param_hid(pdev, &board_info)) {		
-			if (wh_w8760_prepare_data(pdev, &board_info)) {			
-				memcpy(pboard_info, &board_info, sizeof(BOARD_INFO));
-				return 1;
-			}
+		if (wh_w8760_prepare_data(pdev, &board_info)) {			
+			memcpy(pboard_info, &board_info, sizeof(BOARD_INFO));
+			return 1;
 		}
 	}
 
@@ -450,7 +467,7 @@ int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 				memcpy(pboard_info, &board_info, sizeof(BOARD_INFO));
 				return 1;
 			}
-	} 
+	}
 
 	if (!wh_i2c_get_desc(pdev, GD_DEVICE, 0, (BYTE*) buf, 18))	{
 		board_info.dev_type = FW_MAYBE_ISP;
@@ -458,10 +475,7 @@ int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 		return 0;	
 	}
 
-	memcpy((void*) &usb_dev_desc, buf, 18);
 
-	board_info.vid = usb_dev_desc.idVendor;
-	board_info.pid = usb_dev_desc.idProduct;
 
 	ret_size = wh_i2c_get_desc(pdev, GD_STRING, STRIDX_PARAMETERS, (BYTE*) buf, 38);
 	if (!ret_size)	{

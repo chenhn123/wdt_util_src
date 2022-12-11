@@ -52,7 +52,7 @@ typedef struct ChunkHeader{
  *		EXT1: external chunk 1, user defined chunk data, chunk id: 0x20
  *		EXT2: external chunk 2, user defined chunk data, chunk id: 0x40	
  *
- * 4bytes¡Glittle-endian 32-bit UINT32¡Ait means the size of this chunk,
+ * 4bytes: little-endian 32-bit UINT32, it means the size of this chunk,
  *		not include the header part.
  * Chunk data: the data of this block, align 4 bytes.
  *

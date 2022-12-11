@@ -19,8 +19,6 @@
 #define	__WDT_DEV_API_H__
 
 #include	"whiff.h"
-#include 	"w8755_def.h"
-#include 	"w8760_def.h"
 #include	"dev_def.h"
 
 #define		API_VERSION			0x00090000
@@ -202,9 +200,14 @@ UINT16 		get_unaligned_le16(const void *p);
 UINT32 		get_unaligned_le32(const void *p);
 void 		put_unaligned_le16(UINT16 val, BYTE *p);
 void 		put_unaligned_le32(UINT32 val, BYTE *p);
+int		check_is_all_ff(BYTE* data, int length);
+int		count_ff_bytes(BYTE* data, int start, int size);
+
 
 int 		check_firmware_id(WDT_DEV *pdev, UINT32 fwid);
 UINT16 		misr_for_bytes(UINT16 current_value, BYTE *bytes, int start, int size);
+UINT16		misr_32b(UINT16 current_value, UINT32 new_word);
+
 
 /* __WDT_DEV_API_H__ */
 #endif

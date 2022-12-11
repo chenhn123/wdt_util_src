@@ -31,6 +31,7 @@
 #include "dev_def.h"
 #include "w8755_funcs.h"
 #include "w8760_funcs.h"
+#include "w8790_funcs.h"
 #include "wdt_ct.h"
 
 UINT32	wh_get_api_version()
@@ -79,6 +80,16 @@ int	wh_get_device_private_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT
 
 		return wh_w8760_dev_set_basic_op(pdev);
 	}
+	if (pdev->board_info.dev_type & FW_WDT8790) {
+		pFuncs->p_wh_program_chunk = (LPFUNC_wh_program_chunk)wh_w8790_dev_program_chunk;
+		pFuncs->p_wh_verify_chunk = (LPFUNC_wh_verify_chunk)wh_w8790_dev_verify_chunk;
+		pFuncs->p_wh_flash_write_data = (LPFUNC_wh_flash_write_data)wh_w8790_dev_flash_write_data;
+		pFuncs->p_wh_flash_get_checksum = (LPFUNC_wh_flash_get_checksum)wh_w8790_dev_flash_get_checksum;
+		pFuncs->p_wh_send_commands = (LPFUNC_wh_send_commands)wh_w8790_dev_send_commands;
+
+		return wh_w8790_dev_set_basic_op(pdev);
+	}
+
 
 	return 0;
 
@@ -108,6 +119,18 @@ int	wh_get_device_basic_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT_D
 		return 1;
 	}
 
+	if (pdev->board_info.dev_type & FW_WDT8790) {
+		pFuncs->p_wh_get_feature = (LPFUNC_wh_get_feature) wh_w8790_dev_get_feature;
+                pFuncs->p_wh_set_feature = (LPFUNC_wh_set_feature) wh_w8790_dev_set_feature;
+                pFuncs->p_wh_get_index_string = (LPFUNC_wh_get_index_string) wh_w8790_dev_get_indexed_string;
+                pFuncs->p_wh_read_report = (LPFUNC_wh_read_report) wh_w8790_dev_read_report;
+
+		return 1;
+
+        }
+
+
+
 	return 0;
 }
 
@@ -129,6 +152,12 @@ int check_firmware_id(WDT_DEV *pdev, UINT32 fwid)
 		if (pdev->pparam->argus & OPTION_INFO)	
 			printf("It is WDT8760 alike !\n");	
 		return FW_WDT8760;
+	}
+	if ((fwid & 0xF0000000) == 0x50000000) {
+		if(pdev->pparam->argus & OPTION_INFO)
+			printf("It is WDT8790 !\n");
+		return FW_WDT8790;
+
 	}
 	
 	return FW_WITH_CMD;
@@ -157,6 +186,32 @@ void put_unaligned_le32(UINT32 val, BYTE *p)
 	put_unaligned_le16(val >> 16, p + 2);
 	put_unaligned_le16(val, p);
 }
+
+
+int check_is_all_ff(BYTE* data, int length)
+{
+	if (data == 0)
+		return 0;
+
+	int idx;
+
+	for (idx = 0; idx < length; idx++)
+		if (data[idx] != 0xFF)
+			return 0;
+	return 1;
+}
+
+int count_ff_bytes(BYTE* data, int start, int size)
+{
+	int count = 0;
+	for (int i = 0; i < size; i++)
+	{
+		if (data[start + i] == 0xFF)
+			count++;
+	}
+	return count;
+}
+
 
 int load_lib_func_address(WDT_DEV *pdev, EXEC_PARAM *pparam)
 {
@@ -270,7 +325,7 @@ int init_n_scan_device(WDT_DEV *pdev, EXEC_PARAM *pparam, unsigned int flag)
 		strcpy(pdev->dev_path, pparam->dev_path);
 
 	if (pdev->funcs_device.p_wh_open_device(pdev)) {
-		if (pdev->funcs_device.p_wh_prepare_data(pdev, &pdev->board_info))	{		
+		if (pdev->funcs_device.p_wh_prepare_data(pdev, &pdev->board_info)) {		
 			if (pdev->is_legacy)
 				return 1;
 			
@@ -280,7 +335,7 @@ int init_n_scan_device(WDT_DEV *pdev, EXEC_PARAM *pparam, unsigned int flag)
 			}
 
 			return 1;
-		}	else
+		}else
 			wh_printf("Get system info error");
 	}
 
@@ -558,7 +613,7 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 	if (!init_n_scan_device(pdev, pparam, 0))
 		return 0;
 
-	ret = !(pinfo->dev_type & (FW_MAYBE_ISP | FW_WDT8755_ISP | FW_WDT8760_2_ISP));	
+	ret = !(pinfo->dev_type & (FW_MAYBE_ISP | FW_WDT8755_ISP | FW_WDT8760_2_ISP));
 
 	if (!ret)
 		goto info_exit;
@@ -1030,6 +1085,15 @@ UINT16 misr_16b( UINT16 currentValue, UINT16 newValue )
 
 	return (UINT16) y;
 }
+
+UINT16 misr_32b(UINT16 current_value, UINT32 new_word)
+{
+	UINT16 checksum = misr_16b(current_value, (UINT16)new_word);
+	checksum = misr_16b(checksum, (UINT16)(new_word >> 16));
+	return checksum;
+}
+
+
 
 
 UINT16 misr_for_halfwords(UINT16 current_value, BYTE *buf, int start, int hword_count)

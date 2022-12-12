@@ -1107,22 +1107,6 @@ int wh_w8790_dev_get_device_status(WDT_DEV* pdev, BYTE* buf, int offset, int siz
 
 }
 
-int wh_w8790_dev_store_parameters(WDT_DEV* pdev, BYTE table_type)
-{
-	BYTE cmd[10] = { W8790_COMMAND9, W8790_STORE_PARAMETERS, (BYTE)table_type };
-
-	if (wh_w8790_dev_command_write(pdev, cmd, 0, sizeof(cmd)) <= 0) {
-		printf("Fail to do get store parameter \n");
-		return 0;
-	}
-
-	if (wh_w8790_dev_wait_cmd_end(pdev, 0, 0) <= 0) {
-		printf("Cd Cs open test time out \n");
-		return 0;
-	}
-
-	return 1;
-}
 
 int wh_w8790_dev_apply_parameters(WDT_DEV* pdev, BYTE table_type)
 {
@@ -1211,12 +1195,6 @@ int wh_w8790_dev_verify_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pChunk)
 
 
 
-
-
-int	wh_w8790_dev_config_store_flash(WDT_DEV* pdev, int type)
-{
-	return	wh_w8790_dev_store_parameters(pdev, (BYTE)W8790_Primary);
-}
 
 
 

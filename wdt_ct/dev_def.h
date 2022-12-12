@@ -42,8 +42,6 @@
 #define 	GD_DEVICE          	0x01
 #define 	GD_STRING          	0x03
 
-#define		STRIDX_IDENTIFICATION	0x3C
-#define		STRIDX_PLATFORM_ID	0x80
 #define		STRIDX_PARAMETERS	0x81
 
 #define 	VND_REQ_DEV_INFO	0xF2
@@ -133,9 +131,9 @@ typedef	struct BoardInfo
 	SYS_PARAM		sys_param;
 	BYTE			platform_id[12];
 
-	I2C_HID_DESC	dev_hid_desc;
+	I2C_HID_DESC		dev_hid_desc;
 	U_DEV_INFO		dev_info;
-	U_SEC_HEADER	sec_header;
+	U_SEC_HEADER		sec_header;
 } BOARD_INFO;
 
 
@@ -159,11 +157,6 @@ int wh_i2c_get_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size);
 int wh_i2c_get_indexed_string(WDT_DEV *pdev, UINT32 index, BYTE* buf, UINT32 buf_size);
 int wh_i2c_read(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size);
 int wh_i2c_get_desc(WDT_DEV *pdev, BYTE desc_type, BYTE string_idx, BYTE* target_buf, UINT32 buf_size);
-
-int wh_hidraw_set_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size);
-int wh_hidraw_get_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size);
-int wh_hidraw_get_indexed_string(WDT_DEV *pdev, UINT32 index, BYTE* buf, UINT32 buf_size);
-int wh_hidraw_read(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size);
 
 /* __DEV_DEF_H__ */
 #endif

@@ -39,6 +39,5 @@ int wh_w8790_dev_flash_block_write(WDT_DEV* pdev, BYTE* data, UINT32 address, in
 int wh_w8790_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value);
 int wh_w8790_dev_verify_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pChunk);
 int wh_w8790_dev_program_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int option);
-int wh_w8790_dev_config_store_flash(WDT_DEV*, int);
 
 #endif		// __w8790_FUNCS_H__

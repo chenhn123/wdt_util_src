@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
-
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -35,9 +34,11 @@
 
 
 #define		MAX_DEV			16
-
 /* i2c-hid driver for weida's controller */
 #define		ACPI_NAME_HID		"i2c-WDHT"
+
+#define		HIDI2C_OPCODE_SET_REPORT	0x03
+#define         HIDI2C_OPCODE_GET_REPORT	0x02
 
 static char		g_dev_path[64];
 
@@ -611,8 +612,8 @@ int wh_i2c_set_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 retry:
 	data_len = 0;
 	cmd = buf[0];
-	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wCommandRegister; //0x22;
-	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wCommandRegister >> 8; //0x00;
+	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wCommandRegister; 
+	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wCommandRegister >> 8;
 
 
 
@@ -621,18 +622,18 @@ retry:
 			tx_buffer[data_len++] = 0x3F;
 		else 
 			tx_buffer[data_len++] = 0x30;
-		tx_buffer[data_len++] = 0x03;
+		tx_buffer[data_len++] = HIDI2C_OPCODE_SET_REPORT;
 		tx_buffer[data_len++] = cmd;
 		
 	} else {
 		tx_buffer[data_len++] = 0x30 | cmd;
-		tx_buffer[data_len++] = 0x03;
+		tx_buffer[data_len++] = HIDI2C_OPCODE_SET_REPORT;
 	}
 	
 
 	
-	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wDataRegister; //0x23;
-	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wDataRegister >> 8; //0x00;
+	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wDataRegister; 
+	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wDataRegister >> 8;
 
 	if ((pdev->board_info.dev_type & FW_WDT8755 &&
 		 pdev->board_info.dev_info.w8755_dev_info.protocol_version >= 0x01000007) ||
@@ -681,10 +682,8 @@ int wh_i2c_get_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 retry:
 	data_len = 0;
 	cmd = buf[0];
-	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wCommandRegister; //0x22;
-	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wCommandRegister>>8; //0x00;
-
-
+	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wCommandRegister; 
+	tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wCommandRegister>>8; 
 
 
 	if (p_req_data->DD.report_id > 0xF)
@@ -693,17 +692,17 @@ retry:
 			tx_buffer[data_len++] = 0x3F;
 		else 
 			tx_buffer[data_len++] = 0x30;
-		tx_buffer[data_len++] = 0x02;
+		tx_buffer[data_len++] = HIDI2C_OPCODE_GET_REPORT;
 		tx_buffer[data_len++] = cmd;
 	}
 	else
 	{
 		tx_buffer[data_len++] = 0x30 | cmd;
-		tx_buffer[data_len++] = 0x02;
+		tx_buffer[data_len++] = HIDI2C_OPCODE_GET_REPORT;
 	}
 
-        tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wDataRegister;//0x23;
-        tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wDataRegister>>8;//0x00;	
+        tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wDataRegister;
+        tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wDataRegister>>8;
 
 
 	if (pdev->pparam->options & EXEC_I2C_REDUNDANT) {

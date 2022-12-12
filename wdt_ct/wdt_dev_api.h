@@ -75,9 +75,6 @@ typedef	int	 	(* LPFUNC_wh_verify_chunk) (WDT_DEV*, CHUNK_INFO_EX*);
 typedef	int		(* LPFUNC_wh_flash_read_data) (WDT_DEV*, BYTE*, UINT32, int); 
 typedef	int		(* LPFUNC_wh_flash_write_data) (WDT_DEV*, BYTE*, UINT32, int);
 typedef	int		(* LPFUNC_wh_flash_get_checksum) (WDT_DEV*, UINT32*, UINT32, int);
-typedef	int		(* LPFUNC_wh_mem_read_data) (WDT_DEV*, BYTE*, UINT32, int);
-typedef	int		(* LPFUNC_wh_mem_write_data) (WDT_DEV*, BYTE*, UINT32, int);
-typedef	int		(* LPFUNC_wh_wait_calibration_done) (WDT_DEV* , BYTE*, int); 
 typedef	int		(* LPFUNC_wh_send_commands) (WDT_DEV*, int, UINT32);
 typedef	int		(* LPFUNC_wh_prepare_data) (WDT_DEV*, BOARD_INFO*);
 

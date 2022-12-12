@@ -34,10 +34,6 @@
 #include "w8790_funcs.h"
 #include "wdt_ct.h"
 
-UINT32	wh_get_api_version()
-{
-	return	API_VERSION;
-}
 
 int	wh_get_device_access_func(int interfaceIndex, FUNC_PTR_STRUCT_DEV_ACCESS*  pFuncs )
 {
@@ -217,12 +213,6 @@ int load_lib_func_address(WDT_DEV *pdev, EXEC_PARAM *pparam)
 {
 	if (!pdev)
 		return 0;
-
-	pdev->func_wh_get_api_version = (LPFUNC_wh_get_api_version) wh_get_api_version;
-	if (!pdev->func_wh_get_api_version) {
-		printf("Not found: wh_get_api_version \n");
-		return 0;
-	}
 
 	pdev->func_wh_open_whiff = (LPFUNC_wh_open_whiff) wh_open_whiff_file;
 	if (!pdev->func_wh_open_whiff) {
@@ -635,11 +625,18 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 
 		if (pdev->board_info.dev_type & FW_WDT8755) {
 			printf("%04x", pinfo->firmware_id & 0xFFFF);
-        } else if (pdev->board_info.dev_type & FW_WDT8760_2) {
-            int fwrev = pinfo->dev_info.w8760_feature_devinfo.firmware_id & 0x0FFF;
-            int fwrexext = pinfo->dev_info.w8760_feature_devinfo.firmware_rev_ext & 0x000F;
-            int versionOuput = (fwrev<<4|fwrexext);
+        	} else if (pdev->board_info.dev_type & FW_WDT8760_2) {
+        		int fwrev = pinfo->dev_info.w8760_feature_devinfo.firmware_id & 0x0FFF;
+        		int fwrexext = pinfo->dev_info.w8760_feature_devinfo.firmware_rev_ext & 0x000F;
+        		int versionOuput = (fwrev << 4 | fwrexext);
 			printf("%04x", versionOuput);
+		}
+		else if (pdev->board_info.dev_type & FW_WDT8790) {
+			int fwrev = pinfo->dev_info.w8790_feature_devinfo.firmware_version & 0x0FFF;
+                        int fwrexext = pinfo->dev_info.w8790_feature_devinfo.firmware_revision_ext & 0x000F;
+                        int versionOuput = (fwrev << 4 | fwrexext);
+                        printf("%04x", versionOuput);
+
 		}
 	}	
 		
@@ -685,14 +682,11 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 			printf("customer_config_id 0x%x\n", pinfo->dev_info.w8755_dev_info.customer_config_id); 		
 		} else if (pinfo->dev_type & FW_WDT8760_2) {
 			char str[16];	
-
 			printf("\nMax_points 0x%X\n", pinfo->dev_info.w8760_feature_devinfo.n_touches_usb);
 			printf("Bytes_per_point 0x%X\n", pinfo->dev_info.w8760_feature_devinfo.n_bytes_touch);		
 			memset(str, 0, 16);
 			memcpy(str, pinfo->dev_info.w8760_feature_devinfo.platform_id, 8);
 			printf("Platform id %s\n", str);
-			printf("Hardware id 0x%X\n", pinfo->dev_info.w8760_feature_devinfo.hardware_id);
-			printf("Firmware id 0x%X\n", pinfo->dev_info.w8760_feature_devinfo.firmware_id);
 			memset(str, 0, 16);
 			memcpy(str, pinfo->dev_info.w8760_feature_devinfo.program_name_fourcc, 4);
 			printf("ProgramFourcc %s\n", str);
@@ -701,7 +695,32 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 			memset(str, 0, 16);
 			memcpy(str, pinfo->dev_info.w8760_feature_devinfo.part_number_ext, 8);		
 			printf("PartNumberExt %s\n", str);
-		}
+		 }else if (pinfo->dev_type & FW_WDT8790) {
+			char str[16] ;
+			memset(str, 0xff, sizeof(str));
+			printf("\nMaxTouches 0x%X\n", pinfo->dev_info.w8790_feature_devinfo.max_touches);
+			printf("FirmwareRevisionExt 0x%X\n", pinfo->dev_info.w8790_feature_devinfo.firmware_revision_ext);
+			printf("Partition 0x%X\n", pinfo->dev_info.w8790_feature_devinfo.partition);
+			printf("PartitionFormatRevision 0x%X\n", pinfo->dev_info.w8790_feature_devinfo.partition_format_revision);
+
+			if(memcmp(str, pinfo->dev_info.w8790_feature_devinfo.part_number, sizeof(str)) == 0)
+				printf("PartNumber all 0xFF \n");
+			else
+			{
+				memset(str, '\0', sizeof(str));
+				memcpy(str, pinfo->dev_info.w8790_feature_devinfo.part_number, sizeof(pinfo->dev_info.w8790_feature_devinfo.part_number));
+				printf("PartNumber %s\n", str);
+			}
+			printf("RomSignature ");
+			for (int idx = 0; idx < 8; idx++)
+				printf("%02X", pinfo->dev_info.w8790_feature_devinfo.rom_signature[idx]);
+			printf("\n");
+			memset(str, '\0', sizeof(str));
+			memcpy(str, pinfo->dev_info.w8790_feature_devinfo.program_name_fourcc, 4);
+			printf("ProgramFourcc %s\n", str);
+
+		 }
+
 	}
 
 info_exit:	

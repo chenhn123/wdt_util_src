@@ -74,7 +74,7 @@ int wh_w8790_dev_set_feature(WDT_DEV* pdev, BYTE* buf, UINT32 buf_size)
 
 	if (buf[0] == W8790_COMMAND9)
 		buf_size = 10;
-	else if (buf[0] == W8790_COMMAND63 || buf[0] == W8790_BLOCK63 || buf[0] == W8790_DEVICE_INFO)
+	else if (buf[0] == W8790_COMMAND63 || buf[0] == W8790_BLOCK63)
 		buf_size = 64;
 	else {
 		printf("Feature id is not supported! (%d)\n", buf[0]);
@@ -94,7 +94,7 @@ int wh_w8790_dev_get_feature(WDT_DEV* pdev, BYTE* buf, UINT32 buf_size)
 
 	if (buf[0] == W8790_COMMAND9)
 		buf_size = 10;
-	else if (buf[0] == W8790_COMMAND63 || buf[0] == W8790_BLOCK63 || buf[0] == W8790_DEVICE_INFO)
+	else if (buf[0] == W8790_COMMAND63 || buf[0] == W8790_BLOCK63)
 		buf_size = 64;
 	else {
 		printf("Feature id is not supported! (%d)\n", buf[0]);
@@ -156,12 +156,14 @@ int wh_w8790_dev_identify_platform(WDT_DEV* pdev)
 		return 0;
 
 	if (memcmp(W8790_RomSignatureVerA, pdev->board_info.dev_info.w8790_feature_devinfo.rom_signature, 8) == 0) {
-		printf("WDT8790_VerA\n");
+		if (pdev->pparam->argus & OPTION_INFO)		
+			printf("WDT8790_VerA\n");
 
 		return 1;
 	}
 	if (memcmp(W8790_RomSignatureVerB, pdev->board_info.dev_info.w8760_feature_devinfo.rom_signature, 8) == 0) {
-		printf("WDT8790_VerB\n");
+                if (pdev->pparam->argus & OPTION_INFO)	
+			printf("WDT8790_VerB\n");
 		return 1;
 	}
 
@@ -597,17 +599,6 @@ int wh_w8790_dev_run_program_from_background(WDT_DEV* pdev, UINT32 program_addre
 
 }
 
-int wh_w8790_dev_write_register(WDT_DEV* pdev, UINT32 address, UINT32 reg_value)
-{
-	BYTE cmd[10] = { 0 };
-
-	cmd[0] = W8790_COMMAND9;
-	cmd[1] = (BYTE)W8790_WRITE_REGISTER;
-	put_unaligned_le32(address, &cmd[2]);
-	put_unaligned_le32(reg_value, &cmd[6]);
-
-	return wh_w8790_dev_command_write(pdev, cmd, 0, sizeof(cmd));
-}
 
 
 int wh_w8790_dev_reboot(WDT_DEV* pdev)
@@ -617,18 +608,6 @@ int wh_w8790_dev_reboot(WDT_DEV* pdev)
 	return wh_w8790_dev_command_write(pdev, cmd, 0, sizeof(cmd));
 }
 
-int wh_w8790_dev_get_hid_descriptor_register(WDT_DEV* pdev, UINT16* pvalue)
-{
-	BYTE cmd[10] = { W8790_COMMAND9, W8790_GET_HID_DESCRIPTOR_REGISTER };
-	BYTE buf[4] = { 0 };
-
-	*pvalue = 0x20;
-	if (wh_w8790_dev_command_read(pdev, cmd, sizeof(cmd), buf, 0, 2) <= 0)
-		return 0;
-
-	*pvalue = get_unaligned_le16(buf);
-	return 1;
-}
 
 int wh_w8790_dev_read_buf_response(WDT_DEV* pdev, BYTE* data, int size)
 {

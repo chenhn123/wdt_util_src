@@ -30,16 +30,11 @@
 #define W8790_MODE_SENSING					1		
 // Device sleeps most time and does sensing in longer period.
 #define W8790_MODE_DOZE						2		
-// Both device and sensor are in sleep.
-#define W8790_MODE_SLEEP					3		
-// The device is in ISP mode. Unable to switch to other mode.
-#define W8790_MODE_ISP						0x10	
 // The device is waiting for memory access or flash parameter read/write commands. Especially from GUI tools.
 #define W8790_MODE_COMMAND					0x90	
 // The device is handling flash firmware erase/program commands. This mode has no return until reboot.
-#define W8790_MODE_FLASH_PROGRAM			0x96	
+#define W8790_MODE_FLASH_PROGRAM				0x96	
 
-#define W8790_DEVICE_INFO 		0xF2
 // Command 1-byte ID + 9 bytes payload
 #define W8790_COMMAND9 			0x06		
 // Command 1-byte ID + 63 bytes payload
@@ -75,7 +70,6 @@ enum W8790_IspCommandType
 	W8790_CALL_FUNCTION = 0xCC,
 	W8790_READ_PARAMETER_TABLE_INFO = 0xCD,
 	W8790_REBOOT = 0xCE,
-	W8790_GET_HID_DESCRIPTOR_REGISTER = 0xCF,
 
 	W8790_SET_FLASH_ADDRESS = 0xD0,
 	W8790_READ_FLASH = 0xD1,
@@ -83,16 +77,6 @@ enum W8790_IspCommandType
 	W8790_WRITE_FLASH = 0xD3,
 	W8790_PROTECT_FLASH = 0xD4,
 	W8790_CALCULATE_FLASH_CHECKSUM = 0xD5,
-	W8790_READ_FLASH_STATUS_REGISTER = 0xD6,
-	W8790_WRITE_FLASH_STATUS_REGISTER = 0xD7,
-	W8790_SET_FLASH_BUS_MODE = 0xD8,
-	W8790_READ_FLASH_SECURITY_REGISTER = 0xD9,
-	W8790_ERASE_FLASH_SECURITY_REGISTER = 0xDA,
-	W8790_WRITE_FLASH_SECURITY_REGISTER = 0xDB,
-	W8790_READ_SPI = 0xDC,
-	W8790_WRITE_SPI = 0xDD,
-	W8790_READ_REGISTER = 0xDE,
-	W8790_WRITE_REGISTER = 0xDF,
 
 	W8790_SET_BLOCK_ACCESS = 0xE0,
 	W8790_BLOCK_READ = 0xE1,

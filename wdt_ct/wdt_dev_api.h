@@ -21,7 +21,6 @@
 #include	"whiff.h"
 #include	"dev_def.h"
 
-#define		API_VERSION			0x00090000
 
 #define		INTERFACE_USB			0x1
 #define		INTERFACE_I2C			0x2
@@ -88,13 +87,7 @@ typedef	int	 	(* LPFUNC_wh_get_feature) (WDT_DEV*, BYTE*, UINT32);
 typedef	int	 	(* LPFUNC_wh_get_index_string) (WDT_DEV*, UINT32, BYTE*, UINT32);
 typedef	int	 	(* LPFUNC_wh_read_report) (WDT_DEV*, BYTE*, UINT32);
 
-/* Basic Bus Access Function Pointer typedef */
-typedef	int	 	(* LPFUNC_wh_bus_set_feature) (WDT_DEV*, BYTE*, UINT32);
-typedef	int	 	(* LPFUNC_wh_bus_get_feature) (WDT_DEV*, BYTE*, UINT32);
-typedef	int	 	(* LPFUNC_wh_bus_get_index_string) (WDT_DEV*, UINT32, BYTE*, UINT32);
-typedef	int	 	(* LPFUNC_wh_bus_read_report) (WDT_DEV*, BYTE*, UINT32);
 
-typedef	unsigned int	(* LPFUNC_wh_get_api_version)();  
 typedef	WH_HANDLE	(* LPFUNC_wh_open_whiff)(char*);  
 typedef	int		(* LPFUNC_wh_close_whiff)(WH_HANDLE);
 typedef	int		(* LPFUNC_wh_get_chunk_info)(WH_HANDLE, UINT32, CHUNK_INFO_EX*);	
@@ -170,7 +163,6 @@ typedef struct WdtDevice {
 	FUNC_PTR_STRUCT_DEV_OPERATION		funcs_device_private;
 	FUNC_PTR_STRUCT_DEV_BASIC		funcs_device_basic;
 
-	LPFUNC_wh_get_api_version		func_wh_get_api_version;
 	LPFUNC_wh_open_whiff			func_wh_open_whiff;
 	LPFUNC_wh_close_whiff			func_wh_close_whiff;
 
@@ -181,7 +173,6 @@ typedef struct WdtDevice {
 
 } WDT_DEV;
 
-UINT32		wh_get_api_version();
 WH_HANDLE	wh_open_whiff_file(char *path);
 int		wh_close_whiff_file(WH_HANDLE handle);
 int		wh_get_chunk_info(WH_HANDLE handle, UINT32 chunk_index, CHUNK_INFO_EX *pChunkInfoEx);

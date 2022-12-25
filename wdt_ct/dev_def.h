@@ -48,7 +48,6 @@
 
 #define		WDT_PAGE_SIZE		0x1000
 
-#define		GET_DEVICE_BY_PATH	0x100
 
 typedef	union
 {

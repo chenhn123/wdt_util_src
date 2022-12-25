@@ -124,7 +124,6 @@ typedef	struct ExecParam
 	UINT32		interface_num;
 	UINT32		options;
 	char		*image_file;
-	char		*production_file;
 	char		*sub_argu;
 	char		dev_path[64];
 } EXEC_PARAM ;

@@ -41,7 +41,6 @@ int	wh_w8760_dev_write_men_halfword(WDT_DEV* pdev, UINT16 hwords);
 int	wh_w8760_dev_run_program_from_background(WDT_DEV* pdev, UINT32 program_address);
 int	wh_w8760_dev_verify_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pChunk);
 int	wh_w8760_dev_program_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int option);
-int	wh_w8760_dev_compare_fw_checksum(WDT_DEV*, int*);
 int	wh_w8760_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int option);
 int	wh_w8760_dev_program_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int option);
 int	wh_w8760_get_rom_signature(int type, BYTE* buf);

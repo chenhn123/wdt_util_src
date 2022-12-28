@@ -74,9 +74,11 @@ typedef	int	 	(* LPFUNC_wh_verify_chunk) (WDT_DEV*, CHUNK_INFO_EX*);
 /* Private Device Access Function Pointer typedef */
 typedef	int		(* LPFUNC_wh_flash_read_data) (WDT_DEV*, BYTE*, UINT32, int); 
 typedef	int		(* LPFUNC_wh_flash_write_data) (WDT_DEV*, BYTE*, UINT32, int);
-typedef	int		(* LPFUNC_wh_flash_get_checksum) (WDT_DEV*, UINT32*, UINT32, int);
+typedef	int		(* LPFUNC_wh_flash_get_checksum) (WDT_DEV*, UINT32*, UINT32, int, UINT32);
 typedef	int		(* LPFUNC_wh_send_commands) (WDT_DEV*, int, UINT32);
 typedef	int		(* LPFUNC_wh_prepare_data) (WDT_DEV*, BOARD_INFO*);
+typedef int		(* LPFUNC_wh_flash_erase)(WDT_DEV*, UINT32, int);
+
 
 /* Basic Device Access Function Pointer typedef */
 typedef	int	 	(* LPFUNC_wh_set_feature) (WDT_DEV*, BYTE*, UINT32);
@@ -104,11 +106,11 @@ typedef struct FuncPtrStructDevAccess {
 typedef struct	FuncPtrStructDevOperation { 
 	LPFUNC_wh_program_chunk		p_wh_program_chunk;
 	LPFUNC_wh_verify_chunk		p_wh_verify_chunk;
-	
 	LPFUNC_wh_flash_read_data	p_wh_flash_read_data;
 	LPFUNC_wh_flash_write_data	p_wh_flash_write_data;
 	LPFUNC_wh_flash_get_checksum	p_wh_flash_get_checksum;
 	LPFUNC_wh_send_commands		p_wh_send_commands;
+	LPFUNC_wh_flash_erase		p_wh_flash_erase;
 } FUNC_PTR_STRUCT_DEV_OPERATION; 
 
 typedef struct 	FuncPtrStructDevBasic {
@@ -198,4 +200,3 @@ UINT16		misr_32b(UINT16 current_value, UINT32 new_word);
 
 /* __WDT_DEV_API_H__ */
 #endif
-

@@ -33,6 +33,7 @@
 #include "w8760_funcs.h"
 #include "w8790_funcs.h"
 #include "wdt_ct.h"
+#include "wif2.h"
 
 
 int	wh_get_device_access_func(int interfaceIndex, FUNC_PTR_STRUCT_DEV_ACCESS*  pFuncs )
@@ -77,11 +78,11 @@ int	wh_get_device_private_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT
 		return wh_w8760_dev_set_basic_op(pdev);
 	}
 	if (pdev->board_info.dev_type & FW_WDT8790) {
-		pFuncs->p_wh_program_chunk = (LPFUNC_wh_program_chunk)wh_w8790_dev_program_chunk;
-		pFuncs->p_wh_verify_chunk = (LPFUNC_wh_verify_chunk)wh_w8790_dev_verify_chunk;
 		pFuncs->p_wh_flash_write_data = (LPFUNC_wh_flash_write_data)wh_w8790_dev_flash_write_data;
 		pFuncs->p_wh_flash_get_checksum = (LPFUNC_wh_flash_get_checksum)wh_w8790_dev_flash_get_checksum;
 		pFuncs->p_wh_send_commands = (LPFUNC_wh_send_commands)wh_w8790_dev_send_commands;
+		pFuncs->p_wh_flash_erase = (LPFUNC_wh_flash_erase)wh_w8790_dev_flash_erase;
+
 
 		return wh_w8790_dev_set_basic_op(pdev);
 	}
@@ -429,6 +430,8 @@ int program_one_chunk(WDT_DEV *pdev, const char *chunk_name, UINT32 chunk_id, UI
 	return 1;
 }
 
+
+
 int image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pparam)
 {
 	BOARD_INFO	*pinfo = &pdev->board_info;
@@ -445,15 +448,23 @@ int image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pparam)
 	if (pinfo->dev_type & (FW_MAYBE_ISP | FW_WDT8755_ISP | FW_WDT8760_2_ISP))
 		return 0;	
 
-	if (!load_wif(pdev, (char*)pparam->image_file))
-		return 0;
+        if (!init_n_scan_device(pdev, pparam, 0)) {
+		printf("Wdt controller not found !\n");
+                goto exit_burn;
+        }
 
-	if (!init_n_scan_device(pdev, pparam, 0)) {
-		goto exit_burn;
+	if (pdev->board_info.dev_type & FW_WDT8790) {
+		return update_fw_by_wif2(pdev, (char*)pparam->image_file);
 	}
 
-	if (pdev->is_legacy) {
-		printf("Not support legacy FW update !\n");
+        if (pdev->is_legacy) {
+                printf("Not support legacy FW update !\n");
+                goto exit_burn;
+        }
+
+
+	if (!load_wif(pdev, (char*)pparam->image_file)){
+		printf("Load WIF failed !\n");
 		goto exit_burn;
 	}
 	
@@ -667,12 +678,11 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 			printf("Platform_ID: 0x%x\n", pinfo->platform_id[1]);
 		printf("XmlId1: %x   XmlId2: %x\n", pinfo->sys_param.xmls_id1, pinfo->sys_param.xmls_id2);
 		printf("Param: phy_x %d, phy_y %d\n", pinfo->sys_param.Phy_Frmbuf_W, pinfo->sys_param.Phy_Frmbuf_H);
-		printf("Scale Factor: %d, USB dbg: 0x%x, I2C dbg: 0x%x\n", pinfo->sys_param.scale_factor, pinfo->sys_param.usb_dbg_cfg, pinfo->sys_param.i2c_dbg_cfg);
 	} 
 
 	if (pparam->argus & OPTION_EXTRA_INFO) {
 		if (pinfo->dev_type & FW_WDT8755) {
-			printf("\n\nprotocol_version 0x%x\n", pinfo->dev_info.w8755_dev_info.protocol_version);
+			printf("\nprotocol_version 0x%x\n", pinfo->dev_info.w8755_dev_info.protocol_version);
 			printf("firmware_id 0x%x\n", pinfo->dev_info.w8755_dev_info.firmware_id);
 			printf("config_size 0x%x\n", pinfo->dev_info.w8755_dev_info.config_size);
 			printf("parameter_map_sum 0x%x\n", pinfo->dev_info.w8755_dev_info.parameter_map_sum);
@@ -935,7 +945,7 @@ int rebind_driver(WDT_DEV *pdev)
 }
 
 
-UINT32	get_chunk_fourcc(UINT32 chunk_index)
+UINT32 get_chunk_fourcc(UINT32 chunk_index)
 {
 	switch (chunk_index) {
 		case	CHUNK_ID_FRMT:
@@ -962,7 +972,7 @@ UINT32	get_chunk_fourcc(UINT32 chunk_index)
 	return 0;
 }
 
-int	 process_whiff_file(WIF_FILE *pcur_wif)
+int process_whiff_file(WIF_FILE *pcur_wif)
 {
 	UINT32*	pstruct = NULL;
 
@@ -1039,7 +1049,7 @@ failed:
 }
 
 
-int	wh_get_chunk_info(WH_HANDLE handle, UINT32 chunk_index, CHUNK_INFO_EX* pchunk_info_ex)
+int wh_get_chunk_info(WH_HANDLE handle, UINT32 chunk_index, CHUNK_INFO_EX* pchunk_info_ex)
 {
 	WIF_FILE	*pcur_wif = (WIF_FILE*) handle;
 

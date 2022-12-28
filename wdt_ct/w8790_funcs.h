@@ -37,7 +37,5 @@ int wh_w8790_dev_flash_get_checksum(WDT_DEV* pdev, UINT32* pchecksum, UINT32 add
 int wh_w8790_dev_flash_erase(WDT_DEV*, UINT32 address, int size);
 int wh_w8790_dev_flash_block_write(WDT_DEV* pdev, BYTE* data, UINT32 address, int size);
 int wh_w8790_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value);
-int wh_w8790_dev_verify_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pChunk);
-int wh_w8790_dev_program_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int option);
 
 #endif		// __w8790_FUNCS_H__

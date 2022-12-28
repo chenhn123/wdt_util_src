@@ -15,17 +15,14 @@
  * limitations under the License.
  */
 
-
-#include "wdt_dev_api.h"
+#include <unistd.h>
 #include <stdio.h>
 #include <malloc.h>
 #include <string.h>
-
+#include "wdt_dev_api.h"
 #include "wdt_ct.h"
 #include "w8790_funcs.h"
 #include "w8790_def.h"
-#include <unistd.h>
-
 
 
 static FUNC_PTR_STRUCT_DEV_BASIC	g_func_dev_basic = { 0, 0, 0, 0 };
@@ -161,7 +158,7 @@ int wh_w8790_dev_identify_platform(WDT_DEV* pdev)
 
 		return 1;
 	}
-	if (memcmp(W8790_RomSignatureVerB, pdev->board_info.dev_info.w8760_feature_devinfo.rom_signature, 8) == 0) {
+	if (memcmp(W8790_RomSignatureVerB, pdev->board_info.dev_info.w8790_feature_devinfo.rom_signature, 8) == 0) {
                 if (pdev->pparam->argus & OPTION_INFO)	
 			printf("WDT8790_VerB\n");
 		return 1;
@@ -248,17 +245,8 @@ int wh_w8790_dev_get_device_mode(WDT_DEV* pdev)
 
 
 
-int wh_w8790_dev_set_mem_address(WDT_DEV* pdev, UINT32 address)
-{
-	BYTE cmd[10] = { 0 };
 
-	cmd[0] = W8790_COMMAND9;
-	cmd[1] = W8790_SET_MEMORY_ADDRESS;
-	put_unaligned_le32(address, &cmd[2]);
 
-	return wh_w8790_dev_command_write(pdev, cmd, 0, sizeof(cmd));
-
-}
 
 int wh_w8790_dev_set_flash_address(WDT_DEV* pdev, UINT32 address)
 {
@@ -299,7 +287,7 @@ int wh_w8790_dev_get_section_addr_map(WDT_DEV* pdev, W8790_FLASH_MAP* psec_map)
 		return 0;
 
 	if (wh_w8790_section_header_valid(&sec_header) && sec_header.PayloadSize >= 32 && sec_header.PayloadSize < 1024) {
-		if (wh_w8790_dev_set_flash_address(pdev, firmware_map_table_addr + sizeof(W8760_FLASH_SECTION_HEADER)) <= 0)
+		if (wh_w8790_dev_set_flash_address(pdev, firmware_map_table_addr + sizeof(W8790_FLASH_SECTION_HEADER)) <= 0)
 			return 0;
 		size_t padata_buffer = sec_header.PayloadSize + 16;
 		BYTE* pdata = (BYTE*)malloc(padata_buffer);
@@ -351,28 +339,6 @@ int wh_w8790_dev_set_n_check_device_mode(WDT_DEV* pdev, BYTE mode, int timeout_m
 	return 0;
 }
 
-int wh_w8760_dev_get_parameter_chksum_by_sec_header(WDT_DEV* pdev, W8790_FLASH_MAP param_addr, UINT16* chksum)
-{
-	UINT32 checksum = 0;
-	W8760_FLASH_SECTION_HEADER	sec_header;
-
-	if (wh_w8790_dev_set_flash_address(pdev, param_addr.ParameterPrimary) <= 0)
-		return 0;
-
-	if (wh_w8790_dev_read_flash(pdev, (BYTE*)&sec_header, sizeof(W8760_FLASH_SECTION_HEADER)) <= 0)
-		return 0;
-
-	if (wh_w8790_dev_flash_get_checksum(pdev, &checksum, param_addr.ParameterPrimary, sec_header.PayloadSize + sizeof(W8760_FLASH_SECTION_HEADER), 0) <= 0)
-		return 0;
-	if (wh_w8790_dev_set_flash_address(pdev, param_addr.ParameterExtended) <= 0)
-		return 0;
-
-	if (wh_w8790_dev_flash_get_checksum(pdev, &checksum, param_addr.ParameterExtended, sec_header.PayloadSize + sizeof(W8760_FLASH_SECTION_HEADER), checksum) <= 0)
-		return 0;
-
-	*chksum = checksum;
-	return 1;
-}
 
 int  wh_w8790_dev_read_parameter_table_info(WDT_DEV* pdev, W8790_PARAMETER_INFO* p_out_parameter_info)
 {
@@ -545,31 +511,10 @@ int wh_w8790_dev_wait_cmd_end(WDT_DEV* pdev, int timeout_ms, int invt_ms)
 
 
 
-int wh_w8790_dev_escape_from_flash_mode(WDT_DEV* pdev, UINT32 mode_id)
-{
-	BYTE cmd[10] = { W8790_COMMAND9, W8790_ESCAPE_FROM_FLASH_MODE, (BYTE)mode_id, 0xFA, 0xEC };
 
-	if (wh_w8790_dev_command_write(pdev, cmd, 0, sizeof(cmd)) <= 0)
-		return 0;
 
-	return 1;
-}
 
-int wh_w8790_dev_call_function(WDT_DEV* pdev, UINT32 function_address, UINT32 arg0,
-	UINT32 arg1, UINT32 arg2, UINT32 arg3)
-{
-	BYTE cmd[64] = { 0 };
 
-	cmd[0] = W8790_COMMAND63;
-	cmd[1] = W8790_CALL_FUNCTION;
-	put_unaligned_le32(function_address, &cmd[2]);
-	put_unaligned_le32(arg0, &cmd[6]);
-	put_unaligned_le32(arg1, &cmd[10]);
-	put_unaligned_le32(arg2, &cmd[14]);
-	put_unaligned_le32(arg3, &cmd[18]);
-
-	return wh_w8790_dev_command_write(pdev, cmd, 0, sizeof(cmd));
-}
 
 int wh_w8790_dev_get_function_return_value(WDT_DEV* pdev, UINT32* pvalue)
 {
@@ -582,21 +527,6 @@ int wh_w8790_dev_get_function_return_value(WDT_DEV* pdev, UINT32* pvalue)
 		*pvalue = 0;
 
 	return ret;
-}
-
-
-
-int wh_w8790_dev_run_program_from_background(WDT_DEV* pdev, UINT32 program_address, UINT32 loader_stack)
-{
-	BYTE cmd[10] = { 0 };
-
-	cmd[0] = W8790_COMMAND63;
-	cmd[1] = W8790_RUN_PROGRAM_FROM_BACKGROUND;
-	put_unaligned_le32(program_address, &cmd[2]);
-	put_unaligned_le32(loader_stack, &cmd[6]);
-
-	return wh_w8790_dev_command_write(pdev, cmd, 0, sizeof(cmd));
-
 }
 
 
@@ -672,12 +602,12 @@ int wh_w8790_dev_write_flash(WDT_DEV* pdev, int addr, BYTE* buf, int start, int 
 {
 	int byte_count = size;
 	int offset = start;
-	int max_payload_size = W8760_USB_MAX_PAYLOAD_SIZE - 2;
+	int max_payload_size = W8790_USB_MAX_PAYLOAD_SIZE - 2;
 	int cur_addr = 0xFFFFFFFF;
 
 	while (byte_count >= max_payload_size) {
 		if ((addr & 0xfff) == 0)
-			wh_printf("base addr: 0x%x\n", addr);
+			printf("base addr: 0x%x\n", addr);
 		if (!check_is_all_ff(&buf[offset], max_payload_size)) {
 			if (cur_addr != addr) {
 				if (!wh_w8790_dev_set_flash_address(pdev, addr))
@@ -1041,8 +971,11 @@ int	wh_w8790_dev_flash_block_write(WDT_DEV* pdev, BYTE* data, UINT32 address, in
 	i = 0;
 	while (1)
 	{
-		while (i < num_pages && (page_map[i] == false))
-			i++;
+		while (i < num_pages)
+		{
+			if(page_map[i] == false)
+				i++;
+		}
 		if (i >= num_pages)
 			break;
 		int num_write_pages;
@@ -1134,35 +1067,11 @@ int wh_w8790_dev_read_parameter_page(WDT_DEV* pdev, BYTE* buf, int page_index)
 
 
 
-int wh_w8790_dev_get_parameter_chksum_by_blk_xfer(WDT_DEV* pdev, UINT16* chksum)
-{
-	int ret = 0;
-	UINT32 parameter_size = 0;
-	BYTE* pdata = 0;
-
-	if (!wh_w8790_dev_set_block_access(pdev, W8790_PrimaryParameter, 0, &parameter_size))
-		return 0;
-
-	if (parameter_size > 16) {
-		pdata = (BYTE*)malloc(parameter_size + 16);
-		ret = wh_w8790_dev_block_read(pdev, pdata, 0, parameter_size);
-
-		if (ret)
-			*chksum = misr_for_bytes(0, pdata, 0, parameter_size);
-		free(pdata);
-		return ret;
-	}
-	return 0;
-}
-
-
-
 
 
 
 int wh_w8790_dev_flash_erase(WDT_DEV* pdev, UINT32 address, int size)
 {
-
 	int ret = wh_w8790_dev_flash_erase_cmd(pdev, address, size);
 
 	if (ret <= 0)
@@ -1170,30 +1079,6 @@ int wh_w8790_dev_flash_erase(WDT_DEV* pdev, UINT32 address, int size)
 
 	return ret;
 }
-
-
-
-
-
-
-
-int wh_w8790_dev_program_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int option)
-{
-	printf("%s: not implemented !\n", __FUNCTION__);
-	return 0;
-
-}
-
-
-
-int wh_w8790_dev_verify_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pChunk)
-{
-	printf("%s: not implemented !\n", __FUNCTION__);
-	return 0;
-
-}
-
-
 
 
 
@@ -1223,7 +1108,7 @@ int	wh_w8790_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
 
 	case	WH_CMD_FLASH_LOCK:
 	case	WH_CMD_FLASH_PROTECTION_ON:
-		ret = wh_w8790_dev_protect_flash(pdev, W8760_ProtectAll512k);
+		ret = wh_w8790_dev_protect_flash(pdev, W8790_ProtectAll512k);
 		break;
 	case	WH_CMD_FLASH_UNLOCK: {
 		ret = wh_w8790_dev_set_n_check_device_mode(pdev, W8790_MODE_FLASH_PROGRAM, 0, 0);
@@ -1237,15 +1122,15 @@ int	wh_w8790_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
 		// size align to 0x100
 		UINT32 size = ((value & 0xFFFF) << 8) + 0x100;
 		if (addr < 128 * 1024 && addr + size <= 128 * 1024)
-			ret = wh_w8790_dev_protect_flash(pdev, W8760_UnprotectLower128k);
+			ret = wh_w8790_dev_protect_flash(pdev, W8790_UnprotectLower128k);
 		else if (addr < 256 * 1024 && addr + size <= 256 * 1024)
-			ret = wh_w8790_dev_protect_flash(pdev, W8760_UnprotectLower256k);
+			ret = wh_w8790_dev_protect_flash(pdev, W8790_UnprotectLower256k);
 		else if (addr < 384 * 1024 && addr + size <= 384 * 1024)
-			ret = wh_w8790_dev_protect_flash(pdev, W8760_UnprotectLower384k);
+			ret = wh_w8790_dev_protect_flash(pdev, W8790_UnprotectLower384k);
 		else if (addr < 508 * 1024 && addr + size <= 508 * 1024)
-			ret = wh_w8790_dev_protect_flash(pdev, W8760_UnprotectLower508k);
+			ret = wh_w8790_dev_protect_flash(pdev, W8790_UnprotectLower508k);
 		else if (addr == 0 && addr + size > 508 * 1024 && addr + size <= 512 * 1024)
-			ret = wh_w8790_dev_protect_flash(pdev, W8760_UnprotectAll512k);
+			ret = wh_w8790_dev_protect_flash(pdev, W8790_UnprotectAll512k);
 	}
 	break;
 	case 	WH_CMD_ALGO_STOP: 
@@ -1274,6 +1159,8 @@ UINT16 wh_w8790_flash_section_header_checksum(W8790_FLASH_SECTION_HEADER header)
 	sum = misr_32b(sum, header.Param1);
 	return sum;
 }
+
+
 int  wh_w8790_flash_section_validate(BYTE* data, UINT32 datalength, int start = 0)
 {
 	int ret = 0;
@@ -1448,7 +1335,7 @@ exit_fun:
 
 }
 
-int	wh_w8790_prepare_data(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
+int wh_w8790_prepare_data(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 {
 	if (!pdev || !p_out_board_info)
 		return 0;

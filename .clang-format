@@ -9,7 +9,7 @@ TabWidth: 8
 UseTab: Always
 
 # Max Line Length
-ColumnLimit: 100
+ColumnLimit: 120
 
 # Put braces on a new line for functions
 BraceWrapping:

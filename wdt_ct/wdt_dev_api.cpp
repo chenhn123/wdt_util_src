@@ -36,7 +36,7 @@
 #include "wif2.h"
 
 
-int	wh_get_device_access_func(int interfaceIndex, FUNC_PTR_STRUCT_DEV_ACCESS*  pFuncs )
+int wh_get_device_access_func(int interfaceIndex, FUNC_PTR_STRUCT_DEV_ACCESS*  pFuncs)
 {
 	if (!pFuncs)
 		return 0;
@@ -53,7 +53,7 @@ int	wh_get_device_access_func(int interfaceIndex, FUNC_PTR_STRUCT_DEV_ACCESS*  p
 	return 0;
 }
 
-int	wh_get_device_private_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT_DEV_OPERATION*  pFuncs )
+int wh_get_device_private_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT_DEV_OPERATION*  pFuncs)
 {
 	if (!pFuncs || !pdev)
 		return 0;
@@ -92,7 +92,7 @@ int	wh_get_device_private_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT
 
 }
 
-int	wh_get_device_basic_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT_DEV_BASIC*  pFuncs )
+int wh_get_device_basic_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT_DEV_BASIC*  pFuncs)
 {
 	if (!pFuncs || !pdev)
 		return 0;
@@ -741,14 +741,15 @@ info_exit:
 
 int show_wif_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 {
-	CHUNK_INFO_EX		chunk_info_ex;
-
 	if (!pdev || !pparam)
 		return 0;
+	if(show_wif2_info((char*)pparam->image_file))
+		return 1;
 
 	if (!load_wif(pdev, (char*)pparam->image_file))
 		return 0;
 
+	CHUNK_INFO_EX           chunk_info_ex;
 	if (pdev->func_wh_get_chunk_info(pdev->wif_access.wif_handle, CHUNK_ID_FRWR, &chunk_info_ex)) 
 		printf("FW id: 0x%08x\n", chunk_info_ex.chuckInfo.versionNumber);
 

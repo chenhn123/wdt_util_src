@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2022 Randy Lai
+ * Copyright (C) 2022 Weida Hi-Tech
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,6 +52,8 @@ int free_wif2(WIF_FILE2 *pcur_wif)
 
 	return 0;
 }
+
+
 
 int get_wif2(char *path, WIF_FILE2 *out_pcur_wif)
 {
@@ -103,8 +123,6 @@ int do_wif2_chunk_info(WIF_FILE2 *pcur_wif, UINT32 chunk_four_cc)
 		if (pchunk_data->FourCC == chunk_four_cc) {
 			pchunk_info_ex->Header.FourCC = pchunk_data->FourCC;
 			pchunk_info_ex->Header.Size = pchunk_data->Size;
-
-			// UINT32	pdata_pos = chunk_start_pos + sizeof(WIF2_Chunk_Header);
 
 			pchunk_info_ex->BinaryData = (BYTE *)malloc(pchunk_data->Size);
 			if (!pchunk_info_ex->BinaryData)
@@ -202,27 +220,21 @@ int do_update_fw_by_wif2_chunk_fbin(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 				goto finish;
 			}
 
-			ret = 0;
-			//ret = pdev->funcs_device_private.p_wh_flash_block_write(
-			//	pdev, pchunk_info_ex->BinaryData, pchunk_info_ex->Binary.Address,
-			//	pchunk_info_ex->Binary.Size);
-			// if fail use 4k program method.
-			if (!ret) {
-				printf("Use 4k program\n");
-				ret = pdev->funcs_device_private.p_wh_flash_erase(
+			
+			printf("Use 4k program\n");
+			ret = pdev->funcs_device_private.p_wh_flash_erase(
 					pdev, pchunk_info_ex->SpaceToErase.Address,
 					pchunk_info_ex->SpaceToErase.Size);
-				if (!ret) {
-					goto finish;
-				}
+			if (!ret) {	
+				goto finish;
+			}
 
-				ret = pdev->funcs_device_private.p_wh_flash_write_data(
+			ret = pdev->funcs_device_private.p_wh_flash_write_data(
 					pdev, pchunk_info_ex->BinaryData,
 					pchunk_info_ex->Binary.Address,
 					pchunk_info_ex->Binary.Size);
-				if (!ret) {
-					goto finish;
-				}
+			if (!ret) {
+				goto finish;
 			}
 
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
@@ -401,6 +413,69 @@ int do_check_fw_by_wif2_flow(WDT_DEV *pdev, WIF_FILE2 *pcur_wif)
 		return 1;
 
 }
+
+
+
+int do_show_wif2_info_chunk(WIF_FILE2* pcur_wif)
+{
+	if (!pcur_wif)
+		return 0;
+	WIF2_Info_Chunk* pchunk_info_ex;
+	pchunk_info_ex = (WIF2_Info_Chunk*)malloc(sizeof(WIF2_Info_Chunk));
+	if (!pchunk_info_ex)
+		return 0;
+	UINT32	chunk_start_pos = 0 + sizeof(ChunkHeader);
+	WIF2_Chunk_Header* pchunk_data = NULL;
+
+	while (chunk_start_pos < pcur_wif->data_len)
+       	{
+		pchunk_data = (WIF2_Chunk_Header*)&pcur_wif->pdata[chunk_start_pos];
+		/* we got it */
+		if (pchunk_data->FourCC == FOURCC_ID_INFO)
+		{
+			pchunk_info_ex->Header.FourCC = pchunk_data->FourCC;
+			pchunk_info_ex->Header.Size = pchunk_data->Size;
+			pchunk_info_ex->BinaryData = (BYTE*)malloc(pchunk_data->Size);
+			if (!pchunk_info_ex->BinaryData)
+				goto finish;
+
+			memcpy((BYTE*)pchunk_info_ex->BinaryData, (BYTE*)&pcur_wif->pdata[chunk_start_pos], pchunk_data->Size);
+			for (size_t i = 0; i < pchunk_data->Size; i++)
+				printf("%c", (unsigned char)(pchunk_info_ex->BinaryData[i]));
+			printf("\n");
+			
+			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
+		}
+		else
+		{
+			/* 8 is the header size */
+			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
+		}
+	}
+finish:
+	if (pchunk_info_ex->BinaryData)
+		free(pchunk_info_ex->BinaryData);
+
+	return 1;
+}
+
+int show_wif2_info(char *path)
+{
+	WIF_FILE2 wif2;
+        int ret;
+        ret = get_wif2(path, &wif2);
+        if (ret == 0) 
+                goto finish;
+	ret = do_show_wif2_info_chunk(&wif2);
+
+
+finish:
+        free_wif2(&wif2);
+        return ret;
+
+}
+
+
 
 int update_fw_by_wif2(WDT_DEV *pdev, char *path)
 {

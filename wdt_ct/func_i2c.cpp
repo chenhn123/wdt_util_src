@@ -36,9 +36,9 @@
 #define		MAX_DEV			16
 /* i2c-hid driver for weida's controller */
 #define		ACPI_NAME_HID		"i2c-WDHT"
-
-#define		HIDI2C_OPCODE_SET_REPORT	0x03
-#define         HIDI2C_OPCODE_GET_REPORT	0x02
+/* same as i2c-hid driver define  */
+#define		I2C_HID_OPCODE_GET_REPORT	0x02
+#define		I2C_HID_OPCODE_SET_REPORT	0x03
 
 static char		g_dev_path[64];
 
@@ -145,7 +145,7 @@ int wh_i2c_scan_hid_path(WDT_DEV* pdev, int *adaptor_no)
 	return found;
 }
 
-int	 wh_i2c_scan_device(WDT_DEV* pdev)
+int wh_i2c_scan_device(WDT_DEV* pdev)
 {
 	int 	found = 0;
 	int		adaptor_no = -1;
@@ -188,7 +188,7 @@ int	 wh_i2c_scan_device(WDT_DEV* pdev)
 	return 1;
 }
 
-int	wh_i2c_get_device(WDT_DEV* pdev, WDT_DEVICE_INFO *pDevInfo, int flag)
+int wh_i2c_get_device(WDT_DEV* pdev, WDT_DEVICE_INFO *pDevInfo, int flag)
 {
 	if (pdev && pDevInfo) {
 		strcpy(pDevInfo->path, g_dev_path);
@@ -198,7 +198,7 @@ int	wh_i2c_get_device(WDT_DEV* pdev, WDT_DEVICE_INFO *pDevInfo, int flag)
 	return 0;
 }
 
-int	wh_i2c_open_device(WDT_DEV* pdev)
+int wh_i2c_open_device(WDT_DEV* pdev)
 {
 	long		fileno = 0;
 	unsigned long	funcs = 0;
@@ -230,7 +230,7 @@ int	wh_i2c_open_device(WDT_DEV* pdev)
 	return (fileno >= 0);
 }
 
-int	wh_i2c_close_device(WDT_DEV* pdev)
+int wh_i2c_close_device(WDT_DEV* pdev)
 {
 	if (pdev && pdev->dev_handle) {
 		close((long) pdev->dev_handle);
@@ -308,7 +308,7 @@ int wh_w8755_i2c_delay(WDT_DEV* pdev, unsigned long delay)
 }
 
 
-int	wh_w8755_i2c_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp)
+int wh_w8755_i2c_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp)
 {
 
 	if (!wh_w8755_dev_parse_new_dev_info(pdev, &pboard_info->dev_info.w8755_dev_info)) {
@@ -341,7 +341,7 @@ int wh_w8760_isp_rerun_recovery(WDT_DEV *pdev)
 
 
 
-int	wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
+int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 {
 	BYTE				buf[80];
 	BOARD_INFO			board_info;	
@@ -622,12 +622,12 @@ retry:
 			tx_buffer[data_len++] = 0x3F;
 		else 
 			tx_buffer[data_len++] = 0x30;
-		tx_buffer[data_len++] = HIDI2C_OPCODE_SET_REPORT;
+		tx_buffer[data_len++] = I2C_HID_OPCODE_SET_REPORT;
 		tx_buffer[data_len++] = cmd;
 		
 	} else {
 		tx_buffer[data_len++] = 0x30 | cmd;
-		tx_buffer[data_len++] = HIDI2C_OPCODE_SET_REPORT;
+		tx_buffer[data_len++] = I2C_HID_OPCODE_SET_REPORT;
 	}
 	
 
@@ -692,13 +692,13 @@ retry:
 			tx_buffer[data_len++] = 0x3F;
 		else 
 			tx_buffer[data_len++] = 0x30;
-		tx_buffer[data_len++] = HIDI2C_OPCODE_GET_REPORT;
+		tx_buffer[data_len++] = I2C_HID_OPCODE_GET_REPORT;
 		tx_buffer[data_len++] = cmd;
 	}
 	else
 	{
 		tx_buffer[data_len++] = 0x30 | cmd;
-		tx_buffer[data_len++] = HIDI2C_OPCODE_GET_REPORT;
+		tx_buffer[data_len++] = I2C_HID_OPCODE_GET_REPORT;
 	}
 
         tx_buffer[data_len++] = pdev->board_info.dev_hid_desc.wDataRegister;
@@ -737,8 +737,8 @@ int wh_i2c_get_desc(WDT_DEV *pdev, BYTE desc_type, BYTE string_idx, BYTE* target
 	int	ret_size = 0;
 	UINT16 cmd_reg = pdev->board_info.dev_hid_desc.wCommandRegister;
         UINT16 data_reg = pdev->board_info.dev_hid_desc.wDataRegister;
-        char    str_txdata[10] = { (BYTE)cmd_reg, (BYTE)(cmd_reg>>8), 0x13, 0x0E, 0x00, (BYTE)data_reg, (BYTE)(data_reg>>8), 0x00, 0x00, 0x00 };
-        char    desc_txdata[10] = { (BYTE)cmd_reg, (BYTE)(cmd_reg>>8), 0x10, 0x0E, (BYTE)data_reg, (BYTE)(data_reg>>8), 0x00, 0x00, 0x00, 0x00 };
+        char    str_txdata[10] = { (char)cmd_reg, (char)(cmd_reg>>8), 0x13, 0x0E, 0x00, (char)data_reg, (char)(data_reg>>8), 0x00, 0x00, 0x00 };
+        char    desc_txdata[10] = { (char)cmd_reg, (char)(cmd_reg>>8), 0x10, 0x0E, (char)data_reg, (char)(data_reg>>8), 0x00, 0x00, 0x00, 0x00 };
 	
 	BYTE*	txbuf;
 	int 	txlen, rxlen;

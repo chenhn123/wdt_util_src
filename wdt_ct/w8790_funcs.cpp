@@ -514,23 +514,6 @@ int wh_w8790_dev_wait_cmd_end(WDT_DEV* pdev, int timeout_ms, int invt_ms)
 
 
 
-
-
-int wh_w8790_dev_get_function_return_value(WDT_DEV* pdev, UINT32* pvalue)
-{
-	BYTE return_bytes[4] = { 0 };
-
-	int ret = wh_w8790_dev_read_buf_response(pdev, return_bytes, 4);
-	if (ret > 0)
-		*pvalue = get_unaligned_le32(return_bytes);
-	else
-		*pvalue = 0;
-
-	return ret;
-}
-
-
-
 int wh_w8790_dev_reboot(WDT_DEV* pdev)
 {
 	BYTE cmd[10] = { W8790_COMMAND9, W8790_REBOOT, 0xB9, 0x0C, 0x8A, 0x24 };
@@ -554,8 +537,6 @@ int wh_w8790_dev_set_device_mode(WDT_DEV* pdev, BYTE mode)
 
 	return wh_w8790_dev_command_write(pdev, cmd, 0, 3);
 }
-
-
 
 
 
@@ -727,10 +708,6 @@ int wh_w8790_dev_flash_get_checksum(WDT_DEV* pdev, UINT32* pchksum, UINT32 flash
 
 
 
-
-
-
-
 /*
  * Block access
  */
@@ -804,7 +781,7 @@ int wh_w8790_dev_block_checksum(WDT_DEV* pdev, UINT32* pchksum, UINT32 size, UIN
 
 
 
-int	wh_w8790_dev_flash_read_data(WDT_DEV* pdev, BYTE* data, UINT32 address, int length)
+int wh_w8790_dev_flash_read_data(WDT_DEV* pdev, BYTE* data, UINT32 address, int length)
 {
 	if (!pdev || !data)
 		return 0;
@@ -910,7 +887,6 @@ int wh_w8790_dev_batch_write_flash(WDT_DEV* pdev, BYTE* data, UINT32 address, UI
 
 
 
-
 }
 
 
@@ -1010,8 +986,6 @@ finish:
 
 	return ret;
 
-
-
 }
 
 
@@ -1041,22 +1015,6 @@ int wh_w8790_dev_get_device_status(WDT_DEV* pdev, BYTE* buf, int offset, int siz
 }
 
 
-int wh_w8790_dev_apply_parameters(WDT_DEV* pdev, BYTE table_type)
-{
-	BYTE cmd[10] = { W8790_COMMAND9, W8790_APPLY_PARAMETERS, (BYTE)table_type };
-
-	if (wh_w8790_dev_command_write(pdev, cmd, 0, sizeof(cmd)) <= 0) {
-		printf("Fail to do get store parameter \n");
-		return 0;
-	}
-
-	if (wh_w8790_dev_wait_cmd_end(pdev, 0, 0) <= 0) {
-		printf("Cd Cs open test time out \n");
-		return 0;
-	}
-
-	return 1;
-}
 
 int wh_w8790_dev_read_parameter_page(WDT_DEV* pdev, BYTE* buf, int page_index)
 {
@@ -1064,7 +1022,6 @@ int wh_w8790_dev_read_parameter_page(WDT_DEV* pdev, BYTE* buf, int page_index)
 
 	return wh_w8790_dev_command_read(pdev, cmd, sizeof(cmd), buf, 0, W8790_USB_MAX_PAYLOAD_SIZE);
 }
-
 
 
 
@@ -1084,7 +1041,7 @@ int wh_w8790_dev_flash_erase(WDT_DEV* pdev, UINT32 address, int size)
 
 
 
-int	wh_w8790_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
+int wh_w8790_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
 {
 	int ret = 0;
 	switch (cmd)
@@ -1161,7 +1118,7 @@ UINT16 wh_w8790_flash_section_header_checksum(W8790_FLASH_SECTION_HEADER header)
 }
 
 
-int  wh_w8790_flash_section_validate(BYTE* data, UINT32 datalength, int start = 0)
+int wh_w8790_flash_section_validate(BYTE* data, UINT32 datalength, int start = 0)
 {
 	int ret = 0;
 	W8790_FLASH_SECTION_HEADER header;
@@ -1382,13 +1339,8 @@ int wh_w8790_prepare_data(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 		wh_w8790_dev_read_parameters_get_checksum(pdev, parameter_info, &cksum);
 		p_out_board_info->sys_param.xmls_id1 = cksum;
 
-
-
 		return 1;
 	}
-
-
-
 
 	return 0;
 }

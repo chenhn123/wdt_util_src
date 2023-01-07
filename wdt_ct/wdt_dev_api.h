@@ -91,8 +91,8 @@ typedef	WH_HANDLE	(* LPFUNC_wh_open_whiff)(char*);
 typedef	int		(* LPFUNC_wh_close_whiff)(WH_HANDLE);
 typedef	int		(* LPFUNC_wh_get_chunk_info)(WH_HANDLE, UINT32, CHUNK_INFO_EX*);	
 typedef	int		(* LPFUNC_wh_get_device_access_func)(int, FUNC_PTR_STRUCT_DEV_ACCESS* );   
-typedef	int		(* LPFUNC_wh_get_device_private_access_func)(WDT_DEV*, UINT32, FUNC_PTR_STRUCT_DEV_OPERATION*);   
-typedef	int		(* LPFUNC_wh_get_device_basic_access_func)(WDT_DEV*, UINT32, FUNC_PTR_STRUCT_DEV_BASIC*);   
+typedef	int		(* LPFUNC_wh_get_device_private_access_func)(WDT_DEV*,  FUNC_PTR_STRUCT_DEV_OPERATION*);   
+typedef	int		(* LPFUNC_wh_get_device_basic_access_func)(WDT_DEV*, FUNC_PTR_STRUCT_DEV_BASIC*);   
 
 typedef struct FuncPtrStructDevAccess { 
 	LPFUNC_wh_scan_device		p_wh_scan_device;	 
@@ -176,8 +176,8 @@ int		wh_close_whiff_file(WH_HANDLE handle);
 int		wh_get_chunk_info(WH_HANDLE handle, UINT32 chunk_index, CHUNK_INFO_EX *pChunkInfoEx);
 
 int		wh_get_device_access_func(int interfaceIndex, FUNC_PTR_STRUCT_DEV_ACCESS *pFuncs );   
-int		wh_get_device_private_access_func(WDT_DEV *pdev, UINT32 key, FUNC_PTR_STRUCT_DEV_OPERATION *pFuncs );   
-int		wh_get_device_basic_access_func(WDT_DEV *pdev, UINT32 key, FUNC_PTR_STRUCT_DEV_BASIC *pFuncs );
+int		wh_get_device_private_access_func(WDT_DEV *pdev, FUNC_PTR_STRUCT_DEV_OPERATION *pFuncs );   
+int		wh_get_device_basic_access_func(WDT_DEV *pdev, FUNC_PTR_STRUCT_DEV_BASIC *pFuncs );
 
 int		wh_i2c_scan_device(WDT_DEV *pdev);
 int		wh_i2c_get_device(WDT_DEV *pdev, WDT_DEVICE_INFO *pDevInfo, int flag);

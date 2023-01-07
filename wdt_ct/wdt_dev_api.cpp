@@ -53,7 +53,7 @@ int wh_get_device_access_func(int interfaceIndex, FUNC_PTR_STRUCT_DEV_ACCESS*  p
 	return 0;
 }
 
-int wh_get_device_private_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT_DEV_OPERATION*  pFuncs)
+int wh_get_device_private_access_func(WDT_DEV* pdev,  FUNC_PTR_STRUCT_DEV_OPERATION*  pFuncs)
 {
 	if (!pFuncs || !pdev)
 		return 0;
@@ -92,7 +92,7 @@ int wh_get_device_private_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT
 
 }
 
-int wh_get_device_basic_access_func(WDT_DEV* pdev, UINT32 key, FUNC_PTR_STRUCT_DEV_BASIC*  pFuncs)
+int wh_get_device_basic_access_func(WDT_DEV* pdev,  FUNC_PTR_STRUCT_DEV_BASIC*  pFuncs)
 {
 	if (!pFuncs || !pdev)
 		return 0;
@@ -320,7 +320,7 @@ int init_n_scan_device(WDT_DEV *pdev, EXEC_PARAM *pparam, unsigned int flag)
 			if (pdev->is_legacy)
 				return 1;
 			
-			if (!pdev->func_wh_get_device_private_access_func(pdev,	0x12345678, &pdev->funcs_device_private)) {
+			if (!pdev->func_wh_get_device_private_access_func(pdev, &pdev->funcs_device_private)) {
 				wh_printf("Get device private funcs error");
 				return 0;		
 			}

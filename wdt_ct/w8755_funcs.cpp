@@ -249,16 +249,6 @@ int	wh_w8755_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
 
 	switch(cmd)
 	{
-		case 	WH_CMD_ENTER_FACTORY: {
-			int count = 20;
-			do {
-				wh_w8755_dev_set_device_mode(pdev, W8755_DM_FACTORY);
-				wh_sleep(5);
-			} while (wh_w8755_dev_get_device_mode(pdev) != W8755_DM_FACTORY&& count-- > 0);
-			
-			return 1;		
-		}
-		break;
 		case 	WH_CMD_ALGO_STOP: {
 			int count = 20;
 			do {

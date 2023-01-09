@@ -539,10 +539,6 @@ int wh_w8760_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
 {
 	switch(cmd)
 	{
-		case 	WH_CMD_ENTER_FACTORY: {
-			return wh_w8760_dev_set_n_check_device_mode(pdev, W8760_MODE_MEASUREMENT, 0, 0);
-		}
-		break;
 		case 	WH_CMD_ALGO_STOP: {
 			return wh_w8760_dev_set_n_check_device_mode(pdev, W8760_MODE_COMMAND, 0, 0);
 		}

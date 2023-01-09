@@ -18,9 +18,6 @@
 #ifndef	__W8755_DEF_H__
 #define	__W8755_DEF_H__
 
-/* w8755 supports */
-#define		WH_CMD_ENTER_FACTORY		0x80
-
 
 #define		EXEC_I2C_NO_REPEAT_START	0x100
 #define		EXEC_I2C_REDUNDANT		0x200

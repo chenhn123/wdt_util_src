@@ -496,7 +496,7 @@ int wh_w8790_dev_wait_cmd_end(WDT_DEV* pdev, int timeout_ms, int invt_ms)
 		if ((status & W8790_COMMAND_BUSY) == 0) {
 			time_period = (get_current_ms() - start_tick);
 			if (time_period)
-				wh_printf("leave %s : %dms\n", __FUNCTION__, time_period);
+				wh_printf("leave %s : %lums\n", __FUNCTION__, time_period);
 
 			return 1;
 		}

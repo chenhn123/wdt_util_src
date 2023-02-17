@@ -37,7 +37,7 @@
 #define		OPTION_HW_ID			0x4000
 
 #define		TOOL_TITLE_STR			"Weida Update Utility"
-#define		TOOL_VERSION_STR		"V0.9.11"
+#define		TOOL_VERSION_STR		"V0.9.12"
 
 int		load_lib_func_address(WDT_DEV*, EXEC_PARAM*);
 int		image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pParam);
@@ -49,7 +49,6 @@ void 		wh_printf(const char *fmt, ...);
 void 		wh_sleep(int ms);
 void 		wh_udelay(int us);
 unsigned long 	get_current_ms();
-
 
 /* __WDT_CT_H__ */
 #endif

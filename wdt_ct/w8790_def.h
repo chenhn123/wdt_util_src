@@ -28,8 +28,7 @@
 #define W8790_MODE_INIT						0		
 // Normal sensing
 #define W8790_MODE_SENSING					1		
-// Device sleeps most time and does sensing in longer period.
-#define W8790_MODE_DOZE						2		
+
 // The device is waiting for memory access or flash parameter read/write commands. Especially from GUI tools.
 #define W8790_MODE_COMMAND					0x90	
 // The device is handling flash firmware erase/program commands. This mode has no return until reboot.
@@ -108,21 +107,10 @@ enum W8790_DeviceStatusBits
 
 enum W8790_BlockAccessDataType
 {
-	W8790_ParameterMap = 0x00,
-	W8790_FirmwareBinary = 0x01,
-	W8790_SRamBuffer = 0x02,
-	W8790_Image = 0x03,
-	W8790_Regions = 0x04,
-
 	W8790_PrimaryParameter = 0x08,
 	W8790_ExtendedParameter = 0x09,
-	W8790_MeasurementResult = 0x10,
 
 	W8790_FlashBatchWrite = 0x20,    
-	W8790_Ram = 0x21,    // Supported in ROM code only
-	W8790_Flash = 0x22,   // Supported in ROM code only
-
-
 };
 
 

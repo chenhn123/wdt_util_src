@@ -22,28 +22,15 @@
  * device working modes 
  * W8760_MODE_INIT: This mode only exists during ROM and fastboot. It cannot be set as the target mode.
  * W8760_MODE_SENSING: Normal sensing
- * W8760_MODE_DOZE: Device sleeps most time and does sensing in longer period.
- * W8760_MODE_SLEEP: Both device and sensor are in sleep.
  * W8760_MODE_ISP: The device is in ISP mode. Unable to switch to other mode.
  * W8760_MODE_COMMAND: The device is waiting for memory access or flash parameter read/write commands. Especially from GUI tools.
  * W8760_MODE_FLASH_PROGRAM: The device is handling flash firmware erase/program commands. This mode has no return until reboot.
- * W8760_MODE_PARAMETER_PROGRAM: For executing parameter erase/program commands from host.
- * W8760_MODE_MEASUREMENT: Do factory MP testing/noise detection/TP RC measurement.
- * W8760_MODE_ATE: The device is in ATE mode. This mode has no return until reboot.
- * W8760_MODE_NOISE_DETECTION: A special in a special noise-detection firmware
  */
 #define W8760_MODE_INIT						0		
 #define W8760_MODE_SENSING					1
-#define W8760_MODE_DOZE						2
-#define W8760_MODE_SLEEP					3
 #define W8760_MODE_ISP						0x10
 #define W8760_MODE_COMMAND					0x90
 #define W8760_MODE_FLASH_PROGRAM				0x96
-#define W8760_MODE_PARAMETER_PROGRAM				0x99
-#define W8760_MODE_MEASUREMENT					0x9F
-#define W8760_MODE_ATE						0xA0
-#define W8760_MODE_NOISE_DETECTION				0xB0
-#define W8760_MODE_UNDEFINED					0xFF	
 
 #define W8760_DEVICE_INFO 		0xF2
 #define W8760_COMMAND9 			0x06

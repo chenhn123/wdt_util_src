@@ -44,7 +44,8 @@
 #define		IS_ADDR_BLK64_ALIGNED(__ADDR__) 	((__ADDR__ & (unsigned int)(FLS_BLK64_SZ - 1)) == 0)
 #define		IS_ADDR_BLK32_ALIGNED(__ADDR__)		((__ADDR__ & (unsigned int)(FLS_BLK32_SZ - 1)) == 0)  
 
-int 	wh_w8755_dev_set_device_mode(WDT_DEV* pdev, BYTE mode);
+
+int     wh_w8755_dev_set_device_mode(WDT_DEV* pdev, BYTE mode);
 BYTE 	wh_w8755_dev_get_device_mode(WDT_DEV* pdev);
 int 	wh_w8755_dev_enable_spi_flash_protection(WDT_DEV* pdev, int protect);
 int 	wh_w8755_i2c_delay(WDT_DEV* pdev, unsigned long delay);
@@ -586,8 +587,7 @@ int wh_w8755_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChu
 	} 
 
 	if (option & OPTION_ERASE_TEMP) {
-		retval = wh_w8755_dev_send_commands(pdev, WH_CMD_FLASH_ERASE4K,
-											pInputChunk->chuckInfo.temp);
+		retval = wh_w8755_dev_send_commands(pdev, WH_CMD_FLASH_ERASE4K, pInputChunk->chuckInfo.temp);
 		if (!retval) {
 			printf("erase temp addr failed !\n");
 			return 0;
@@ -831,16 +831,128 @@ int wh_w8755_dev_set_basic_op(WDT_DEV *pdev)
 	return 1;
 }
 
+int wh_w8755_dev_flash_read_data(WDT_DEV* pdev, BYTE* data, UINT32 address, int length)
+{
+	int		addr_start, data_len, packet_size;
+	BYTE*	 psource_data = 0;
+	int		count = 0;
+	int		retval = 1;
+
+	if (!pdev || !data)
+		return 0;
+
+	// address and length should be align to 4
+	if ((address & 0x3) != 0 || (length & 0x3) != 0)
+		return 0;
+
+	data_len = length;
+	addr_start = address;
+	psource_data = data;
+
+	packet_size = W8755_PACKET_SIZE;
+
+	retval = wh_w8755_dev_exec_report_type_write(pdev, W8755_ISP_SET_FLASH_ADDRESS, (BYTE *) &addr_start, 4);
+	if (!retval)
+		return 0;
+
+	while(data_len)	{
+		if (data_len < W8755_PACKET_SIZE)
+			packet_size = data_len;
+
+		if (!wh_w8755_dev_exec_report_type_read(pdev, W8755_ISP_GET_FLASH, psource_data, packet_size, 0)) {
+			printf("can't get flash: 0x%x\n", addr_start);
+			break;
+		}
+
+		data_len = data_len - packet_size;
+		psource_data = psource_data + packet_size;
+		addr_start = addr_start + packet_size;
+
+		wh_sleep(1);
+		count++;
+	}
+
+	return retval;
+
+}
+
+
+int wh_w8755_dev_read_flash_map(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
+{
+
+	BYTE	buffer[64];
+	int 	retval = 1;
+
+	if (!p_out_board_info) 
+		return 0;
+
+	W8755_SEC_ADDR_TYPE *psec_addr_type = &p_out_board_info->sec_header.w8755_sec_header;
+
+	memset(psec_addr_type->device_id, 0, 10);
+
+	int count = 20;
+	do {
+		wh_w8755_dev_set_device_mode(pdev, W8755_DM_COMMAND);
+		wh_sleep(5);
+	} while (wh_w8755_dev_get_device_mode(pdev) != W8755_DM_COMMAND && count-- > 0);
+	
+	
+	retval = wh_w8755_dev_flash_read_data(pdev, buffer, W8755_SEC_ADDR_TABLE_OFFSET, 48);
+	if (!retval)
+		goto failed_exit;
+
+
+	psec_addr_type->fastboot_addr = (get_unaligned_le16(&buffer[0]) << 8);
+	psec_addr_type->library_addr = (get_unaligned_le16(&buffer[2]) << 8);
+	psec_addr_type->firmware_image_addr = (get_unaligned_le16(&buffer[4]) << 8);
+	psec_addr_type->parameter_addr = (get_unaligned_le16(&buffer[6]) << 8);		
+	psec_addr_type->ate_firmware_addr = (get_unaligned_le16(&buffer[8]) << 8);		
+	psec_addr_type->recovery_addr = (get_unaligned_le16(&buffer[10]) << 8);		
+	psec_addr_type->param_clone_addr = (get_unaligned_le16(&buffer[12]) << 8);	
+	psec_addr_type->secondary_image_address = (get_unaligned_le16(&buffer[14]) << 8);
+
+	printf("ate_addr: 0x%X\n", psec_addr_type->ate_firmware_addr);
+
+	if (p_out_board_info->dev_info.w8755_dev_info.boot_partition == BP_SECONDARY)
+	{
+		memset(buffer, 0, sizeof(buffer));
+  
+		retval = wh_w8755_dev_flash_read_data(pdev, buffer, W8755_SEC_ADDR_TABLE_EXTENDED_OFFSET, 32);
+		if (!retval)
+			goto failed_exit;
+
+		psec_addr_type->secondary_param_addr = (get_unaligned_le16(&buffer[0]) << 8);
+		psec_addr_type->secondary_param_clone_addr = (get_unaligned_le16(&buffer[2]) << 8);
+                printf("param_clone_addr: 0x%X\n", psec_addr_type->secondary_param_clone_addr);
+
+
+	}
+
+
+failed_exit:
+	wh_w8755_dev_set_device_mode(pdev, W8755_DM_SENSING);
+
+	return retval;
+}
+
+
+
+
 
 int wh_w8755_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp)
 {
 
         if (!wh_w8755_dev_parse_new_dev_info(pdev, &pboard_info->dev_info.w8755_dev_info)) {
                 printf("Can't get new device info!\n");
+		wh_w8755_dev_set_device_mode(pdev, W8755_DM_SENSING);
                 return 0;
         }
 
-        wh_w8755_dev_set_device_mode(pdev, W8755_DM_SENSING);
+	if (!wh_w8755_dev_read_flash_map(pdev, pboard_info)) {
+                 printf("Can't get address table!\n");
+                 return 0;
+         }
+
 
         return 1;
 }

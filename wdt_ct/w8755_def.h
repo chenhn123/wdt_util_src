@@ -27,6 +27,12 @@
 #define 	BP_PRIMARY			1
 #define 	BP_SECONDARY			2
 
+
+#define		W8755_SEC_ADDR_TABLE_OFFSET		0x90
+#define		W8755_SEC_ADDR_TABLE_SIZE		16
+#define		W8755_SEC_ADDR_TABLE_EXTENDED_OFFSET 0x0001F0
+
+
 typedef struct WeidaDeviceInfoNew
 {
 	UINT32		protocol_version;
@@ -54,22 +60,33 @@ typedef struct WeidaDeviceStatus
 	UINT32		flash_buff_address;
 } W8755_DEV_STATUS; 
 
+
+
 typedef struct SectionAddressType
 {
-	UINT32		fastboot_addr;
-	UINT32		library_addr;
-	UINT32		firmware_image_addr;
-	UINT32		parameter_addr;
-	UINT32		ate_firmware_addr;
-	UINT32		recovery_addr;
-	UINT32		param_clone_addr;
-	UINT32		reserved2_addr;
-	UINT32		firmware_addr;
-	UINT32		overlay_addr;
-	UINT32		parameter_map_addr;
-	char 		device_id[10];
-	char 		tracking_info[16];
+        UINT32          fastboot_addr;
+        UINT32          library_addr;
+        UINT32          firmware_image_addr;
+        UINT32          parameter_addr;
+        UINT32          ate_firmware_addr;
+        UINT32          recovery_addr;
+        UINT32          param_clone_addr;
+        UINT32          secondary_image_address;
+// Secondary for dual boot
+        UINT32          secondary_param_addr;
+        UINT32          secondary_param_clone_addr;
+
+// for device_id in flash
+        char            device_id[10];
+        char            tracking_info[16];
 } W8755_SEC_ADDR_TYPE;
+
+
+
+
+
+
+
 
 typedef struct SectionHeader
 {

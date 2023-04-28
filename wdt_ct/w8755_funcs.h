@@ -48,5 +48,9 @@ int wh_w8755_dev_set_device_mode(WDT_DEV* pdev, BYTE mode);
 
 int wh_w8755_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp);
 
+
+int wh_w8755_dev_read_flash_map(WDT_DEV* pdev, BOARD_INFO* p_out_board_info);
+
+
 /* __W8755_FUNCS_H__ */
 #endif

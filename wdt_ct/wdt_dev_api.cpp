@@ -692,11 +692,29 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 			printf("customer_config_id 0x%x\n", pinfo->dev_info.w8755_dev_info.customer_config_id); 	
 			printf("boot_partition: ");
 
-		       if (pinfo->dev_info.w8755_dev_info.boot_partition == BP_SECONDARY) 
-			       printf("Secondary\n");
-		       else 
-			       printf("Primary\n");
+			if (pinfo->dev_info.w8755_dev_info.boot_partition == BP_SECONDARY) 
+			{
+				printf("Secondary");
+				printf("\n\nfastboot_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.fastboot_addr);
+				printf("library_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.library_addr);
+				printf("firmware_image_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.secondary_image_address);
+				printf("parameter_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.secondary_param_addr);
+				printf("ate_firmware_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.ate_firmware_addr);
+				printf("recovery_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.recovery_addr);
+				printf("param_clone_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.secondary_param_clone_addr);
 
+			}
+			else 
+			{
+				printf("Primary");
+				printf("\n\nfastboot_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.fastboot_addr);
+				printf("library_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.library_addr);
+				printf("firmware_image_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.firmware_image_addr);
+				printf("parameter_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.parameter_addr);
+				printf("ate_firmware_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.ate_firmware_addr);
+				printf("recovery_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.recovery_addr);
+				printf("param_clone_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.param_clone_addr);
+			}
 
 
 

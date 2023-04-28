@@ -544,6 +544,16 @@ int wh_w8755_dev_parse_new_dev_info(WDT_DEV* pdev, W8755_DEV_INFO_NEW *pdev_info
 	pdev_info_new->bytes_per_point = buffer[0x16];
 	pdev_info_new->customer_config_id = get_unaligned_le32(&buffer[0x18]);
 
+	pdev_info_new->boot_partition = BP_DEFAULT;
+	if (pdev_info_new->protocol_version >= 0x01010000) {
+		if (buffer[0x001E] == 0xB1)
+			pdev_info_new->boot_partition = BP_PRIMARY;
+		else if (buffer[0x001E] == 0xB2)
+            pdev_info_new->boot_partition = BP_SECONDARY;
+	}	
+
+
+
 	return true;
 }
 
@@ -820,4 +830,65 @@ int wh_w8755_dev_set_basic_op(WDT_DEV *pdev)
 
 	return 1;
 }
+
+
+int wh_w8755_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp)
+{
+
+        if (!wh_w8755_dev_parse_new_dev_info(pdev, &pboard_info->dev_info.w8755_dev_info)) {
+                printf("Can't get new device info!\n");
+                return 0;
+        }
+
+        wh_w8755_dev_set_device_mode(pdev, W8755_DM_SENSING);
+
+        return 1;
+}
+
+
+int wh_w8755_i2c_delay(WDT_DEV* pdev, unsigned long delay)
+{
+        /* if the fw version is not supported,  just delay the max period and return */
+        if (pdev->board_info.dev_info.w8755_dev_info.protocol_version < 0x01000006)
+                wh_sleep(delay);
+        else {
+                BYTE rc = W8755_ISP_RSP_BUSY;
+                unsigned long   start_tick = get_current_ms();
+                int retval;
+                BYTE readByte[8];
+                int count = 0;
+                unsigned long time_period = 0;
+                int delay_slot = 10;
+
+                if (delay < 100)
+                        delay_slot = 5;
+
+                if (!pdev || !pdev->dev_handle)
+                                return 0;
+
+                while (rc != W8755_ISP_RSP_OK && ((get_current_ms() - start_tick) < (delay + 100))) {
+
+                        /* polling interval => 10ms */
+                        wh_sleep(delay_slot);
+
+                        retval = wh_i2c_rx(pdev, 0x2C, readByte, 3);
+                        if (!retval)
+                                continue;
+                        else
+                                /* 3 byte format: 0x0, 0x0, status */
+                                rc = readByte[2];
+
+                        count ++;
+                }
+
+                time_period = (get_current_ms() - start_tick);
+                if (time_period > (delay + 50))
+                        printf("%s: timeout %d occured!\n", __func__, (int) time_period);
+
+                return time_period;
+        }
+
+        return delay;
+}
+
 

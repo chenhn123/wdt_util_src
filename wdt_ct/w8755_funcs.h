@@ -46,5 +46,7 @@ int wh_w8755_dev_identify_platform(WDT_DEV* pdev);
 int wh_w8755_dev_parse_new_dev_info(WDT_DEV* pdev, W8755_DEV_INFO_NEW *pdev_info_new);
 int wh_w8755_dev_set_device_mode(WDT_DEV* pdev, BYTE mode);
 
+int wh_w8755_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp);
+
 /* __W8755_FUNCS_H__ */
 #endif

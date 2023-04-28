@@ -689,7 +689,17 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 			printf("firmware_revision 0x%x\n", pinfo->dev_info.w8755_dev_info.firmware_revision);
 			printf("max_points 0x%x\n", pinfo->dev_info.w8755_dev_info.max_points); 
 			printf("bytes_per_point 0x%x\n", pinfo->dev_info.w8755_dev_info.bytes_per_point);	
-			printf("customer_config_id 0x%x\n", pinfo->dev_info.w8755_dev_info.customer_config_id); 		
+			printf("customer_config_id 0x%x\n", pinfo->dev_info.w8755_dev_info.customer_config_id); 	
+			printf("boot_partition: ");
+
+		       if (pinfo->dev_info.w8755_dev_info.boot_partition == BP_SECONDARY) 
+			       printf("Secondary\n");
+		       else 
+			       printf("Primary\n");
+
+
+
+
 		} else if (pinfo->dev_type & FW_WDT8760_2) {
 			char str[16];	
 			printf("\nMax_points 0x%X\n", pinfo->dev_info.w8760_feature_devinfo.n_touches_usb);

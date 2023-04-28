@@ -23,7 +23,9 @@
 #define		EXEC_I2C_REDUNDANT		0x200
 
 
-
+#define 	BP_DEFAULT			0
+#define 	BP_PRIMARY			1
+#define 	BP_SECONDARY			2
 
 typedef struct WeidaDeviceInfoNew
 {
@@ -36,17 +38,9 @@ typedef struct WeidaDeviceInfoNew
 	int		max_points;
 	int		bytes_per_point;
 	UINT32		customer_config_id;
+	UINT32		boot_partition;
 } W8755_DEV_INFO_NEW;
 
-typedef	struct WeidaDeviceInfo
-{
-	UINT32		firmware_id;
-	UINT32		hardware_id;
-	UINT32		serial_number;
-	UINT32		max_points;
-	UINT32		bytes_per_point;
-	UINT32		protocol_id;
- } W8755_DEV_INFO;
 
 typedef struct WeidaDeviceStatus
 {

@@ -262,64 +262,7 @@ int wh_i2c_get_param_hid(WDT_DEV *pdev, BOARD_INFO *pinfo)
 	return 1;
 }
 
-int wh_w8755_i2c_delay(WDT_DEV* pdev, unsigned long delay)
-{
-	/* if the fw version is not supported,  just delay the max period and return */
-	if (pdev->board_info.dev_info.w8755_dev_info.protocol_version < 0x01000006) 
-		wh_sleep(delay);
-	else {
-		BYTE rc = W8755_ISP_RSP_BUSY;
-		unsigned long 	start_tick = get_current_ms();
-		int retval;
-		BYTE readByte[8];
-		int count = 0;
-		unsigned long time_period = 0;
-		int delay_slot = 10;
 
-		if (delay < 100)
-			delay_slot = 5;
-		
-		if (!pdev || !pdev->dev_handle)
-				return 0;
-			
-		while (rc != W8755_ISP_RSP_OK && ((get_current_ms() - start_tick) < (delay + 100))) {	
-			
-			/* polling interval => 10ms */
-			wh_sleep(delay_slot);
-
-			retval = wh_i2c_rx(pdev, 0x2C, readByte, 3);
-			if (!retval)
-				continue;
-			else 
-				/* 3 byte format: 0x0, 0x0, status */
-				rc = readByte[2];
-		
-			count ++;
-		}
-
-		time_period = (get_current_ms() - start_tick);
-		if (time_period > (delay + 50))
-			printf("%s: timeout %d occured!\n", __func__, (int) time_period);
-			
-		return time_period;
-	}
-	
-	return delay;
-}
-
-
-int wh_w8755_i2c_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp)
-{
-
-	if (!wh_w8755_dev_parse_new_dev_info(pdev, &pboard_info->dev_info.w8755_dev_info)) {
-		printf("Can't get new device info!\n");
-		return 0;
-	}
-
-	wh_w8755_dev_set_device_mode(pdev, W8755_DM_SENSING);
-
-	return 1;
-}
 
 int wh_w8762_isp_rerun_recovery(WDT_DEV *pdev)
 {
@@ -464,7 +407,7 @@ int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 
 		memcpy(&board_info.sys_param, &buf[10], get_unaligned_le16(buf + 12));
 		if (wh_i2c_get_param_hid(pdev, &board_info)) 
-			if (wh_w8755_i2c_prepare_data(pdev, &board_info, 0)) {
+			if (wh_w8755_prepare_data(pdev, &board_info, 0)) {
 				memcpy(pboard_info, &board_info, sizeof(BOARD_INFO));
 				return 1;
 			}

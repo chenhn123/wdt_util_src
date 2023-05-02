@@ -44,6 +44,8 @@ int	wh_w8760_dev_program_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int op
 int	wh_w8760_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int option);
 int	wh_w8760_dev_program_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChunk, int option);
 int	wh_w8760_get_rom_signature(int type, BYTE* buf);
+int	wh_w8762_isp_rerun_recovery(WDT_DEV *pdev);
+int	wh_w8760_isp_rerun_recovery(WDT_DEV *pdev);
 
 /* __w8760_FUNCS_H__ */
 #endif		

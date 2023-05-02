@@ -953,3 +953,22 @@ int wh_w8760_get_rom_signature(int type, BYTE* buf)
 }
 
 
+int wh_w8762_isp_rerun_recovery(WDT_DEV *pdev)
+{
+        wh_printf("It is maybe WDT8762 ISP\n");
+        wh_w8760_dev_set_men_address(pdev, 0xA022750A);
+        wh_w8760_dev_write_men_halfword(pdev, 0);
+        wh_w8760_dev_run_program_from_background(pdev, 0x061000);
+        wh_printf("Rerun Recovery fw \n");
+        return 1;
+}
+
+int wh_w8760_isp_rerun_recovery(WDT_DEV *pdev)
+{
+        wh_printf("It is maybe WDT8760 ISP\n");
+        wh_w8760_dev_run_program_from_background(pdev, 0x061000);
+        wh_printf("Rerun Recovery fw \n");
+        return 1;
+}
+
+

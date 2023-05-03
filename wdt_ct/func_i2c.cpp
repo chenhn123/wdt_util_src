@@ -22,8 +22,10 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <dirent.h>
-#include "i2c-dev.h"
+#include <errno.h>
 
+
+#include "i2c-dev.h"
 #include "wdt_dev_api.h"
 #include "wdt_ct.h"
 #include "w8755_funcs.h"
@@ -284,7 +286,7 @@ int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 	pdev->dev_state = DS_GET_INFO;
 	int get_param_hid_ret = wh_i2c_get_param_hid(pdev, &board_info);
 	if(get_param_hid_ret == 0) {
-		printf("i2c_get_param_hid fail !");
+		printf("i2c_get_param_hid fail ! \n");
 	}
 		
 	
@@ -507,7 +509,9 @@ int wh_i2c_xfer(WDT_DEV *pdev, BYTE slave_addr, BYTE* txbuf, UINT32 tx_len,
 	
 	if (err < 0) {
 		wh_printf("%s: ioctl operation failed: (%d)\n", __func__, err);
+		wh_printf("errno: %s\n", strerror(errno));
 		return 0;
+
 	}
 	
 //	wh_udelay(I2C_OPERATION_DELAY_US);

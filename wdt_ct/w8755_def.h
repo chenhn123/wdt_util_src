@@ -23,9 +23,9 @@
 #define		EXEC_I2C_REDUNDANT		0x200
 
 
-#define 	BP_DEFAULT			0
-#define 	BP_PRIMARY			1
-#define 	BP_SECONDARY			2
+#define 	W8755_BP_DEFAULT			0
+#define 	W8755_BP_PRIMARY			1
+#define 	W8755_BP_SECONDARY			2
 
 
 #define		W8755_SEC_ADDR_TABLE_OFFSET		0x90
@@ -115,17 +115,13 @@ typedef struct SectionHeader
  * W8755_DM_SENSING: normal sensing
  * W8755_DM_DOZE: device sleeps most time and does sensing in longer period.
  * W8755_DM_SLEEP: both device and sensor are in sleep.
- * W8755_DM_FACTORY: for MP testing. The device cannot switch to other modes unless reboot it.
  * W8755_DM_COMMAND: STANDBY mode will be renamed to COMMAND mode.
- * W8755_DM_ATE: a special mode for IC production
  */
 #define		W8755_DM_BOOTLOADER 		0
 #define		W8755_DM_SENSING		1
 #define		W8755_DM_DOZE			2
 #define 	W8755_DM_SLEEP			3
-#define		W8755_DM_FACTORY 		0x80
 #define		W8755_DM_COMMAND		0x90
-#define		W8755_DM_ATE			0xA0
 
 
 /* definition of Flash Memory Block */

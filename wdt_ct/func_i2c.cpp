@@ -514,7 +514,11 @@ int wh_i2c_xfer(WDT_DEV *pdev, BYTE slave_addr, BYTE* txbuf, UINT32 tx_len,
 	
 	if (err < 0) {
 		wh_printf("%s: ioctl operation failed: (%d)\n", __func__, err);
+<<<<<<< HEAD
 		wh_printf("strerror(errno): %s\n", strerror(errno));
+=======
+		wh_printf("errno: %s\n", strerror(errno));
+>>>>>>> 944fd88995098a81964d99051af169d5314e6923
 		return 0;
 
 	}

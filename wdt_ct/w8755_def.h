@@ -113,20 +113,10 @@ typedef struct SectionHeader
  * definition of Device Mode 
  * W8755_DM_BOOTLOADER: this mode only exists during ROM and fastboot. It cannot be set as the target mode.
  * W8755_DM_SENSING: normal sensing
-<<<<<<< HEAD
-=======
- * W8755_DM_DOZE: device sleeps most time and does sensing in longer period.
- * W8755_DM_SLEEP: both device and sensor are in sleep.
->>>>>>> 944fd88995098a81964d99051af169d5314e6923
  * W8755_DM_COMMAND: STANDBY mode will be renamed to COMMAND mode.
  */
 #define		W8755_DM_BOOTLOADER 		0
 #define		W8755_DM_SENSING		1
-<<<<<<< HEAD
-=======
-#define		W8755_DM_DOZE			2
-#define 	W8755_DM_SLEEP			3
->>>>>>> 944fd88995098a81964d99051af169d5314e6923
 #define		W8755_DM_COMMAND		0x90
 
 

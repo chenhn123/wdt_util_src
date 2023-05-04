@@ -526,14 +526,7 @@ int image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pparam)
 		if (!(pdev->pparam->argus & OPTION_NO_RPARAM)) {
 			if (pdev->board_info.dev_type & FW_WDT8755) {
 			
-<<<<<<< HEAD
 				chunk_info_cfg.chuckInfo.targetStartAddr = pdev->board_info.sec_header.w8755_sec_header.param_clone_addr;
-=======
-				if (pinfo->dev_info.w8755_dev_info.boot_partition == W8755_BP_SECONDARY)
-					chunk_info_cfg.chuckInfo.targetStartAddr = pdev->board_info.sec_header.w8755_sec_header.secondary_param_clone_addr;
-				else				
-					chunk_info_cfg.chuckInfo.targetStartAddr = pdev->board_info.sec_header.w8755_sec_header.param_clone_addr;
->>>>>>> 944fd88995098a81964d99051af169d5314e6923
 
 				err = program_one_chunk(pdev, "r_config", CHUNK_ID_CNFG, OPTION_4K_VERIFY, &chunk_info_cfg);
 
@@ -1139,11 +1132,7 @@ int wh_get_chunk_info(WH_HANDLE handle, UINT32 chunk_index, CHUNK_INFO_EX* pchun
 /* 
  * 	the checksum functions
  */
-<<<<<<< HEAD
 UINT16 misr_16b(UINT16 current_value, UINT16 new_value)
-=======
-UINT16 misr_16b(UINT16 currentValue, UINT16 newValue)
->>>>>>> 944fd88995098a81964d99051af169d5314e6923
 {
 	unsigned int a, b;
 	unsigned int bit0;

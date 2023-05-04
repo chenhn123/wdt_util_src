@@ -156,9 +156,6 @@ int wh_i2c_scan_device(WDT_DEV* pdev)
 
 	strcpy(g_dev_path, "/dev/i2c-2");
 
-	/* initialize the basic function for handling the following operations */
-	wh_w8755_dev_set_basic_op(pdev);
-
 	pdev->dev_state = DS_ENUM;
 
 	found = wh_i2c_scan_driver_path(pdev, &adaptor_no);
@@ -208,7 +205,6 @@ int wh_i2c_open_device(WDT_DEV* pdev)
 	else 
 		fileno = open(pdev->dev_path, O_RDWR);
 
-	wh_w8755_dev_set_basic_op(pdev);
 
 	if (fileno >= 0) {
 		if (ioctl(fileno, I2C_FUNCS, &funcs) < 0) {

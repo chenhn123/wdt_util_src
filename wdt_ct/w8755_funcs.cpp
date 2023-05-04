@@ -939,6 +939,14 @@ failed_exit:
 
 int wh_w8755_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp)
 {
+	 /* initialize the basic function for handling the following operations */
+        if(!wh_w8755_dev_set_basic_op(pdev)) {
+		wh_printf("pdev is null \n");
+		return 0;
+	}
+
+
+
 
         if (!wh_w8755_dev_parse_new_dev_info(pdev, &pboard_info->dev_info.w8755_dev_info)) {
                 printf("Can't get new device info!\n");

@@ -462,6 +462,13 @@ int image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pparam)
                 goto exit_burn;
         }
 
+	if (pdev->board_info.dev_type & FW_WDT8755) {
+		if (pinfo->dev_info.w8755_dev_info.boot_partition == W8755_BP_SECONDARY) {
+			printf("Not support Secondary boot_partition FW update !\n");
+			goto exit_burn;
+		}
+
+	}
 
 	if (!load_wif(pdev, (char*)pparam->image_file)){
 		printf("Load WIF failed !\n");
@@ -512,12 +519,15 @@ int image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pparam)
 		UINT32 tempStartAddr = chunk_info_cfg.chuckInfo.targetStartAddr;
 
 		/*
-		 * it will program a backup parameters to 0x58000 in general
+		 *
+		 * it will program a backup parameters to param_clone_address in general
 		 * just specify OPTION_NO_RPARAM if don't want this backup
 		 */
 		if (!(pdev->pparam->argus & OPTION_NO_RPARAM)) {
 			if (pdev->board_info.dev_type & FW_WDT8755) {
-				chunk_info_cfg.chuckInfo.targetStartAddr = 0x58000;
+			
+				chunk_info_cfg.chuckInfo.targetStartAddr = pdev->board_info.sec_header.w8755_sec_header.param_clone_addr;
+
 				err = program_one_chunk(pdev, "r_config", CHUNK_ID_CNFG, OPTION_4K_VERIFY, &chunk_info_cfg);
 
 				if (!err)
@@ -692,7 +702,7 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 			printf("customer_config_id 0x%x\n", pinfo->dev_info.w8755_dev_info.customer_config_id); 	
 			printf("boot_partition: ");
 
-			if (pinfo->dev_info.w8755_dev_info.boot_partition == BP_SECONDARY) 
+			if (pinfo->dev_info.w8755_dev_info.boot_partition == W8755_BP_SECONDARY) 
 			{
 				printf("Secondary");
 				printf("\n\nfastboot_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.fastboot_addr);
@@ -1122,14 +1132,14 @@ int wh_get_chunk_info(WH_HANDLE handle, UINT32 chunk_index, CHUNK_INFO_EX* pchun
 /* 
  * 	the checksum functions
  */
-UINT16 misr_16b( UINT16 currentValue, UINT16 newValue )
+UINT16 misr_16b(UINT16 current_value, UINT16 new_value)
 {
 	unsigned int a, b;
 	unsigned int bit0;
 	unsigned int y;
 
-	a = currentValue;
-	b = newValue;
+	a = current_value;
+	b = new_value;
 	bit0 = a^(b&1);
 	bit0 ^= a>>1;
 	bit0 ^= a>>2;

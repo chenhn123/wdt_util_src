@@ -22,8 +22,10 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <dirent.h>
-#include "i2c-dev.h"
+#include <errno.h>
 
+
+#include "i2c-dev.h"
 #include "wdt_dev_api.h"
 #include "wdt_ct.h"
 #include "w8755_funcs.h"
@@ -211,6 +213,7 @@ int wh_i2c_open_device(WDT_DEV* pdev)
 	if (fileno >= 0) {
 		if (ioctl(fileno, I2C_FUNCS, &funcs) < 0) {
 			wh_printf("Can't get the i2c funcs !\n");
+			wh_printf("strerror(errno): %s\n", strerror(errno));
 			close(fileno);
 			fileno = 0;
 		}
@@ -284,7 +287,7 @@ int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 	pdev->dev_state = DS_GET_INFO;
 	int get_param_hid_ret = wh_i2c_get_param_hid(pdev, &board_info);
 	if(get_param_hid_ret == 0) {
-		printf("i2c_get_param_hid fail !");
+		printf("i2c_get_param_hid fail ! \n");
 	}
 		
 	
@@ -375,11 +378,12 @@ int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 	buf[0] = 0xf4;
 	if (!wh_i2c_get_feature(pdev, buf, 56)) 
 		printf("failed to get i2c cfg\n");
-	else 
+	else {
 		if (buf[0] != 0xf4)
 			wh_printf("wrong id[0xf4] of fw response: 0x%x\n", buf[0]);
 		else
 			board_info.i2c_dummy = buf[1];
+	}
 
 	if (buf[0] == 0xf4 && (get_unaligned_le16(buf + 2) == 0x154f)) { 
 
@@ -387,14 +391,15 @@ int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 		board_info.platform_id[1] = buf[5];
 
 		memcpy(&board_info.sys_param, &buf[10], get_unaligned_le16(buf + 12));
-		if (wh_i2c_get_param_hid(pdev, &board_info)) 
+		if (wh_i2c_get_param_hid(pdev, &board_info)) {
 			if (wh_w8755_prepare_data(pdev, &board_info, 0)) {
 				memcpy(pboard_info, &board_info, sizeof(BOARD_INFO));
 				return 1;
 			}
+		}
 	}
 
-	if (!wh_i2c_get_desc(pdev, GD_DEVICE, 0, (BYTE*) buf, 18))	{
+	if (!wh_i2c_get_desc(pdev, GD_DEVICE, 0, (BYTE*) buf, 18)) {
 		board_info.dev_type = FW_MAYBE_ISP;
 		printf("Get device desc error !\n");
 		return 0;	
@@ -439,6 +444,7 @@ int wh_i2c_tx(WDT_DEV *pdev, BYTE slave_addr, BYTE* pbuf, UINT32 buf_size)
 	
 	if (err < 0) {
 		wh_printf("%s: ioctl operation failed: (%d)\n", __func__, err);
+		wh_printf("strerror(errno): %s\n", strerror(errno));
 		return 0;
 	}
 
@@ -471,6 +477,7 @@ int wh_i2c_rx(WDT_DEV *pdev, BYTE slave_addr, BYTE* pbuf, UINT32 buf_size)
 	
 	if (err < 0) {
 		wh_printf("%s: ioctl operation failed: (%d)\n", __func__, err);
+		wh_printf("strerror(errno): %s\n", strerror(errno));
 		return 0;
 	}
 	
@@ -507,7 +514,9 @@ int wh_i2c_xfer(WDT_DEV *pdev, BYTE slave_addr, BYTE* txbuf, UINT32 tx_len,
 	
 	if (err < 0) {
 		wh_printf("%s: ioctl operation failed: (%d)\n", __func__, err);
+		wh_printf("strerror(errno): %s\n", strerror(errno));
 		return 0;
+
 	}
 	
 //	wh_udelay(I2C_OPERATION_DELAY_US);

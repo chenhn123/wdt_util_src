@@ -545,12 +545,12 @@ int wh_w8755_dev_parse_new_dev_info(WDT_DEV* pdev, W8755_DEV_INFO_NEW *pdev_info
 	pdev_info_new->bytes_per_point = buffer[0x16];
 	pdev_info_new->customer_config_id = get_unaligned_le32(&buffer[0x18]);
 
-	pdev_info_new->boot_partition = BP_DEFAULT;
+	pdev_info_new->boot_partition = W8755_BP_DEFAULT;
 	if (pdev_info_new->protocol_version >= 0x01010000) {
 		if (buffer[0x001E] == 0xB1)
-			pdev_info_new->boot_partition = BP_PRIMARY;
+			pdev_info_new->boot_partition = W8755_BP_PRIMARY;
 		else if (buffer[0x001E] == 0xB2)
-            pdev_info_new->boot_partition = BP_SECONDARY;
+            pdev_info_new->boot_partition = W8755_BP_SECONDARY;
 	}	
 
 
@@ -911,9 +911,8 @@ int wh_w8755_dev_read_flash_map(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 	psec_addr_type->param_clone_addr = (get_unaligned_le16(&buffer[12]) << 8);	
 	psec_addr_type->secondary_image_address = (get_unaligned_le16(&buffer[14]) << 8);
 
-	printf("ate_addr: 0x%X\n", psec_addr_type->ate_firmware_addr);
 
-	if (p_out_board_info->dev_info.w8755_dev_info.boot_partition == BP_SECONDARY)
+	if (p_out_board_info->dev_info.w8755_dev_info.boot_partition == W8755_BP_SECONDARY)
 	{
 		memset(buffer, 0, sizeof(buffer));
   
@@ -923,7 +922,6 @@ int wh_w8755_dev_read_flash_map(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 
 		psec_addr_type->secondary_param_addr = (get_unaligned_le16(&buffer[0]) << 8);
 		psec_addr_type->secondary_param_clone_addr = (get_unaligned_le16(&buffer[2]) << 8);
-                printf("param_clone_addr: 0x%X\n", psec_addr_type->secondary_param_clone_addr);
 
 
 	}

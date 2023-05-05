@@ -112,10 +112,10 @@ int do_wif2_chunk_info(WIF_FILE2 *pcur_wif, UINT32 chunk_four_cc)
 	pchunk_info_ex = (WIF2_Info_Chunk *)malloc(sizeof(WIF2_Info_Chunk));
 	if (!pchunk_info_ex)
 		return 0;
-
+	int ret = 1;
 	UINT32 chunk_start_pos = 0 + sizeof(ChunkHeader);
 	WIF2_Chunk_Header *pchunk_data = NULL;
-
+	 
 	while (chunk_start_pos < pcur_wif->data_len) {
 		pchunk_data = (WIF2_Chunk_Header *)&pcur_wif->pdata[chunk_start_pos];
 
@@ -125,20 +125,24 @@ int do_wif2_chunk_info(WIF_FILE2 *pcur_wif, UINT32 chunk_four_cc)
 			pchunk_info_ex->Header.Size = pchunk_data->Size;
 
 			pchunk_info_ex->BinaryData = (BYTE *)malloc(pchunk_data->Size);
-			if (!pchunk_info_ex->BinaryData)
+			if (!pchunk_info_ex->BinaryData){
+				ret = 0;
 				goto finish;
+			}
 
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
 
-		} else
+		} else{
 			/* 8 is the header size */
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
+		}
+		if (pchunk_info_ex->BinaryData)
+                	free(pchunk_info_ex->BinaryData);
+
 	}
 finish:
-	if (pchunk_info_ex->BinaryData)
-		free(pchunk_info_ex->BinaryData);
 
-	return 1;
+	return ret;
 }
 
 int do_update_fw_by_wif2_chunk_fbin(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 chunk_four_cc)
@@ -193,6 +197,8 @@ int do_update_fw_by_wif2_chunk_fbin(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 			pchunk_info_ex->BinaryData = (BYTE *)malloc(pchunk_info_ex->Binary.Size);
 			if (!pchunk_info_ex->BinaryData) {
 				ret = 0;
+				if (pchunk_info_ex->BinaryData)
+                			free(pchunk_info_ex->BinaryData);
 				goto finish;
 			}
 
@@ -201,6 +207,9 @@ int do_update_fw_by_wif2_chunk_fbin(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 			
 			ret = pdev->funcs_device_private.p_wh_send_commands(pdev, WH_CMD_FLASH_UNLOCK, 0);
 			if (!ret) {
+				if (pchunk_info_ex->BinaryData)
+                			free(pchunk_info_ex->BinaryData);
+
 				goto finish;
 			}
 			// address and size align to 0x100
@@ -211,12 +220,18 @@ int do_update_fw_by_wif2_chunk_fbin(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 			ret = pdev->funcs_device_private.p_wh_send_commands(
 				pdev, WH_CMD_FLASH_PROTECTION_OFF, protect_off_arg);
 			if (!ret) {
+            			if (pchunk_info_ex->BinaryData)
+                			free(pchunk_info_ex->BinaryData);
+
 				goto finish;
 			}
 			ret = pdev->funcs_device_private.p_wh_flash_erase(
 				pdev, pchunk_info_ex->SpaceToErase.Address,
 				pchunk_info_ex->SpaceToErase.Size);
 			if (!ret) {
+				if (pchunk_info_ex->BinaryData)
+                			free(pchunk_info_ex->BinaryData);
+
 				goto finish;
 			}
 
@@ -225,7 +240,10 @@ int do_update_fw_by_wif2_chunk_fbin(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 			ret = pdev->funcs_device_private.p_wh_flash_erase(
 					pdev, pchunk_info_ex->SpaceToErase.Address,
 					pchunk_info_ex->SpaceToErase.Size);
-			if (!ret) {	
+			if (!ret) {
+				if (pchunk_info_ex->BinaryData)
+                			free(pchunk_info_ex->BinaryData);
+
 				goto finish;
 			}
 
@@ -234,20 +252,25 @@ int do_update_fw_by_wif2_chunk_fbin(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 					pchunk_info_ex->Binary.Address,
 					pchunk_info_ex->Binary.Size);
 			if (!ret) {
+            			if (pchunk_info_ex->BinaryData)
+               				free(pchunk_info_ex->BinaryData);
+
 				goto finish;
-			}
+			}	
 
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
 
-		} else
+		} else{
 			/* 8 is the header size */
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
+		}
+		if (pchunk_info_ex->BinaryData)
+                	free(pchunk_info_ex->BinaryData);
+
 	}
 finish:
 	pdev->funcs_device_private.p_wh_send_commands(pdev, WH_CMD_FLASH_PROTECTION_ON, 0);
 
-	if (pchunk_info_ex->BinaryData)
-		free(pchunk_info_ex->BinaryData);
 	if (pchunk_info_ex)
 		free(pchunk_info_ex);
 
@@ -375,16 +398,22 @@ int do_update_fw_by_wif2_chunk_fsum(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
 
-		} else
+		} else {
 			/* 8 is the header size */
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
+		}
 	}
 finish:
+	pchunk_info_ex->Spaces = head;
+
 
 	if (pchunk_info_ex->Spaces) {
-		pchunk_info_ex->Spaces = head;
 		free_WIF2_flash_node(pchunk_info_ex->Spaces);
 	}
+
+	if (pchunk_info_ex)
+        	free(pchunk_info_ex);
+
 
 	return 1;
 }
@@ -424,6 +453,7 @@ int do_show_wif2_info_chunk(WIF_FILE2* pcur_wif)
 	pchunk_info_ex = (WIF2_Info_Chunk*)malloc(sizeof(WIF2_Info_Chunk));
 	if (!pchunk_info_ex)
 		return 0;
+	int ret =1;
 	UINT32	chunk_start_pos = 0 + sizeof(ChunkHeader);
 	WIF2_Chunk_Header* pchunk_data = NULL;
 
@@ -436,8 +466,10 @@ int do_show_wif2_info_chunk(WIF_FILE2* pcur_wif)
 			pchunk_info_ex->Header.FourCC = pchunk_data->FourCC;
 			pchunk_info_ex->Header.Size = pchunk_data->Size;
 			pchunk_info_ex->BinaryData = (BYTE*)malloc(pchunk_data->Size);
-			if (!pchunk_info_ex->BinaryData)
+			if (!pchunk_info_ex->BinaryData){
+				ret = 0;
 				goto finish;
+			}
 
 			memcpy((BYTE*)pchunk_info_ex->BinaryData, (BYTE*)&pcur_wif->pdata[chunk_start_pos], pchunk_data->Size);
 			for (size_t i = 0; i < pchunk_data->Size; i++)
@@ -451,12 +483,16 @@ int do_show_wif2_info_chunk(WIF_FILE2* pcur_wif)
 			/* 8 is the header size */
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
 		}
+
+		if (pchunk_info_ex->BinaryData)
+                	free(pchunk_info_ex->BinaryData);
+
 	}
 finish:
-	if (pchunk_info_ex->BinaryData)
-		free(pchunk_info_ex->BinaryData);
+	if(pchunk_info_ex)
+		free(pchunk_info_ex);
 
-	return 1;
+	return ret;
 }
 
 int show_wif2_info(char *path)

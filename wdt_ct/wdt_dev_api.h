@@ -136,8 +136,6 @@ typedef enum tagDevState
 	DS_ENUM = 1,
 	DS_GET_INFO = 2,
 	DS_PROGRAM = 3,
-	DS_PRODUCT = 4,
-	DS_GET_RAW = 5
 } DEV_STATE;
 
 typedef struct WifAccess {

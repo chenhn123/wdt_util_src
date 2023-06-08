@@ -18,7 +18,6 @@
 #ifndef		__wif2_H__
 #define		__wif2_H__
 
-#include "wdt_dev_api.h"
 
 
 #define	FOURCC_ID_WIF2	0x32464957

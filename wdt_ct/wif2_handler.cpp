@@ -131,16 +131,19 @@ int do_wif2_chunk_info(WIF_FILE2 *pcur_wif, UINT32 chunk_four_cc)
 			}
 
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
+			if (pchunk_info_ex->BinaryData)
+                        	free(pchunk_info_ex->BinaryData);
+
 
 		} else{
 			/* 8 is the header size */
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
 		}
-		if (pchunk_info_ex->BinaryData)
-                	free(pchunk_info_ex->BinaryData);
 
 	}
 finish:
+	if(pchunk_info_ex)
+		free(pchunk_info_ex);
 
 	return ret;
 }
@@ -260,12 +263,14 @@ int do_update_fw_by_wif2_chunk_fbin(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
 
+			if (pchunk_info_ex->BinaryData)
+                        	free(pchunk_info_ex->BinaryData);
+
+
 		} else{
 			/* 8 is the header size */
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
 		}
-		if (pchunk_info_ex->BinaryData)
-                	free(pchunk_info_ex->BinaryData);
 
 	}
 finish:
@@ -477,15 +482,16 @@ int do_show_wif2_info_chunk(WIF_FILE2* pcur_wif)
 			printf("\n");
 			
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
+                	if (pchunk_info_ex->BinaryData)
+                        	free(pchunk_info_ex->BinaryData);
+
+
 		}
 		else
 		{
 			/* 8 is the header size */
 			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
 		}
-
-		if (pchunk_info_ex->BinaryData)
-                	free(pchunk_info_ex->BinaryData);
 
 	}
 finish:

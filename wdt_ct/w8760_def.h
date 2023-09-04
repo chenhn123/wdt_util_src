@@ -171,42 +171,6 @@ enum W8760_FlashProtect
 	W8760_UnprotectNone = 0x007C,
 };
 
-typedef	union
-{
-	struct {
-		BYTE	rpt_id;
-		BYTE	type;
-		union
-		{
-			UINT16 size;
-			UINT16 offset;
-		};
-		BYTE	data[60];	
-	} DD;
-	BYTE	buffer[64];
-} W8760_WRITE_DATA;
-
-typedef	union
-{
-	struct {
-		BYTE	rpt_id;
-		BYTE	type;
-		UINT16	size;
-		UINT32	reserved;	
-	} DD;
-	BYTE	buffer[8];
-} W8760_REQ_READ;
-
-typedef	union
-{
-	struct {
-		BYTE	rpt_id;
-		BYTE	type;
-		UINT16	checksum;
-		BYTE	data[60];	
-	} DD;
-	BYTE	buffer[64];
-} W8760_READ_DATA;
 
 /* __WDT8760_DEF_H__ */
 #endif

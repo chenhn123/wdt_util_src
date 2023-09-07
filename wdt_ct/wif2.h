@@ -23,8 +23,8 @@
 #define	FOURCC_ID_WIF2	0x32464957
 #define	FOURCC_ID_FBIN	0x4e494246
 #define	FOURCC_ID_FSUM	0x4d555346
-#define	FOURCC_ID_FCRC  0x43524336
 #define	FOURCC_ID_INFO	0x4f464e49
+#define FOURCC_ID_FERA  0x41524546
 
 
 typedef struct WIF2ChunkHeader
@@ -66,6 +66,11 @@ typedef struct WIF2FlashChecksumChunk {
 	WIF2FlashNode* Spaces;
 
 }WIF2_Flash_Checksum_Chunk;
+
+typedef struct WIF2FlashEraseChunk {
+	WIF2_Chunk_Header Header;
+	WIF2_Flash_Space SpaceToErase;
+}WIF2_FlashErase_Chunk;
 
 typedef	struct WifFile2 {
 	BYTE* pdata;

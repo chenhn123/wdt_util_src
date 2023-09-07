@@ -734,7 +734,7 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 			printf("Bytes_per_point 0x%X\n", pinfo->dev_info.w8760_feature_devinfo.n_bytes_touch);		
 			memset(str, 0, 16);
 			memcpy(str, pinfo->dev_info.w8760_feature_devinfo.platform_id, 8);
-			printf("Platform id %s\n", str);
+			printf("Platform_id %s\n", str);
 			memset(str, 0, 16);
 			memcpy(str, pinfo->dev_info.w8760_feature_devinfo.program_name_fourcc, 4);
 			printf("ProgramFourcc %s\n", str);

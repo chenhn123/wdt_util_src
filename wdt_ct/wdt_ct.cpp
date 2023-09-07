@@ -27,7 +27,7 @@
 #include "wdt_dev_api.h"
 #include "wdt_ct.h"
 
-#define WDT_UTIL_GETOPTS	"hd:u:fbrsw:vcixk"
+#define WDT_UTIL_GETOPTS	"hd:u:fbrsw:vcixka:"
 
 static struct option long_options[] = {
 	{"help", 0, NULL, 'h'},
@@ -57,7 +57,7 @@ void print_help(const char *prog_name)
 {
 	print_version();
 	
-	printf("\nUsage: %s [OPTIONS] [FW_FILE|PD_FILE|SUB-ARGU]\n", prog_name);
+	printf("\nUsage: %s [OPTIONS] [FW_FILE|SUB-ARGU]\n", prog_name);
 	printf("\t-h, --help\tPrint this message\n");
 	printf("\t-d, --device\ti2c device file associated with the device.\n");	
 	printf("\t-u, --update\tUpdate firmware with verification\n");
@@ -187,7 +187,7 @@ int parse_args(int argc, char* argv[], EXEC_PARAM* pparam)
 				g_show_extra_info = 1;
 			case 'k':
 				pparam->argus |= OPTION_BLOCK;
-				break;			
+				break;	
 			default:
 				break;
 

@@ -423,8 +423,85 @@ finish:
 	return 1;
 }
 
+int do_update_fw_by_wif2_chunk_fera(WDT_DEV* pdev, WIF_FILE2* pcur_wif, UINT32 chunk_four_cc)
+{
+    int ret = 1;
+    if (!pcur_wif)
+        return 0;
+
+    if (!chunk_four_cc)
+        return 0;
+
+    WIF2_FlashErase_Chunk pchunk_info_ex;
+
+    UINT32	chunk_start_pos = 0 + sizeof(ChunkHeader);
+    WIF2_Chunk_Header* pchunk_data = NULL;
+
+    while (chunk_start_pos < pcur_wif->data_len) {
+        pchunk_data = (WIF2_Chunk_Header*)&pcur_wif->pdata[chunk_start_pos];
+
+        /* we got it */
+        if (pchunk_data->FourCC == chunk_four_cc)
+        {
+            pchunk_info_ex.Header.FourCC = pchunk_data->FourCC;
+            pchunk_info_ex.Header.Size = pchunk_data->Size;
+
+            UINT32	pdata_pos = chunk_start_pos + sizeof(WIF2_Chunk_Header);
+
+            // Flash space to erase
+            pchunk_info_ex.SpaceToErase.Address = get_unaligned_le32(&pcur_wif->pdata[pdata_pos]);
+            pdata_pos = pdata_pos + sizeof(UINT32);
+            pchunk_info_ex.SpaceToErase.Size = get_unaligned_le32(&pcur_wif->pdata[pdata_pos]);
+            pdata_pos = pdata_pos + sizeof(UINT32);
+
+
+
+
+            ret = pdev->funcs_device_private.p_wh_send_commands(pdev, WH_CMD_FLASH_UNLOCK, 0);
+            if (!ret) {
+                goto finish;
+            }
+            //address and size align to 0x100
+            UINT32 protect_off_arg = (pchunk_info_ex.SpaceToErase.Address >> 8 << 16 & 0xffff0000) | (pchunk_info_ex.SpaceToErase.Size >> 8 & 0x0000ffff);
+
+            ret = pdev->funcs_device_private.p_wh_send_commands(pdev, WH_CMD_FLASH_PROTECTION_OFF, protect_off_arg);
+            if (!ret) {
+                goto finish;
+            }
+            ret = pdev->funcs_device_private.p_wh_flash_erase(pdev, pchunk_info_ex.SpaceToErase.Address, pchunk_info_ex.SpaceToErase.Size);
+
+
+            if (!ret) {
+                goto finish;
+            }
+
+            chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
+
+
+        }
+        else
+            /* 8 is the header size */
+            chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
+
+
+
+
+    }
+finish:
+    pdev->funcs_device_private.p_wh_send_commands(pdev, WH_CMD_FLASH_PROTECTION_ON, 0);
+
+
+
+
+    return ret;
+}
+
+
+
 int do_update_fw_by_wif2_flow(WDT_DEV *pdev, WIF_FILE2 *pcur_wif)
 {
+	if (!do_update_fw_by_wif2_chunk_fera(pdev, pcur_wif,  FOURCC_ID_FERA))
+		return 0;
 
 	if (!do_update_fw_by_wif2_chunk_fbin(pdev, pcur_wif, FOURCC_ID_FBIN))
 		return 0;

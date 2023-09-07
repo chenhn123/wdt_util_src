@@ -33,10 +33,13 @@
 #include "w8790_funcs.h"
 
 
-#define		MAX_DEV			16
 /* i2c-hid driver for weida's controller */
 #define		ACPI_NAME_HID		"i2c-WDHT"
 /* same as i2c-hid driver define  */
+
+
+
+
 #define		I2C_HID_OPCODE_GET_REPORT	0x02
 #define		I2C_HID_OPCODE_SET_REPORT	0x03
 
@@ -70,6 +73,27 @@ int wh_i2c_scan_driver_path(WDT_DEV* pdev, int *adaptor_no)
 	return found;
 }
 
+int get_i2c_dev_count(){
+        char dev_sys_class_path[] = "/sys/class/i2c-dev";
+	int count = 0;
+	struct dirent *dir;
+	DIR *d;
+	d = opendir(dev_sys_class_path);
+	if(d){
+		while ((dir = readdir(d)) != NULL) {
+                    count ++;
+		}
+		closedir(d);
+        }
+	if(count == 0)
+		return 16;
+	else
+		return count;
+        return count;
+
+
+}
+
 int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 {
 	DIR	*d;
@@ -83,25 +107,25 @@ int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 
 	if (pdev->pparam->argus & OPTION_INFO)
 		printf("Scan I2C device in adapter path...\n");		
-	
+	int max_count = get_i2c_dev_count();
+        
+
+	wh_printf("max_cnt %d \n", max_count);
 	adp_no = 0;
-	while (adp_no < MAX_DEV) {
+	while (adp_no < max_count) {
 		sprintf(dev_path, "%s/i2c-%d", dev_sysfs_adapter_path, adp_no);
 		d = opendir(dev_path);	
 		if (d) {	
-			char slave_dev[10];
-
 			wh_printf("scan %s\n", dev_path);
-			sprintf(slave_dev, "%d-002c", adp_no);		
 			while ((dir = readdir(d)) != NULL) {
 				if (memcmp(dir->d_name, ACPI_NAME_HID, strlen(ACPI_NAME_HID)) == 0) {
+					char reg_gen_hid[8];
+					memcpy(reg_gen_hid, &dir->d_name[4], sizeof(reg_gen_hid));
+					pdev->board_info.i2c_address = get_i2c_address_map(reg_gen_hid);
+					wh_printf("i2c_address %x\n", pdev->board_info.i2c_address);
 					found = 1;
 					break;	
 				}				
-				if (memcmp(dir->d_name, slave_dev, strlen(slave_dev)) == 0) {
-					found = 1;
-					break;
-				}	
 			}
 		}
 		closedir(d);
@@ -116,6 +140,36 @@ int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 
 	return found;
 }
+
+
+int wh_i2c_scan_hid_of_path(WDT_DEV* pdev, int *adaptor_no)
+{
+        DIR     *d;
+        struct dirent *dir;
+        int found = 0;
+        int dev_addr = 0;
+
+        /* hid over i2c driver path in sysfs */
+        char dev_sysfs_hid_path[] = "/sys/bus/i2c/drivers/i2c_hid_of";
+
+        d = opendir(dev_sysfs_hid_path);
+        if (d) {
+                if (pdev->pparam->argus & OPTION_INFO)
+                        printf("Scan I2C device in hid path...\n");
+
+                while ((dir = readdir(d)) != NULL) {
+                        sscanf(dir->d_name, "%d-%x", adaptor_no, &dev_addr);
+                        if (dev_addr == DEFAULT_I2C_ADDR) {
+                                found = 1;
+                                break;
+                        }
+                }
+                closedir(d);
+        }
+
+        return found;
+}
+
 
 int wh_i2c_scan_hid_path(WDT_DEV* pdev, int *adaptor_no)
 {
@@ -134,7 +188,7 @@ int wh_i2c_scan_hid_path(WDT_DEV* pdev, int *adaptor_no)
 		
 		while ((dir = readdir(d)) != NULL) {
 			sscanf(dir->d_name, "%d-%x", adaptor_no, &dev_addr);
-			if (dev_addr == 0x2C) {
+			if (dev_addr == DEFAULT_I2C_ADDR) {
 				found = 1;
 				break;	
 			}
@@ -148,7 +202,7 @@ int wh_i2c_scan_hid_path(WDT_DEV* pdev, int *adaptor_no)
 int wh_i2c_scan_device(WDT_DEV* pdev)
 {
 	int 	found = 0;
-	int		adaptor_no = -1;
+	int	adaptor_no = -1;
 	long 	file_no = 0;
 
 	if (!pdev)
@@ -158,13 +212,15 @@ int wh_i2c_scan_device(WDT_DEV* pdev)
 
 	pdev->dev_state = DS_ENUM;
 
-	found = wh_i2c_scan_driver_path(pdev, &adaptor_no);
+	found = wh_i2c_scan_adaptor_path(pdev, &adaptor_no);
 
-	if (!found) 
-		found = wh_i2c_scan_hid_path(pdev, &adaptor_no);
+	if (!found)
+                found = wh_i2c_scan_hid_path(pdev, &adaptor_no);
 
-	if (!found) 
-		found = wh_i2c_scan_adaptor_path(pdev, &adaptor_no);
+
+	if(!found)
+	        found = wh_i2c_scan_driver_path(pdev, &adaptor_no);
+
 	
 	if (!found)
 		printf("Use the default i2c-dev: %s\n", g_dev_path);
@@ -244,7 +300,7 @@ int wh_i2c_get_param_hid(WDT_DEV *pdev, BOARD_INFO *pinfo)
 	buf[0] = 0x20;
 	buf[1] = 0x00;
 
-	if (!wh_i2c_xfer(pdev, 0x2C, buf, 2, (BYTE*) &pinfo->dev_hid_desc, sizeof(I2C_HID_DESC))) {
+	if (!wh_i2c_xfer(pdev, pdev->board_info.i2c_address, buf, 2, (BYTE*) &pinfo->dev_hid_desc, sizeof(I2C_HID_DESC))) {
 		wh_printf("failed to get hid desc\n");
 		return 0;
 	}
@@ -578,7 +634,7 @@ retry:
 
 	memcpy(&tx_buffer[data_len], buf, buf_size);
 
-	retval = wh_i2c_tx(pdev, 0x2C, tx_buffer,
+	retval = wh_i2c_tx(pdev, pdev->board_info.i2c_address, tx_buffer,
 			 data_len + buf_size);	
 
 	
@@ -639,7 +695,7 @@ retry:
 		tx_buffer[data_len++] = 0x00;
 	}
 
-	retval = wh_i2c_xfer(pdev, 0x2C, tx_buffer, data_len, rx_buffer, buf_size + 2);
+	retval = wh_i2c_xfer(pdev, pdev->board_info.i2c_address, tx_buffer, data_len, rx_buffer, buf_size + 2);
 	if (!retval)
 		return 0;
 
@@ -664,8 +720,8 @@ int wh_i2c_get_desc(WDT_DEV *pdev, BYTE desc_type, BYTE string_idx, BYTE* target
 {
 	int	retval;
 	int	ret_size = 0;
-	UINT16 cmd_reg = pdev->board_info.dev_hid_desc.wCommandRegister;
-        UINT16 data_reg = pdev->board_info.dev_hid_desc.wDataRegister;
+	UINT16  cmd_reg = pdev->board_info.dev_hid_desc.wCommandRegister;
+        UINT16  data_reg = pdev->board_info.dev_hid_desc.wDataRegister;
         char    str_txdata[10] = { (char)cmd_reg, (char)(cmd_reg>>8), 0x13, 0x0E, 0x00, (char)data_reg, (char)(data_reg>>8), 0x00, 0x00, 0x00 };
         char    desc_txdata[10] = { (char)cmd_reg, (char)(cmd_reg>>8), 0x10, 0x0E, (char)data_reg, (char)(data_reg>>8), 0x00, 0x00, 0x00, 0x00 };
 	
@@ -697,7 +753,7 @@ int wh_i2c_get_desc(WDT_DEV *pdev, BYTE desc_type, BYTE string_idx, BYTE* target
 	if (pdev->pparam->options & EXEC_I2C_REDUNDANT) 
 		txlen += 2;
 
-	retval = wh_i2c_xfer(pdev, 0x2C, (BYTE*) txbuf, txlen, (BYTE*) xfer_buffer, rxlen);
+	retval = wh_i2c_xfer(pdev, pdev->board_info.i2c_address, (BYTE*) txbuf, txlen, (BYTE*) xfer_buffer, rxlen);
 
 	if (!retval)
 		return 0;

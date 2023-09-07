@@ -38,6 +38,9 @@
 #define		FW_WDT8760_2_ISP	(FW_WDT8760_ISP | FW_WDT8762_ISP)
 
 
+#define         DEFAULT_I2C_ADDR        0x2c
+
+
 /* compatibility to the usb descriptor */
 #define 	GD_DEVICE          	0x01
 #define 	GD_STRING          	0x03
@@ -45,7 +48,6 @@
 #define		STRIDX_PARAMETERS	0x81
 
 #define 	VND_REQ_DEV_INFO	0xF2
-
 #define		WDT_PAGE_SIZE		0x1000
 
 
@@ -129,7 +131,7 @@ typedef	struct BoardInfo
 	
 	SYS_PARAM		sys_param;
 	BYTE			platform_id[12];
-
+	BYTE                    i2c_address;
 	I2C_HID_DESC		dev_hid_desc;
 	U_DEV_INFO		dev_info;
 	U_SEC_HEADER		sec_header;
@@ -142,6 +144,35 @@ typedef struct	WdtDeviceInfo
 	UINT32	pid;
 	char	path[256];
 } WDT_DEVICE_INFO;
+
+
+typedef struct i2c_address_table {
+       	const char *generic_hid;
+       	BYTE address;
+} I2C_ADDRESS_TABLE ;
+
+
+inline BYTE get_i2c_address_map(const char* generic_hid_name){
+
+       I2C_ADDRESS_TABLE address_map[] = {
+            { "WDHT0002", DEFAULT_I2C_ADDR },
+            { "WDHT1F01", DEFAULT_I2C_ADDR },
+            { "WDHT1F02", DEFAULT_I2C_ADDR },
+            { "WDHT1F03", DEFAULT_I2C_ADDR },
+            { "WDHT1F04", DEFAULT_I2C_ADDR },
+            { "WDHT2001", DEFAULT_I2C_ADDR },
+            { "WDHT2002", DEFAULT_I2C_ADDR },
+            { "WDHT2601", 0x3c },
+            { "WDHT2602", 0x3c },
+       };
+       for(size_t i =0;i< (sizeof (address_map) / sizeof (address_map[0]));i++){
+           if(generic_hid_name == address_map[i].generic_hid)
+               return address_map[i].address;
+       }
+       return DEFAULT_I2C_ADDR;
+}
+
+
 
 /* forward declaration */
 struct WdtDevice;

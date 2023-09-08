@@ -74,7 +74,7 @@ int wh_i2c_scan_driver_path(WDT_DEV* pdev, int *adaptor_no)
 }
 
 int get_i2c_dev_count(){
-        char dev_sys_class_path[] = "/sys/class/i2c-dev";
+        char dev_sys_class_path[] = "/sys/class/i2c-adapter";
 	int count = 0;
 	struct dirent *dir;
 	DIR *d;
@@ -155,7 +155,7 @@ int wh_i2c_scan_hid_of_path(WDT_DEV* pdev, int *adaptor_no)
         d = opendir(dev_sysfs_hid_path);
         if (d) {
                 if (pdev->pparam->argus & OPTION_INFO)
-                        printf("Scan I2C device in hid path...\n");
+                        printf("Scan I2C device in hid of path...\n");
 
                 while ((dir = readdir(d)) != NULL) {
                         sscanf(dir->d_name, "%d-%x", adaptor_no, &dev_addr);
@@ -213,6 +213,9 @@ int wh_i2c_scan_device(WDT_DEV* pdev)
 	pdev->dev_state = DS_ENUM;
 
 	found = wh_i2c_scan_adaptor_path(pdev, &adaptor_no);
+
+	if(!found)
+		found = wh_i2c_scan_hid_of_path(pdev, &adaptor_no);
 
 	if (!found)
                 found = wh_i2c_scan_hid_path(pdev, &adaptor_no);

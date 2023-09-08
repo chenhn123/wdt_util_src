@@ -61,7 +61,7 @@ int wh_i2c_scan_driver_path(WDT_DEV* pdev, int *adaptor_no)
 			printf("Scan I2C device in driver path...\n");
 		while ((dir = readdir(d)) != NULL) {
 			sscanf(dir->d_name, "%d-%x", adaptor_no, &dev_addr);
-			if (dev_addr == 0x2C) {
+			if (dev_addr == DEFAULT_I2C_ADDR) {
 				found = 1;
 				pdev->is_legacy = 1;
 				break;	
@@ -220,11 +220,9 @@ int wh_i2c_scan_device(WDT_DEV* pdev)
 	if (!found)
                 found = wh_i2c_scan_hid_path(pdev, &adaptor_no);
 
-
 	if(!found)
 	        found = wh_i2c_scan_driver_path(pdev, &adaptor_no);
 
-	
 	if (!found)
 		printf("Use the default i2c-dev: %s\n", g_dev_path);
 	else

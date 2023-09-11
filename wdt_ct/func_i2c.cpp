@@ -81,16 +81,15 @@ int get_i2c_dev_count(){
 	d = opendir(dev_sys_class_path);
 	if(d){
 		while ((dir = readdir(d)) != NULL) {
-                    count ++;
+                    if(strncmp("i2c", dir->d_name, 3) == 0)
+                        count ++;
 		}
 		closedir(d);
-        }
+    }
 	if(count == 0)
 		return 16;
 	else
 		return count;
-        return count;
-
 
 }
 
@@ -107,20 +106,20 @@ int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 
 	if (pdev->pparam->argus & OPTION_INFO)
 		printf("Scan I2C device in adapter path...\n");		
-	int max_count = get_i2c_dev_count();
+	int i2c_max_count = get_i2c_dev_count();
         
 
-	wh_printf("max_cnt %d \n", max_count);
+	wh_printf("i2c_cnt %d \n", i2c_max_count);
 	adp_no = 0;
-	while (adp_no < max_count) {
+	while (adp_no < i2c_max_count) {
 		sprintf(dev_path, "%s/i2c-%d", dev_sysfs_adapter_path, adp_no);
 		d = opendir(dev_path);	
 		if (d) {	
 			wh_printf("scan %s\n", dev_path);
 			while ((dir = readdir(d)) != NULL) {
 				if (memcmp(dir->d_name, ACPI_NAME_HID, strlen(ACPI_NAME_HID)) == 0) {
-					char reg_gen_hid[8];
-					memcpy(reg_gen_hid, &dir->d_name[4], sizeof(reg_gen_hid));
+					char* reg_gen_hid  = strdup(&dir->d_name[4]);
+                    reg_gen_hid[8] = {'\0'};
 					pdev->board_info.i2c_address = get_i2c_address_map(reg_gen_hid);
 					wh_printf("i2c_address %x\n", pdev->board_info.i2c_address);
 					found = 1;
@@ -161,7 +160,7 @@ int wh_i2c_scan_hid_of_path(WDT_DEV* pdev, int *adaptor_no)
                         sscanf(dir->d_name, "%d-%x", adaptor_no, &dev_addr);
                         if (dev_addr == DEFAULT_I2C_ADDR) {
                                 found = 1;
-				pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
+				                pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
                                 break;
                         }
                 }

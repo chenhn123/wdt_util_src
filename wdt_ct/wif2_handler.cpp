@@ -500,8 +500,7 @@ finish:
 
 int do_update_fw_by_wif2_flow(WDT_DEV *pdev, WIF_FILE2 *pcur_wif)
 {
-	if (!do_update_fw_by_wif2_chunk_fera(pdev, pcur_wif,  FOURCC_ID_FERA))
-		return 0;
+	//do_update_fw_by_wif2_chunk_fera(pdev, pcur_wif,  FOURCC_ID_FERA);
 
 	if (!do_update_fw_by_wif2_chunk_fbin(pdev, pcur_wif, FOURCC_ID_FBIN))
 		return 0;

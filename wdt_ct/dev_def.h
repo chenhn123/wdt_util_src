@@ -38,7 +38,7 @@
 #define		FW_WDT8760_2_ISP	(FW_WDT8760_ISP | FW_WDT8762_ISP)
 
 
-#define         DEFAULT_I2C_ADDR        0x2c
+#define     DEFAULT_I2C_ADDR        0x2c
 
 
 /* compatibility to the usb descriptor */
@@ -166,8 +166,9 @@ inline BYTE get_i2c_address_map(const char* generic_hid_name){
             { "WDHT2602", 0x3c },
        };
        for(size_t i =0;i< (sizeof (address_map) / sizeof (address_map[0]));i++){
-           if(generic_hid_name == address_map[i].generic_hid)
+           if(strcmp(generic_hid_name, address_map[i].generic_hid) == 0 ){
                return address_map[i].address;
+           }
        }
        return DEFAULT_I2C_ADDR;
 }

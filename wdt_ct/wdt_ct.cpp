@@ -27,7 +27,7 @@
 #include "wdt_dev_api.h"
 #include "wdt_ct.h"
 
-#define WDT_UTIL_GETOPTS	"hd:u:fbrsw:vcixka:"
+#define WDT_UTIL_GETOPTS	"hd:u:fbrsw:vcixk"
 
 static struct option long_options[] = {
 	{"help", 0, NULL, 'h'},

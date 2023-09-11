@@ -161,6 +161,7 @@ int wh_i2c_scan_hid_of_path(WDT_DEV* pdev, int *adaptor_no)
                         sscanf(dir->d_name, "%d-%x", adaptor_no, &dev_addr);
                         if (dev_addr == DEFAULT_I2C_ADDR) {
                                 found = 1;
+				pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
                                 break;
                         }
                 }
@@ -190,6 +191,7 @@ int wh_i2c_scan_hid_path(WDT_DEV* pdev, int *adaptor_no)
 			sscanf(dir->d_name, "%d-%x", adaptor_no, &dev_addr);
 			if (dev_addr == DEFAULT_I2C_ADDR) {
 				found = 1;
+				pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
 				break;	
 			}
 		}

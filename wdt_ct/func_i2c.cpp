@@ -335,7 +335,7 @@ int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 		printf("device ptr is null !\n");
 		return 0;
 	}
-	printf("prepare_i2c%x \n", pdev->board_info.i2c_address);
+	wh_printf("prepare_i2c_addr%x \n", pdev->board_info.i2c_address);
 
 	memset(&board_info, 0, sizeof(BOARD_INFO));
 	board_info.i2c_address = pdev->board_info.i2c_address;

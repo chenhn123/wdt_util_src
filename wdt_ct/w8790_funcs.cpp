@@ -244,10 +244,6 @@ int wh_w8790_dev_get_device_mode(WDT_DEV* pdev)
 
 
 
-
-
-
-
 int wh_w8790_dev_set_flash_address(WDT_DEV* pdev, UINT32 address)
 {
 	BYTE cmd[10] = { 0 };
@@ -778,9 +774,6 @@ int wh_w8790_dev_block_checksum(WDT_DEV* pdev, UINT32* pchksum, UINT32 size, UIN
 
 
 
-
-
-
 int wh_w8790_dev_flash_read_data(WDT_DEV* pdev, BYTE* data, UINT32 address, int length)
 {
 	if (!pdev || !data)
@@ -890,103 +883,6 @@ int wh_w8790_dev_batch_write_flash(WDT_DEV* pdev, BYTE* data, UINT32 address, UI
 }
 
 
-
-int	wh_w8790_dev_flash_block_write(WDT_DEV* pdev, BYTE* data, UINT32 address, int size)
-{
-	int ret = 1;
-	int start = 0;
-	UINT32 batch_buf_size = 0;
-
-	if (!wh_w8790_dev_set_block_access(pdev, W8790_FlashBatchWrite, 0, &batch_buf_size))
-		return 0;
-	if (batch_buf_size <= 0)
-		return 0;
-
-	// handle the 1st page if not page aligned
-	if (IS_ADDR_PAGE_ALIGNED(address) != 1)
-	{
-		UINT32 next_page_address = ((address / W8790_FLASH_PAGE_SIZE) + 1) * W8790_FLASH_PAGE_SIZE;
-		int first_page_size = (int)(next_page_address - address);
-		int retry = 5;
-		while ((wh_w8790_dev_batch_write_flash(pdev,  data, address, start, first_page_size) == false) && --retry > 0);
-		if (retry == 0)
-			return false;
-		start += first_page_size;
-		size -= first_page_size;
-		address += first_page_size;
-		if (size <= 0)
-			return 1;
-	}
-	int page_size = W8790_FLASH_PAGE_SIZE;
-	unsigned int  page_addr_mask = ~(unsigned int)(page_size - 1);
-	UINT32 page_aligned_start = address;
-	unsigned int page_aligned_end = (address + (unsigned int)size + (unsigned int)page_size - 1u) & page_addr_mask;
-	int num_pages = (int)(page_aligned_end - page_aligned_start) / page_size;
-
-	bool* page_map;
-	page_map = (bool*)calloc(num_pages, sizeof(bool));
-	if (!page_map)
-		return 0;
-
-	int source_size = size;
-	int source_start = start;
-	int i = 0;
-	while (source_size > 0)
-	{
-		int write_size;
-		if (page_size > source_size)
-			write_size = source_size;
-		else
-			write_size = page_size;
-
-		page_map[i] =(count_ff_bytes(data, source_start, write_size) != write_size);
-		i++;
-		source_start += page_size;
-		source_size -= page_size;
-	}
-	i = 0;
-	while (1)
-	{
-		while (i < num_pages)
-		{
-			if(page_map[i] == false)
-				i++;
-		}
-		if (i >= num_pages)
-			break;
-		int num_write_pages;
-		if (num_pages - i > 8)
-			num_write_pages = 8;
-		else
-			num_write_pages = num_pages - i;
-
-		while (page_map[i + num_write_pages - 1] == false)
-			num_write_pages--;
-		int offset = i * page_size;
-		int write_size;
-		if (num_write_pages * page_size > size - offset)
-			write_size = size - offset;
-		else
-			write_size = num_write_pages * page_size;
-		int retry = 5;
-
-		while ((wh_w8790_dev_batch_write_flash(pdev, data, (address + offset), start + offset, write_size) == 0) && --retry > 0);
-		if (retry == 0) {
-			ret = 0;
-		    goto finish;
-		}
-		i += num_write_pages;
-	}
-
-finish: 
-
-	if (page_map) {
-		free(page_map);
-	}
-
-	return ret;
-
-}
 
 
 

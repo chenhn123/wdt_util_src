@@ -212,6 +212,7 @@ int do_update_fw_by_wif2_chunk_fbin(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 			if (!ret) {
 				if (pchunk_info_ex->BinaryData)
                 			free(pchunk_info_ex->BinaryData);
+				printf("unlock fail");
 
 				goto finish;
 			}
@@ -455,8 +456,6 @@ int do_update_fw_by_wif2_chunk_fera(WDT_DEV* pdev, WIF_FILE2* pcur_wif, UINT32 c
             pdata_pos = pdata_pos + sizeof(UINT32);
 
 
-
-
             ret = pdev->funcs_device_private.p_wh_send_commands(pdev, WH_CMD_FLASH_UNLOCK, 0);
             if (!ret) {
                 goto finish;
@@ -500,7 +499,8 @@ finish:
 
 int do_update_fw_by_wif2_flow(WDT_DEV *pdev, WIF_FILE2 *pcur_wif)
 {
-	//do_update_fw_by_wif2_chunk_fera(pdev, pcur_wif,  FOURCC_ID_FERA);
+	if(!do_update_fw_by_wif2_chunk_fera(pdev, pcur_wif,  FOURCC_ID_FERA))
+		return 0;
 
 	if (!do_update_fw_by_wif2_chunk_fbin(pdev, pcur_wif, FOURCC_ID_FBIN))
 		return 0;

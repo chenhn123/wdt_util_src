@@ -119,7 +119,7 @@ int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 			while ((dir = readdir(d)) != NULL) {
 				if (memcmp(dir->d_name, ACPI_NAME_HID, strlen(ACPI_NAME_HID)) == 0) {
 					char* reg_gen_hid  = strdup(&dir->d_name[4]);
-                    reg_gen_hid[8] = {'\0'};
+                    			reg_gen_hid[8] = {'\0'};
 					pdev->board_info.i2c_address = get_i2c_address_map(reg_gen_hid);
 					wh_printf("i2c_address %x\n", pdev->board_info.i2c_address);
 					found = 1;
@@ -160,7 +160,7 @@ int wh_i2c_scan_hid_of_path(WDT_DEV* pdev, int *adaptor_no)
                         sscanf(dir->d_name, "%d-%x", adaptor_no, &dev_addr);
                         if (dev_addr == DEFAULT_I2C_ADDR) {
                                 found = 1;
-				                pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
+				pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
                                 break;
                         }
                 }
@@ -297,7 +297,7 @@ int wh_i2c_close_device(WDT_DEV* pdev)
 
 int wh_i2c_get_param_hid(WDT_DEV *pdev, BOARD_INFO *pinfo)
 {
-	BYTE buf[80];
+	BYTE buf[80] = {0};
 
 	buf[0] = 0x20;
 	buf[1] = 0x00;
@@ -324,7 +324,7 @@ int wh_i2c_get_param_hid(WDT_DEV *pdev, BOARD_INFO *pinfo)
 
 int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 {
-	BYTE				buf[80];
+	BYTE				buf[80] ={0};
 	BOARD_INFO			board_info;	
 	int	ret_size;
 	int 	ret = 0;
@@ -335,8 +335,10 @@ int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 		printf("device ptr is null !\n");
 		return 0;
 	}
+	printf("prepare_i2c%x \n", pdev->board_info.i2c_address);
 
 	memset(&board_info, 0, sizeof(BOARD_INFO));
+	board_info.i2c_address = pdev->board_info.i2c_address;
 
 	pdev->dev_state = DS_GET_INFO;
 	int get_param_hid_ret = wh_i2c_get_param_hid(pdev, &board_info);
@@ -584,7 +586,7 @@ int wh_i2c_set_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 	REQ_DATA*	p_req_data = (REQ_DATA*) buf;
 	int		data_len = 0;
 	BYTE 	cmd;
-	BYTE	tx_buffer[80];
+	BYTE	tx_buffer[80] = {0};
 	bool    retryflag = true;	
 	int 	retval = 0;
 
@@ -654,8 +656,8 @@ int wh_i2c_get_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 	REQ_DATA*	p_req_data = (REQ_DATA*) buf;
 	int		data_len = 0;
 	BYTE	cmd;
-	BYTE	tx_buffer[10]; 
-	BYTE	rx_buffer[80];
+	BYTE	tx_buffer[10] = {0}; 
+	BYTE	rx_buffer[80] = {0};
 	bool    retryflag = true;
 
 	if (buf_size > 64)
@@ -729,7 +731,7 @@ int wh_i2c_get_desc(WDT_DEV *pdev, BYTE desc_type, BYTE string_idx, BYTE* target
 	
 	BYTE*	txbuf;
 	int 	txlen, rxlen;
-	BYTE	xfer_buffer[80]; 
+	BYTE	xfer_buffer[80] ={0}; 
 
 	if (buf_size > 64)
 		buf_size = 64;

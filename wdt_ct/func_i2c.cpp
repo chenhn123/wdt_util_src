@@ -120,7 +120,7 @@ int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 			while ((dir = readdir(d)) != NULL) {
 				if (memcmp(dir->d_name, ACPI_NAME_HID, strlen(ACPI_NAME_HID)) == 0) {
 					char* reg_gen_hid  = strdup(&dir->d_name[4]);
-                    wh_printf("current reg_gen_hid:%s", reg_gen_hid);
+                    wh_printf("current reg_gen_hid:%s \n", reg_gen_hid);
 					pdev->board_info.i2c_address = get_i2c_address_map(reg_gen_hid);
 					wh_printf("i2c_address %x\n", pdev->board_info.i2c_address);
 					found = 1;
@@ -203,9 +203,9 @@ int wh_i2c_scan_hid_path(WDT_DEV* pdev, int *adaptor_no)
 
 int wh_i2c_scan_device(WDT_DEV* pdev)
 {
-	int 	found = 0;
+	int found = 0;
 	int	adaptor_no = -1;
-	long 	file_no = 0;
+	long file_no = 0;
 
 	if (!pdev)
 		return 0;

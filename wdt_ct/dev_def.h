@@ -39,6 +39,9 @@
 
 
 #define     DEFAULT_I2C_ADDR        0x2c
+/* i2c-hid driver for weida's controller */
+#define     ACPI_NAME_HID       "i2c-WDHT"
+
 
 
 /* compatibility to the usb descriptor */

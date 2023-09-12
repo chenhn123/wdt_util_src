@@ -33,10 +33,6 @@
 #include "w8790_funcs.h"
 
 
-/* i2c-hid driver for weida's controller */
-#define		ACPI_NAME_HID		"i2c-WDHT"
-/* same as i2c-hid driver define  */
-
 
 
 

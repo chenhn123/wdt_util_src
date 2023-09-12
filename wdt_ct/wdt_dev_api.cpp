@@ -312,9 +312,31 @@ int init_n_scan_device(WDT_DEV *pdev, EXEC_PARAM *pparam, unsigned int flag)
 			return 0;
 			
 		strcpy(pdev->dev_path, wdtDevInfo.path);
-	}else
-		strcpy(pdev->dev_path, pparam->dev_path);
+	}else{
+        struct dirent *dir;
+        pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
+        wh_printf("%s\n", pparam->dev_path);
+        char i2c_sysfs_path[64] = "/sys/bus/i2c/devices";	
+        strcat(i2c_sysfs_path, strdup(&pparam->dev_path[4]));
+        DIR* d = opendir(i2c_sysfs_path);
+        wh_printf("%s\n", i2c_sysfs_path);
+		if (d) {	
+			while ((dir = readdir(d)) != NULL) {
+				if (memcmp(dir->d_name, ACPI_NAME_HID, strlen(ACPI_NAME_HID)) == 0) {
+					char* reg_gen_hid  = strdup(&dir->d_name[4]);
+                    wh_printf("current reg_gen_hid:%s\n", reg_gen_hid);
+					pdev->board_info.i2c_address = get_i2c_address_map(reg_gen_hid);
+					wh_printf("i2c_address %x\n", pdev->board_info.i2c_address);
+					break;	
+				}				
+			}
+            closedir(d);
+		}
 
+
+        
+		strcpy(pdev->dev_path, pparam->dev_path);
+    }
 	if (pdev->funcs_device.p_wh_open_device(pdev)) {
 		if (pdev->funcs_device.p_wh_prepare_data(pdev, &pdev->board_info)) {		
 			if (pdev->is_legacy)

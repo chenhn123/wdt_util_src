@@ -166,7 +166,7 @@ inline BYTE get_i2c_address_map(const char* generic_hid_name){
             { "WDHT2602", 0x3c },
        };
        for(size_t i =0;i< (sizeof (address_map) / sizeof (address_map[0]));i++){
-           if(strcmp(generic_hid_name, address_map[i].generic_hid) == 0 ){
+           if(strncmp(generic_hid_name, address_map[i].generic_hid, 8) == 0 ){
                return address_map[i].address;
            }
        }

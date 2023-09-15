@@ -59,7 +59,7 @@ int wh_i2c_scan_driver_path(WDT_DEV* pdev, int *adaptor_no)
 			sscanf(dir->d_name, "%d-%x", adaptor_no, &dev_addr);
 			if (dev_addr == DEFAULT_I2C_ADDR) {
 				found = 1;
-                pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
+				pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
 				pdev->is_legacy = 1;
 				break;	
 			}
@@ -92,7 +92,7 @@ int get_i2c_dev_count(){
 
 int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 {
-	DIR	*d;
+	DIR *d;
 	struct dirent *dir;
 	int found = 0;
 	int adp_no = 0;
@@ -116,7 +116,7 @@ int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 			while ((dir = readdir(d)) != NULL) {
 				if (memcmp(dir->d_name, ACPI_NAME_HID, strlen(ACPI_NAME_HID)) == 0) {
 					char* reg_gen_hid  = strdup(&dir->d_name[4]);
-                    wh_printf("current reg_gen_hid:%s \n", reg_gen_hid);
+					wh_printf("current reg_gen_hid:%s \n", reg_gen_hid);
 					pdev->board_info.i2c_address = get_i2c_address_map(reg_gen_hid);
 					wh_printf("i2c_address %x\n", pdev->board_info.i2c_address);
 					found = 1;
@@ -157,7 +157,7 @@ int wh_i2c_scan_hid_of_path(WDT_DEV* pdev, int *adaptor_no)
                         sscanf(dir->d_name, "%d-%x", adaptor_no, &dev_addr);
                         if (dev_addr == DEFAULT_I2C_ADDR) {
                                 found = 1;
-								pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
+				pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
                                 break;
                         }
                 }

@@ -552,7 +552,17 @@ int wh_w8760_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
 			return wh_w8760_dev_set_n_check_device_mode(pdev, value, 0, 0);
 		}
 		break;
-		case 	WH_CMD_RESET: {	
+		case 	WH_CMD_RESET: {
+			/**
+ 		 	 *  Hard reset doesn't make OSC back to default. So we need this workaround to set OSC to default.
+                 	 * If not, the OSC clock for ROM code is too high and might cause booting fails.
+                 	 */
+                        if (pdev->board_info.dev_type & FW_WDT8762) {
+                                wh_w8760_dev_write_register(pdev, 0x90801408, 0x1B);
+                        }else if (pdev->board_info.dev_type & FW_WDT8760) {
+                                wh_w8760_dev_write_register(pdev, 0x00801408, 0x28);
+                        }
+	
 			return wh_w8760_dev_reboot(pdev);
 		}
 		break;

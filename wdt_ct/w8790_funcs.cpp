@@ -943,6 +943,12 @@ int wh_w8790_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
 	switch (cmd)
 	{
 	case 	WH_CMD_RESET:
+		/** 
+         	 * Hard reset doesn't make OSC back to default. So we need this workaround to set OSC to default.
+         	 * If not, the OSC clock for ROM code is too high and might cause booting fails.
+        	 */
+        	ret = wh_w8790_dev_write_register(pdev, 0x00801408, 0x47);
+
 		ret = wh_w8790_dev_reboot(pdev);
 		break;
 	case 	WH_CMD_SET_DEV_MODE: {

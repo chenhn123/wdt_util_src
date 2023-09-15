@@ -933,9 +933,17 @@ int wh_w8790_dev_flash_erase(WDT_DEV* pdev, UINT32 address, int size)
 	return ret;
 }
 
+int wh_w8790_dev_write_register(WDT_DEV* pdev, UINT32 address, UINT32 reg_value)
+{
+    BYTE cmd[10] = { 0 };
+    
+    cmd[0] = W8790_COMMAND9;
+    cmd[1] = (BYTE)W8790_WRITE_REGISTER;
+    put_unaligned_le32(address, &cmd[2]);
+    put_unaligned_le32(reg_value, &cmd[6]);
 
-
-
+    return wh_w8790_dev_command_write(pdev, cmd, 0, sizeof(cmd));
+}
 
 int wh_w8790_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
 {

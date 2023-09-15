@@ -19,8 +19,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "wdt_ct.h"
 #include "wdt_dev_api.h"
+#include "wdt_ct.h"
 #include "wif2.h"
 
 int process_wif2(WIF_FILE2 *pcur_wif)

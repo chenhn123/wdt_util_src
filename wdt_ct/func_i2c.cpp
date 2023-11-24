@@ -24,7 +24,6 @@
 #include <dirent.h>
 #include <errno.h>
 
-
 #include "i2c-dev.h"
 #include "wdt_dev_api.h"
 #include "wdt_ct.h"
@@ -32,12 +31,9 @@
 #include "w8760_funcs.h"
 #include "w8790_funcs.h"
 
-
-
-
-
 #define		I2C_HID_OPCODE_GET_REPORT	0x02
 #define		I2C_HID_OPCODE_SET_REPORT	0x03
+#define		HID_DESC_REG_OFFSET		0x20
 
 static char		g_dev_path[64];
 
@@ -296,7 +292,7 @@ int wh_i2c_get_param_hid(WDT_DEV *pdev, BOARD_INFO *pinfo)
 {
 	BYTE buf[80] = {0};
 
-	buf[0] = 0x20;
+	buf[0] = HID_DESC_REG_OFFSET;
 	buf[1] = 0x00;
 
 	if (!wh_i2c_xfer(pdev, pdev->board_info.i2c_address, buf, 2, (BYTE*) &pinfo->dev_hid_desc, sizeof(I2C_HID_DESC))) {

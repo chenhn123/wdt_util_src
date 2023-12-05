@@ -24,8 +24,6 @@
 
 
 // device working modes
-// This mode only exists during ROM and fastboot. It cannot be set as the target mode.
-#define W8790_MODE_INIT						0		
 // Normal sensing
 #define W8790_MODE_SENSING					1		
 

@@ -58,8 +58,10 @@ int get_wif2(char *path, WIF_FILE2 *out_pcur_wif)
 	int ret = 1;
 
 	pfile = fopen(path, "rb");
-	if (!pfile)
+	if (!pfile){
+		printf("Failed to read file: %s\n", path);
 		return 0;
+	}
 
 	/* set file ptr to the end */
 	fseek(pfile, 0, SEEK_END);

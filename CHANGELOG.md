@@ -6,7 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
-
+### Added
+- Add definition hid_desc_reg_offset.
+- Add message hint when open wif2 file fail. 
+### Removed
+- Remove the definition of bootloader mode.
 
 
 ## [0.9.14] - 2023-09-15

@@ -111,11 +111,9 @@ typedef struct SectionHeader
 
 /* 
  * definition of Device Mode 
- * W8755_DM_BOOTLOADER: this mode only exists during ROM and fastboot. It cannot be set as the target mode.
  * W8755_DM_SENSING: normal sensing
  * W8755_DM_COMMAND: STANDBY mode will be renamed to COMMAND mode.
  */
-#define		W8755_DM_BOOTLOADER 		0
 #define		W8755_DM_SENSING		1
 #define		W8755_DM_COMMAND		0x90
 

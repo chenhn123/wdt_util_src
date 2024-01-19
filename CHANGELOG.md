@@ -5,11 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 
-## [Unreleased]
+## [0.9.15] - 2024-01-19
 ### Added
 - Add definition hid_desc_reg_offset.
 - Add message hint when open wif2 file fail.
-- Add 4k checksum to w8790 firmware program.
+### Change
+- Use 4k checksum to replace the checksum in wif2 when burning firmware.
 ### Removed
 - Remove the definition of bootloader mode.
 

@@ -220,14 +220,6 @@ int do_update_fw_by_wif2_chunk_fbin(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 
 				goto finish;
 			}
-			ret = pdev->funcs_device_private.p_wh_flash_erase(pdev, pchunk_info_ex->SpaceToErase.Address,
-									  pchunk_info_ex->SpaceToErase.Size);
-			if (!ret) {
-				if (pchunk_info_ex->BinaryData)
-					free(pchunk_info_ex->BinaryData);
-
-				goto finish;
-			}
 
 			printf("Use 4k program\n");
 			ret = pdev->funcs_device_private.p_wh_flash_erase(pdev, pchunk_info_ex->SpaceToErase.Address,
@@ -471,9 +463,6 @@ int do_update_fw_by_wif2_flow(WDT_DEV *pdev, WIF_FILE2 *pcur_wif)
 		return 0;
 
 	if (!do_update_fw_by_wif2_chunk_fbin(pdev, pcur_wif, FOURCC_ID_FBIN))
-		return 0;
-
-	if (!do_update_fw_by_wif2_chunk_fsum(pdev, pcur_wif, FOURCC_ID_FSUM))
 		return 0;
 
 	pdev->funcs_device_private.p_wh_send_commands(pdev, WH_CMD_RESET, 0);

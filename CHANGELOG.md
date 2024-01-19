@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 ### Added
 - Add definition hid_desc_reg_offset.
-- Add message hint when open wif2 file fail. 
+- Add message hint when open wif2 file fail.
+- Add 4k checksum to w8790 firmware program.
 ### Removed
 - Remove the definition of bootloader mode.
 

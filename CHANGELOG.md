@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
+## [Unreleased]
+### Added
+- Add message of open device failed.
+
+### Change
+- Fix misr_for_halfwords checksum if start not zero.
+- Fix indent.
+- modify misr_16b declare type
+
+### Removed
+- Remove cal_checksum function
 
 ## [0.9.15] - 2024-01-19
 ### Added

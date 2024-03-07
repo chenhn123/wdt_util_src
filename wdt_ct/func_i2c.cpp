@@ -225,7 +225,8 @@ int wh_i2c_scan_device(WDT_DEV* pdev)
 	file_no = open(g_dev_path, O_RDWR);
 
 	if (file_no < 0) {
-		printf("Open device failed!\n");
+		printf("Open device failed! file_no %ld \n", file_no);
+		perror("Error: ");
 		return 0;
 	}
 

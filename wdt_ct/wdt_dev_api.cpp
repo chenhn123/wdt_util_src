@@ -607,29 +607,6 @@ exit_burn:
 	return err;
 }
 
-unsigned int cal_checksum(unsigned char *buffer, int length)
-{
-	unsigned int	value, value2, value3;
-	unsigned int	tmpbuffer, output, source;
-	int		i, j;
-
-
-	output = 0xFFFFFFFF;
-
-	for (i=0; i<(length/4); i++)
-	{
-		j = i * 4;
-		source = output;
-		value = output <<1;
-		value2 = ((source & 0x80000000) >>31) ^ ((source & 0x200000) >>21) ^ ((source & 0x2) >>1);
-		value3 = value | value2;
-
-		tmpbuffer = buffer[j+3]<<24 | buffer[j+2]<<16 | buffer[j+1]<<8 | buffer[j];
-		output = value3 ^ tmpbuffer;
-	}
-
-	return output;
-}
 
 int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 {
@@ -1154,7 +1131,7 @@ UINT16 misr_16b(UINT16 current_value, UINT16 new_value)
 {
 	unsigned int a, b;
 	unsigned int bit0;
-	unsigned int y;
+	UINT16 y;
 
 	a = current_value;
 	b = new_value;
@@ -1169,7 +1146,7 @@ UINT16 misr_16b(UINT16 current_value, UINT16 new_value)
 	y = (a<<1)^b;
 	y = (y&~1) | (bit0&1);
 
-	return (UINT16) y;
+	return y;
 }
 
 UINT16 misr_32b(UINT16 current_value, UINT32 new_word)
@@ -1186,7 +1163,7 @@ UINT16 misr_for_halfwords(UINT16 current_value, BYTE *buf, int start, int hword_
 {
 	int i;
 	UINT32 checksum = current_value;
-	UINT16 *p_hword = (UINT16 *)buf;
+	UINT16 *p_hword = (UINT16 *)&buf[start];
 	
 	for (i = 0; i < hword_count; i++)
 		checksum = misr_16b(checksum, *p_hword++);

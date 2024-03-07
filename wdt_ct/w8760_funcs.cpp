@@ -37,7 +37,7 @@ static BYTE W8762_RomSignatureVerA[8] = { 0x7F, 0xD0, 0x20, 0x00, 0xB8, 0x1D, 0x
 static BYTE W8762_RomSignatureVerC[8] = { 0x6B, 0x6B, 0xA2, 0x08, 0xC6, 0x4C, 0x4D, 0xDD, };
 
 
-int  wh_w8760_get_feature_devinfo(W8760_REPORT_FEATURE_DEVINFO* report_feature_devinfo, BYTE* buf)
+int wh_w8760_get_feature_devinfo(W8760_REPORT_FEATURE_DEVINFO* report_feature_devinfo, BYTE* buf)
 {
 	if (!report_feature_devinfo || !buf)
 		return 0;
@@ -159,7 +159,7 @@ int wh_w8760_dev_command_read(WDT_DEV *pdev, BYTE* cmd, int cmd_size, BYTE* data
 	return 0;
 }
 
-int  wh_w8760_dev_read_items(WDT_DEV *pdev, int cmd_id, BYTE* buffer, int start, int item_size, int item_count)
+int wh_w8760_dev_read_items(WDT_DEV *pdev, int cmd_id, BYTE* buffer, int start, int item_size, int item_count)
 {
 	int size = item_size * item_count;
 	BYTE cmd[] = { W8760_COMMAND9, (BYTE) cmd_id, (BYTE) item_count };
@@ -728,7 +728,7 @@ int wh_w8760_dev_get_context(WDT_DEV* pdev, W8760_PCT_DATA* pPct)
 	return 1;
 }
 
-int	wh_w8760_prepare_data(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
+int wh_w8760_prepare_data(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 {
 	if (!pdev || !p_out_board_info)
 		return 0;

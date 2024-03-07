@@ -157,7 +157,7 @@ int wh_w8755_dev_get_new_device_info(WDT_DEV* pdev, BYTE *pbuf, int offset, int 
 	return 0;
 }
 
-int	wh_w8755_dev_flash_write_data_page(WDT_DEV* pdev, BYTE* data, UINT32 address, int length)
+int wh_w8755_dev_flash_write_data_page(WDT_DEV* pdev, BYTE* data, UINT32 address, int length)
 {
 	int	addr_start, data_len, packet_size;
 	BYTE*	psource_data = 0;
@@ -238,7 +238,7 @@ int wh_w8755_dev_flash_write_data(WDT_DEV* pdev, BYTE* pdata, UINT32 start_addr,
 
 
 
-int	wh_w8755_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
+int wh_w8755_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
 {
 	W8755_CMD_DATA	cmd_data;
 	unsigned long 	delay = 0;
@@ -744,7 +744,7 @@ chunk_exit:
 
 }
 
-int  wh_w8755_dev_verify_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pChunk)
+int wh_w8755_dev_verify_chunk(WDT_DEV* pdev, CHUNK_INFO_EX* pChunk)
 {
 	if (!pdev)
 		return 0;

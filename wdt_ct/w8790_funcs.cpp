@@ -121,7 +121,7 @@ int wh_w8790_dev_command_write(WDT_DEV* pdev, BYTE* data, int start, int size)
 	}
 }
 
-int  wh_w8790_parse_device_info(W8790_DEV_INFO* report_feature_devinfo, BYTE* buf)
+int wh_w8790_parse_device_info(W8790_DEV_INFO* report_feature_devinfo, BYTE* buf)
 {
 	if (!report_feature_devinfo || !buf)
 		return 0;

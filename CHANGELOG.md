@@ -12,8 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Change
 - Fix misr_for_halfwords checksum if start not zero.
 - Fix indent.
-- modify misr_16b declare type
-- Use 2 byte to check firmware id after 0x50000000.
+- Modify misr_16b declare type
+- Use 2 byte to check device type if fwid > 0x50000000.
 - Replace FW_LEGACY with FW_NOT_SUPPORT.
 
 

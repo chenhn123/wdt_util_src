@@ -25,7 +25,7 @@
 /* what version FW is running in the device */
 #define		FW_MAYBE_ISP		0x01
 #define		FW_WITH_CMD		0x02
-#define		FW_LEGACY		0x04
+#define		FW_NOT_SUPPORT		0x04
 #define		FW_WDT8755		0x20
 #define		FW_WDT8755_ISP		0x40
 #define		FW_WDT8790		0x200

@@ -966,8 +966,6 @@ int wh_w8790_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
 			ret = wh_w8790_dev_protect_flash(pdev, W8790_UnprotectLower384k);
 		else if (addr < 508 * 1024 && addr + size <= 508 * 1024)
 			ret = wh_w8790_dev_protect_flash(pdev, W8790_UnprotectLower508k);
-		else if (addr == 0 && addr + size > 508 * 1024 && addr + size <= 512 * 1024)
-			ret = wh_w8790_dev_protect_flash(pdev, W8790_UnprotectAll512k);
 	}
 	break;
 	case 	WH_CMD_ALGO_STOP: 

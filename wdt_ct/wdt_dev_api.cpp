@@ -150,7 +150,17 @@ int check_firmware_id(WDT_DEV *pdev, UINT32 fwid)
 			printf("It is WDT8760 alike !\n");	
 		return FW_WDT8760;
 	}
-	if ((fwid & 0xF0000000) == 0x50000000) {
+
+	if ((fwid & 0xFF000000) == 0x51000000) {
+                if(pdev->pparam->argus & OPTION_INFO)
+                        printf("It is WDT8730 !\n");
+                return FW_NOT_SUPPORT;
+
+        }
+
+	//TODO: We will add new devices here and should before FW_WDT8970 for compatibility.
+
+	if ((fwid & 0xFF000000) == 0x50000000) {
 		if(pdev->pparam->argus & OPTION_INFO)
 			printf("It is WDT8790 !\n");
 		return FW_WDT8790;

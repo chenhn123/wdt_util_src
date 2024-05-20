@@ -150,9 +150,6 @@ enum W8760_DeviceStatusBits
 
 enum W8760_FlashProtect
 {
-	W8760_ProtectNone = 0, 					  
-	W8760_UnprotectAll512k = 0,
-
 	W8760_ProtectLower256k = 0x002C,			
 	W8760_UnprotectUpper256k = 0x002C,
 

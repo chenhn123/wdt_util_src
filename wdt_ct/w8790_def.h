@@ -127,10 +127,6 @@ enum W8790_ParameterTableType
 
 enum W8790_FlashProtect
 {
-	// All 512kB unprotected
-	W8790_ProtectNone = 0,
-	W8790_UnprotectAll512k = 0,
-
 	// 0x000000 - 0x03FFFF : lower 256kB protected, higher 256kB unprotected
 	W8790_ProtectLower256k = 0x002C,
 	W8790_UnprotectUpper256k = 0x002C,

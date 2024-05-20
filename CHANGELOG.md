@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 
 ## [Unreleased]
+
 ### Added
 - Add message of open device failed.
 
@@ -12,9 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix misr_for_halfwords checksum if start not zero.
 - Fix indent.
 - modify misr_16b declare type
+- Use 2 byte to check firmware id after 0x50000000.
+- Replace FW_LEGACY with FW_NOT_SUPPORT.
+
 
 ### Removed
 - Remove cal_checksum function
+- Remove cmd unprotect 512k from w8760/w8790 device.
+
+
 
 ## [0.9.15] - 2024-01-19
 ### Added

@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 - Remove cal_checksum function
 - Remove cmd unprotect 512k from w8760/w8790 device.
+- Remove get_indexed_string api.
 
 
 

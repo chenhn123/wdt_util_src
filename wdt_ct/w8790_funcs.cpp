@@ -42,17 +42,6 @@ int wh_w8790_dev_read_report(WDT_DEV* pdev, BYTE* buf, UINT32 buf_size)
 
 	return 0;
 }
-int wh_w8790_dev_get_indexed_string(WDT_DEV* pdev, UINT32 index, BYTE* buf, UINT32 buf_size)
-{
-	if (!pdev)
-		return 0;
-
-	if (pdev->intf_index == INTERFACE_I2C)
-		return wh_i2c_get_indexed_string(pdev, index, buf, buf_size);
-
-
-	return 0;
-}
 
 
 int wh_w8790_dev_set_feature(WDT_DEV* pdev, BYTE* buf, UINT32 buf_size)
@@ -103,7 +92,6 @@ int wh_w8790_dev_set_basic_op(WDT_DEV* pdev)
 
 	g_func_dev_basic.p_wh_get_feature = wh_w8790_dev_get_feature;
 	g_func_dev_basic.p_wh_set_feature = wh_w8790_dev_set_feature;
-	g_func_dev_basic.p_wh_get_index_string = wh_w8790_dev_get_indexed_string;
 	g_func_dev_basic.p_wh_read_report = wh_w8790_dev_read_report;
 
 	return 1;

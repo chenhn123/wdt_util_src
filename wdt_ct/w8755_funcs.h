@@ -37,7 +37,6 @@ int wh_w8755_dev_send_commands(WDT_DEV*, int, UINT32);
 /* Basic Device Access Function Pointer typedef */
 int wh_w8755_dev_set_feature(WDT_DEV*, BYTE*, UINT32);
 int wh_w8755_dev_get_feature(WDT_DEV*, BYTE*, UINT32);
-int wh_w8755_dev_get_indexed_string(WDT_DEV*, UINT32, BYTE*, UINT32);
 int wh_w8755_dev_read_report(WDT_DEV*, BYTE*, UINT32);
 
 

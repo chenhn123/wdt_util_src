@@ -105,7 +105,7 @@ typedef struct i2c_hid_desc
 	UINT16 wProductID;
 	UINT16 wVersionID;
 	UINT32 reserved;
-} I2C_HID_DESC;
+} __attribute__((packed))I2C_HID_DESC;
 
 typedef union u_dev_info {
 	W8755_DEV_INFO_NEW	w8755_dev_info;

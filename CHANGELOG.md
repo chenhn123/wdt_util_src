@@ -12,16 +12,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Change
 - Fix misr_for_halfwords checksum if start not zero.
 - Fix indent.
-- Modify misr_16b declare type
+- Modify misr_16b declare type.
 - Use 2 byte to check device type if fwid > 0x50000000.
 - Replace FW_LEGACY with FW_NOT_SUPPORT.
 
 
 ### Removed
-- Remove cal_checksum function
+- Remove cal_checksum function.
 - Remove cmd unprotect 512k from w8760/w8790 device.
 - Remove get_indexed_string api.
 
+### Fixed
+- I2C_HID_DESC not packed issue.
 
 
 ## [0.9.15] - 2024-01-19

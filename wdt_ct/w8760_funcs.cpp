@@ -79,7 +79,7 @@ int wh_w8760_dev_set_feature(WDT_DEV* pdev, BYTE* buf, UINT32 buf_size)
 	if (buf[0] == W8760_COMMAND9 || buf[0] == W8760_PIPE9)
 		buf_size = 10;
 	else if (buf[0] == W8760_COMMAND63 || buf[0] == W8760_PIPE63 || 
-		buf[0] == W8760_BLOCK63 || buf[0] == VND_REQ_DEV_INFO)
+		buf[0] == W8760_BLOCK63 )
 		buf_size = 64;
 	else {
 		printf("Feature id is not supported! (%d)\n", buf[0]);

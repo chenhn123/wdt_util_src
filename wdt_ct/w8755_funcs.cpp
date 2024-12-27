@@ -55,7 +55,7 @@ static FUNC_PTR_STRUCT_DEV_BASIC	g_func_dev_basic = { 0, 0, 0, 0 };
 
 int wh_w8755_dev_exec_report_type_write(WDT_DEV* pdev, BYTE type, BYTE *pbuf, int size)
 {
-	W8755_WRITE_DATA	write_data;
+	W8755_WRITE_DATA write_data;
 
 	if (!pdev || !pbuf)
 		return 0;
@@ -77,7 +77,7 @@ int wh_w8755_dev_exec_report_type_write(WDT_DEV* pdev, BYTE type, BYTE *pbuf, in
 
 int wh_w8755_dev_exec_set_report_read(WDT_DEV* pdev, BYTE type, BYTE *pbuf, int size)
 {
-	W8755_WRITE_DATA	write_data;
+	W8755_WRITE_DATA write_data;
 
 	if (!pdev || !pbuf || !g_func_dev_basic.p_wh_set_feature)
 		return 0;
@@ -91,9 +91,9 @@ int wh_w8755_dev_exec_set_report_read(WDT_DEV* pdev, BYTE type, BYTE *pbuf, int 
 
 int wh_w8755_dev_exec_get_report_read(WDT_DEV* pdev, BYTE type, BYTE *pbuf, int size)
 {
-	W8755_READ_DATA 	read_data;
-	int 				retval;
-	UINT32				read_checksum, calc_checksum;
+	W8755_READ_DATA read_data;
+	int retval;
+	UINT32 read_checksum, calc_checksum;
 	
 	if (!pdev || !pbuf || !g_func_dev_basic.p_wh_get_feature)
 		return 0;
@@ -129,8 +129,8 @@ int wh_w8755_dev_exec_get_report_read(WDT_DEV* pdev, BYTE type, BYTE *pbuf, int 
 
 int wh_w8755_dev_exec_report_type_read(WDT_DEV* pdev, BYTE type, BYTE *pbuf, int size, int offset)
 {
-	int	retval;
-	int	i_size;
+	int retval;
+	int i_size;
 
 	if (offset & TYPE_READ_OFFSET_SET)
 		i_size = offset & 0xFF;
@@ -147,7 +147,7 @@ int wh_w8755_dev_exec_report_type_read(WDT_DEV* pdev, BYTE type, BYTE *pbuf, int
 
 int wh_w8755_dev_get_new_device_info(WDT_DEV* pdev, BYTE *pbuf, int offset, int size)
 {
-	BYTE	buf[64];
+	BYTE buf[64];
 	
 	if (wh_w8755_dev_exec_report_type_read(pdev, W8755_FW_GET_DEVICE_INFO, buf, 32, TYPE_READ_OFFSET_SET | offset)) {
 		memcpy(pbuf, &buf[0], size);
@@ -426,7 +426,7 @@ unsigned int wh_w8755_dev_write_flash_status_register(WDT_DEV* pdev, unsigned in
 	}
 
 	if (timeout_count >= 100)
-		printf("%s: error in timeout !\n", __func__);
+		wh_printf("%s: error in timeout !\n", __func__);
 
 	return 1;
 }
@@ -516,7 +516,7 @@ int wh_w8755_dev_flash_get_checksum(WDT_DEV* pdev, UINT32* pchecksum, UINT32 add
 	wh_printf("chksum delay: %d ms\n", delay);
 
 	if (!wh_w8755_dev_exec_report_type_read(pdev, W8755_ISP_GET_CHECKSUM, buf, DataPayloadSize, 0)) {
-		printf("%s: report type read chksum error!\n", __func__);
+		wh_printf("%s: report type read chksum error!\n", __func__);
 		return 0;
 	}
 
@@ -849,7 +849,7 @@ int wh_w8755_dev_flash_read_data(WDT_DEV* pdev, BYTE* data, UINT32 address, int 
 			packet_size = data_len;
 
 		if (!wh_w8755_dev_exec_report_type_read(pdev, W8755_ISP_GET_FLASH, psource_data, packet_size, 0)) {
-			printf("can't get flash: 0x%x\n", addr_start);
+			wh_printf("can't get flash: 0x%x\n", addr_start);
 			break;
 		}
 
@@ -938,13 +938,13 @@ int wh_w8755_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp)
 
 
         if (!wh_w8755_dev_parse_new_dev_info(pdev, &pboard_info->dev_info.w8755_dev_info)) {
-                printf("Can't get new device info!\n");
+                wh_printf("Can't get new device info!\n");
 		wh_w8755_dev_set_device_mode(pdev, W8755_DM_SENSING);
                 return 0;
         }
 
 	if (!wh_w8755_dev_read_flash_map(pdev, pboard_info)) {
-                 printf("Can't get address table!\n");
+                 wh_printf("Can't get address table!\n");
                  return 0;
          }
 
@@ -990,7 +990,7 @@ int wh_w8755_i2c_delay(WDT_DEV* pdev, unsigned long delay)
 
                 time_period = (get_current_ms() - start_tick);
                 if (time_period > (delay + 50))
-                        printf("%s: timeout %d occured!\n", __func__, (int) time_period);
+                        wh_printf("%s: timeout %d occured!\n", __func__, (int) time_period);
 
                 return time_period;
         }

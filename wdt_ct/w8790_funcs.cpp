@@ -54,7 +54,7 @@ int wh_w8790_dev_set_feature(WDT_DEV* pdev, BYTE* buf, UINT32 buf_size)
 	else if (buf[0] == W8790_COMMAND63 || buf[0] == W8790_BLOCK63)
 		buf_size = 64;
 	else {
-		printf("Feature id is not supported! (%d)\n", buf[0]);
+		wh_printf("Feature id is not supported! (%d)\n", buf[0]);
 		return 0;
 	}
 	if (pdev->intf_index == INTERFACE_I2C)
@@ -74,7 +74,7 @@ int wh_w8790_dev_get_feature(WDT_DEV* pdev, BYTE* buf, UINT32 buf_size)
 	else if (buf[0] == W8790_COMMAND63 || buf[0] == W8790_BLOCK63)
 		buf_size = 64;
 	else {
-		printf("Feature id is not supported! (%d)\n", buf[0]);
+		wh_printf("Feature id is not supported! (%d)\n", buf[0]);
 		return 0;
 	}
 	if (pdev->intf_index == INTERFACE_I2C)
@@ -486,7 +486,7 @@ int wh_w8790_dev_wait_cmd_end(WDT_DEV* pdev, int timeout_ms, int invt_ms)
 		polling_timeout_ms -= polling_intv_ms;
 	} while (polling_timeout_ms > 0);
 
-	printf("%s: timeout occured (%d)!\n", __FUNCTION__, polling_timeout_ms * polling_intv_ms);
+	wh_printf("%s: timeout occured (%d)!\n", __FUNCTION__, polling_timeout_ms * polling_intv_ms);
 	return 0;
 }
 
@@ -540,7 +540,7 @@ int wh_w8790_dev_flash_erase_cmd(WDT_DEV* pdev, UINT32 address, UINT32 size)
 int wh_w8790_dev_write_flash_cmd(WDT_DEV* pdev, BYTE* buf, int start, int size)
 {
 	if (size > W8790_USB_MAX_PAYLOAD_SIZE - 2) {
-		printf("%s: payload data overrun\n", __FUNCTION__);
+		wh_printf("%s: payload data overrun\n", __FUNCTION__);
 		return 0;
 	}
 
@@ -553,7 +553,7 @@ int wh_w8790_dev_write_flash_cmd(WDT_DEV* pdev, BYTE* buf, int start, int size)
 
 	if (wh_w8790_dev_command_write(pdev, cmd, 0, size + 3) > 0)
 		return wh_w8790_dev_wait_cmd_end(pdev, 0, 0);
-	printf("w8790_write_cmd fail \n)");
+	wh_printf("w8790_write_cmd fail \n)");
 	return 0;
 }
 
@@ -709,7 +709,7 @@ int wh_w8790_dev_set_block_access(WDT_DEV* pdev, BYTE type, UINT32 offset, UINT3
 
 	if (wh_w8790_dev_command_read(pdev, cmd, sizeof(cmd), response, 0, 4) <= 0)
 	{
-		printf("%s: Failed !\n", __FUNCTION__);
+		wh_printf("%s: Failed !\n", __FUNCTION__);
 		return 0;
 	}
 		
@@ -996,25 +996,25 @@ int wh_w8790_flash_section_validate(BYTE* data, UINT32 datalength, int start = 0
 	header.Checksum = get_unaligned_le16(&data[0]);
 	if (header.HeaderChecksum != wh_w8790_flash_section_header_checksum(header))
 	{
-		printf("Invalid section header. \n");
+		wh_printf("Invalid section header. \n");
 		return 0;
 	}
 	if (start + sizeof(header) + header.PayloadSize > datalength)
 	{
-		printf("Invalid section length. \n");
+		wh_printf("Invalid section length. \n");
 		return 0;
 	}
 	BYTE* payload;
 	payload = (BYTE*)calloc(header.PayloadSize, sizeof(BYTE));
 	if (!payload) {
-		printf("calloc fail !\n");
+		wh_printf("calloc fail !\n");
 		return 0;
 	}
 	memcpy(payload, &data[16], header.PayloadSize);
 
 	if (header.Checksum != misr_for_bytes(header.HeaderChecksum, payload, 0, header.PayloadSize / sizeof(BYTE))) {
 		ret = 0;
-		printf("Payload checksum error.\n");
+		wh_printf("Payload checksum error.\n");
 	}
 	else 
 	{
@@ -1040,7 +1040,7 @@ int wh_w8790_dev_read_parameters_get_checksum(WDT_DEV* pdev, W8790_PARAMETER_INF
 	}
 
 	if (primary_parameter_size != parameter_info.PrimarySize) {
-		printf("Invalid primary parameter. ({ %d }) \n", primary_parameter_size);
+		wh_printf("Invalid primary parameter. ({ %d }) \n", primary_parameter_size);
 		ret = 0;
 		return 0;
 
@@ -1050,7 +1050,7 @@ int wh_w8790_dev_read_parameters_get_checksum(WDT_DEV* pdev, W8790_PARAMETER_INF
 	primary_bin = (BYTE*)calloc(primary_parameter_size, sizeof(BYTE));
 	if (!primary_bin)
 	{
-		printf("calloc fail ! \n");
+		wh_printf("calloc fail ! \n");
 		ret = 0;
 		goto exit_fun;
 	}
@@ -1080,7 +1080,7 @@ int wh_w8790_dev_read_parameters_get_checksum(WDT_DEV* pdev, W8790_PARAMETER_INF
 		ret = wh_w8790_dev_block_checksum(pdev, &expected_sum, primary_parameter_size, 0);
 
 		if (*sum != expected_sum) {
-			printf("Primary parameter checksum mismatch. \n");
+			wh_printf("Primary parameter checksum mismatch. \n");
 			ret = 0;
 			goto exit_fun;
 		}
@@ -1089,10 +1089,10 @@ int wh_w8790_dev_read_parameters_get_checksum(WDT_DEV* pdev, W8790_PARAMETER_INF
 	else
 	{
 		if (primary_header.HeaderChecksum != wh_w8790_flash_section_header_checksum(primary_header))
-			printf("Primary parameter section header checksum failed.\n");
+			wh_printf("Primary parameter section header checksum failed.\n");
 
 		if(wh_w8790_flash_section_validate(primary_bin, primary_parameter_size) == 0)
-			printf("Invalid primary parameter section.\n");
+			wh_printf("Invalid primary parameter section.\n");
 
 	}
 
@@ -1110,7 +1110,7 @@ int wh_w8790_dev_read_parameters_get_checksum(WDT_DEV* pdev, W8790_PARAMETER_INF
 			extended_bin = (BYTE*)calloc(extent_parameter_size, sizeof(BYTE));
 			if (!extended_bin)
 			{
-				printf("calloc fail !");
+				wh_printf("calloc fail !");
 
 				ret = 0;
 				goto exit_fun;
@@ -1132,10 +1132,10 @@ int wh_w8790_dev_read_parameters_get_checksum(WDT_DEV* pdev, W8790_PARAMETER_INF
 			extended_header.Checksum = get_unaligned_le16(&extended_bin[0]);
 
 			if (extended_header.HeaderChecksum != wh_w8790_flash_section_header_checksum(extended_header))
-				printf("Extended parameter section header checksum failed.\n");
+				wh_printf("Extended parameter section header checksum failed.\n");
 
 			if (wh_w8790_flash_section_validate(extended_bin, extent_parameter_size) == 0)
-				printf("Invalid extended parameter section.\n");
+				wh_printf("Invalid extended parameter section.\n");
 		}
 		else
 		{
@@ -1167,7 +1167,7 @@ int wh_w8790_prepare_data(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 
 
 	if (!wh_w8790_dev_identify_platform(pdev)) {
-		printf("can't get platform identify!\n");
+		wh_printf("can't get platform identify!\n");
 		return 0;
 	}
 	//I:0x49 S:0x53 P:0x50 
@@ -1176,7 +1176,7 @@ int wh_w8790_prepare_data(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 		pdev->board_info.dev_info.w8790_feature_devinfo.program_name_fourcc[2] == 'P')
 	{
 		p_out_board_info->dev_type = FW_WDT8790_ISP;
-		printf("It is ISP mode!\n");
+		wh_printf("It is ISP mode!\n");
 
 
 		return 1;

@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+## [0.9.16] - 2024-12-27
+
 ### Added
 - Add message of open device failed.
 
@@ -21,9 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Remove cal_checksum function.
 - Remove cmd unprotect 512k from w8760/w8790 device.
 - Remove get_indexed_string api.
+- Remove remove erase all command in w8760 device.
+- Remove the read hid prameter twice in w87555 device.
 
 ### Fixed
 - I2C_HID_DESC not packed issue.
+- Remove the timeout message in the -v command that caused the python script parsing issue.
 
 
 ## [0.9.15] - 2024-01-19

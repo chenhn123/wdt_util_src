@@ -78,12 +78,11 @@ int get_i2c_dev_count(){
                         count ++;
 		}
 		closedir(d);
-    }
+	}
 	if(count == 0)
 		return 16;
 	else
 		return count;
-
 }
 
 int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
@@ -326,7 +325,7 @@ int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 	int     retryF2 = 3;
 
 	if (!pdev || !pdev->dev_handle || !pboard_info) {
-		printf("device ptr is null !\n");
+		wh_printf("device ptr is null !\n");
 		return 0;
 	}
 	wh_printf("prepare_i2c_addr %x\n", pdev->board_info.i2c_address);
@@ -337,7 +336,7 @@ int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 	pdev->dev_state = DS_GET_INFO;
 	int get_param_hid_ret = wh_i2c_get_param_hid(pdev, &board_info);
 	if(get_param_hid_ret == 0) {
-		printf("i2c_get_param_hid fail ! \n");
+		wh_printf("i2c_get_param_hid fail ! \n");
 	}
 		
 	
@@ -441,11 +440,9 @@ int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 		board_info.platform_id[1] = buf[5];
 
 		memcpy(&board_info.sys_param, &buf[10], get_unaligned_le16(buf + 12));
-		if (wh_i2c_get_param_hid(pdev, &board_info)) {
-			if (wh_w8755_prepare_data(pdev, &board_info, 0)) {
-				memcpy(pboard_info, &board_info, sizeof(BOARD_INFO));
-				return 1;
-			}
+		if (wh_w8755_prepare_data(pdev, &board_info, 0)) {
+			memcpy(pboard_info, &board_info, sizeof(BOARD_INFO));
+			return 1;
 		}
 	}
 
@@ -577,12 +574,12 @@ int wh_i2c_xfer(WDT_DEV *pdev, BYTE slave_addr, BYTE* txbuf, UINT32 tx_len,
 int wh_i2c_set_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 {
 
-	REQ_DATA*	p_req_data = (REQ_DATA*) buf;
-	int		data_len = 0;
-	BYTE 	cmd;
-	BYTE	tx_buffer[80] = {0};
-	bool    retryflag = true;	
-	int 	retval = 0;
+	REQ_DATA* p_req_data = (REQ_DATA*) buf;
+	int data_len = 0;
+	BYTE cmd;
+	BYTE tx_buffer[80] = {0};
+	bool retryflag = true;	
+	int retval = 0;
 
 	if (buf_size > 64)
 		buf_size = 64;
@@ -646,13 +643,13 @@ retry:
 
 int wh_i2c_get_feature(WDT_DEV *pdev, BYTE* buf, UINT32 buf_size)
 {
-	int 		retval;
-	REQ_DATA*	p_req_data = (REQ_DATA*) buf;
-	int		data_len = 0;
-	BYTE	cmd;
-	BYTE	tx_buffer[10] = {0}; 
-	BYTE	rx_buffer[80] = {0};
-	bool    retryflag = true;
+	int retval;
+	REQ_DATA* p_req_data = (REQ_DATA*) buf;
+	int data_len = 0;
+	BYTE cmd;
+	BYTE tx_buffer[10] = {0}; 
+	BYTE rx_buffer[80] = {0};
+	bool retryflag = true;
 
 	if (buf_size > 64)
 		buf_size = 64;

@@ -82,7 +82,7 @@ int wh_w8760_dev_set_feature(WDT_DEV* pdev, BYTE* buf, UINT32 buf_size)
 		buf[0] == W8760_BLOCK63 )
 		buf_size = 64;
 	else {
-		printf("Feature id is not supported! (%d)\n", buf[0]);
+		wh_printf("Feature id is not supported! (%d)\n", buf[0]);
 		return 0;
 	}
 	
@@ -103,7 +103,7 @@ int wh_w8760_dev_get_feature(WDT_DEV* pdev, BYTE* buf, UINT32 buf_size)
 		buf[0] == W8760_BLOCK63 || buf[0] == VND_REQ_DEV_INFO)
 		buf_size = 64;
 	else {
-		printf("Feature id is not supported! (%d)\n", buf[0]);
+		wh_printf("Feature id is not supported! (%d)\n", buf[0]);
 		return 0;
 	}
 			
@@ -132,7 +132,7 @@ int wh_w8760_dev_command_write(WDT_DEV *pdev, BYTE* data, int start, int size)
 
 int wh_w8760_dev_command_read(WDT_DEV *pdev, BYTE* cmd, int cmd_size, BYTE* data, int start, int size)
 {
-	BYTE	buf[64];
+	BYTE buf[64];
 	if (wh_w8760_dev_command_write(pdev, cmd, 0, cmd_size) > 0) {
 		if (size > 9)
 			buf[0] = W8760_COMMAND63;
@@ -215,7 +215,7 @@ int wh_w8760_dev_wait_cmd_end(WDT_DEV* pdev, int timeout_ms, int invt_ms)
 		polling_timeout_ms -= polling_intv_ms;		
 	} while (polling_timeout_ms > 0);
 
-	printf("%s: timeout occured (%d)!\n", __func__, polling_timeout_ms * polling_intv_ms);	
+	wh_printf("%s: timeout occured (%d)!\n", __func__, polling_timeout_ms * polling_intv_ms);	
 	return 0;
 }
 
@@ -267,7 +267,7 @@ int wh_w8760_dev_set_device_mode(WDT_DEV* pdev, BYTE mode)
 
 int wh_w8760_dev_get_device_mode(WDT_DEV* pdev)
 {
-	BYTE	status[4];
+	BYTE status[4];
 	if (!pdev)
 		return 0;
 
@@ -387,7 +387,7 @@ int wh_w8760_dev_erase_flash(WDT_DEV* pdev, UINT32 address, UINT32 size)
 int wh_w8760_dev_batch_write_flash(WDT_DEV* pdev, BYTE* buf, int start, int size)
 {
 	if (size > W8760_USB_MAX_PAYLOAD_SIZE - 2) {
-		printf("%s: payload data overrun\n", __func__);
+		wh_printf("%s: payload data overrun\n", __func__);
 		return 0;
 	}
 
@@ -568,11 +568,6 @@ int wh_w8760_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
 			return wh_w8760_dev_reboot(pdev);
 		}
 		break;
-		case	WH_CMD_FLASH_ERASEALL:	{
-			printf("FLASH_ERASEALL: not implemented!");		
-			return 0;
-		}
-		break;
 		case	WH_CMD_FLASH_ERASE4K:	{
 			return wh_w8760_dev_flash_erase(pdev, value, 0x1000);
 		}
@@ -658,7 +653,7 @@ int wh_w8760_dev_verify_chunk_by_read_checksum(WDT_DEV* pdev, CHUNK_INFO_EX* pCh
 		return retval;
 
 	if (bin_checksum != read_checksum) {
-		printf("Checksum mismatch!!! Original=0x%x, Flash checksum=0x%x\n", bin_checksum, read_checksum);
+		wh_printf("Checksum mismatch!!! Original=0x%x, Flash checksum=0x%x\n", bin_checksum, read_checksum);
 		result = 0;
 	}
 	
@@ -725,7 +720,7 @@ int wh_w8760_prepare_data(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 	wh_w8760_dev_set_basic_op(pdev);
 
 	if (!wh_w8760_dev_identify_platform(pdev, p_out_board_info))  {
-		printf("Can't get platform identify!\n");
+		wh_printf("Can't get platform identify!\n");
 		return 0;
 	}
 	
@@ -756,7 +751,7 @@ int wh_w8760_dev_flash_erase(WDT_DEV* pdev, UINT32 address, int size)
 	int ret = wh_w8760_dev_erase_flash(pdev, address, size);
 
 	if (ret <= 0)
-		printf("%s: addr: %x, size: %x\n", __func__, address, size);
+		wh_printf("%s: addr: %x, size: %x\n", __func__, address, size);
 	
 	return ret;
 }
@@ -767,10 +762,10 @@ int wh_w8760_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChu
 	int size;
 	int start_addr = 0;
 	int page_size;
-	int	retry_count = 0;
+	int retry_count = 0;
 	int is_first_page = 0;
-	char*	pdata;
-	UINT32	calc_checksum, read_checksum;
+	char* pdata;
+	UINT32 calc_checksum, read_checksum;
 	CHUNK_INFO_EX	*pChunk = pInputChunk;
 	FUNC_PTR_STRUCT_DEV_OPERATION funcs;
 

@@ -29,7 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - I2C_HID_DESC not packed issue.
-- Remove the timeout message in the -v command that caused the python script parsing issue.
+- Remove the timeout message in the -v command that caused the script parsing issue.
 
 
 ## [0.9.15] - 2024-01-19

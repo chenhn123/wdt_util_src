@@ -39,8 +39,8 @@ static char		g_dev_path[64];
 
 int wh_i2c_scan_driver_path(WDT_DEV* pdev, int *adaptor_no)
 {
-	DIR	*d;
-	struct dirent *dir;
+	DIR *d;
+	struct dirent *dir = NULL;
 	int found = 0;
 	int dev_addr = 0;
 
@@ -69,7 +69,7 @@ int wh_i2c_scan_driver_path(WDT_DEV* pdev, int *adaptor_no)
 int get_i2c_dev_count(){
 	char dev_sys_class_path[] = "/sys/class/i2c-adapter";
 	int count = 0;
-	struct dirent *dir;
+	struct dirent *dir = NULL;
 	DIR *d;
 	d = opendir(dev_sys_class_path);
 	if(d){
@@ -88,7 +88,7 @@ int get_i2c_dev_count(){
 int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 {
 	DIR *d;
-	struct dirent *dir;
+	struct dirent *dir = NULL;
 	int found = 0;
 	int adp_no = 0;
 	char dev_path[64];			
@@ -136,7 +136,7 @@ int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 int wh_i2c_scan_hid_of_path(WDT_DEV* pdev, int *adaptor_no)
 {
         DIR     *d;
-        struct dirent *dir;
+        struct dirent *dir = NULL;
         int found = 0;
         int dev_addr = 0;
 
@@ -165,8 +165,8 @@ int wh_i2c_scan_hid_of_path(WDT_DEV* pdev, int *adaptor_no)
 
 int wh_i2c_scan_hid_path(WDT_DEV* pdev, int *adaptor_no)
 {
-	DIR	*d;
-	struct dirent *dir;
+	DIR *d;
+	struct dirent *dir = NULL;
 	int found = 0;
 	int dev_addr = 0;
 
@@ -195,7 +195,7 @@ int wh_i2c_scan_hid_path(WDT_DEV* pdev, int *adaptor_no)
 int wh_i2c_scan_device(WDT_DEV* pdev)
 {
 	int found = 0;
-	int	adaptor_no = -1;
+	int adaptor_no = -1;
 	long file_no = 0;
 
 	if (!pdev)

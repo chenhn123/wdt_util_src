@@ -28,7 +28,7 @@
 
 #define		RETRY_COUNT			3
 
-#define		OPTION_DES			0x1
+
 #define		OPTION_4K_VERIFY		0x2
 #define		OPTION_ERR_RTN			0x4
 #define		OPTION_ISP_MODE			0x8

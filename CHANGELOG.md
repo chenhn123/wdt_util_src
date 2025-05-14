@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add initialize to *dir.
 - Add support for the secondary firmware update on W8752 dual-partition devices.
 
+### Removed
+- Remove macro OPTION_DES.
+
 ## [0.9.16] - 2024-12-30
 
 ### Added

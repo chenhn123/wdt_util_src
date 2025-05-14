@@ -20,7 +20,7 @@
 
 typedef		void*	WH_HANDLE;
 
-/* since long is 4bytes on windows64, but is 8bytes on linux 64 */
+/* since long is 4bytes on Windows64, but is 8bytes Linux 64 */
 typedef unsigned char 	BYTE; 
 typedef unsigned short 	UINT16;
 typedef unsigned int	UINT32;
@@ -30,7 +30,7 @@ typedef UINT32 FOUR_CC;
 
 /* Header
  * 4bytes: the fixed data RIFF.
- * 4bytes: little-endian 32-bit UINT32eger, size of entire file
+ * 4bytes: little-endian 32-bit UINT32 integer, size of entire file
  * 4bytes: file type WHIF
  */
 typedef struct ChunkHeader{ 
@@ -50,7 +50,10 @@ typedef struct ChunkHeader{
  *		FSBT: fastboot chunk, chunk id: 0x08
  *		BINF: bin chunk, if the bin chunk is existed, then other chunks will be ignored, chunk id: 0x10
  *		EXT1: external chunk 1, user defined chunk data, chunk id: 0x20
- *		EXT2: external chunk 2, user defined chunk data, chunk id: 0x40	
+ *		EXT2: external chunk 2, user defined chunk data, chunk id: 0x40
+ *		EXTB: external binary chunk, can be any raw binary data, chunk id: 0x80
+ *		FRWD: dual firmware secondary partition firmware chunk, chunk id: 0x200
+ *		CNFD: dual firmware secondary partition config(parameters chunk, chunk id: 0x400
  *
  * 4bytes: little-endian 32-bit UINT32, it means the size of this chunk,
  *		not include the header part.
@@ -114,6 +117,9 @@ typedef struct ChunkInfoEx{
 #define		FOURCC_ID_RCVY		0x52435659
 #define		FOURCC_ID_TSTB		0x54535442
 #define		FOURCC_ID_EXTB		0x45585442
+#define		FOURCC_ID_FRWD		0x44575246
+#define 	FOURCC_ID_CNFD		0x44464E43
+
 
 #define		CHUNK_ID_FRMT		0x00
 #define		CHUNK_ID_FRWR		0x01
@@ -124,6 +130,10 @@ typedef struct ChunkInfoEx{
 #define		CHUNK_ID_RCVY		0x20
 #define		CHUNK_ID_TSTB		0x40	
 #define		CHUNK_ID_EXTB		0x80
+#define 	CHUNK_ID_FRWD		0x200
+#define 	CHUNK_ID_CNFD		0x400
+
+
 
 typedef	struct WifFile {
 	BYTE	*pdata;

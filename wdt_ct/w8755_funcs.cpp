@@ -529,7 +529,7 @@ int wh_w8755_dev_flash_get_checksum(WDT_DEV* pdev, UINT32* pchecksum, UINT32 add
 int wh_w8755_dev_parse_new_dev_info(WDT_DEV* pdev, W8755_DEV_INFO_NEW *pdev_info_new)
 {
 	BYTE	buffer[32];
-	int		retval;
+	int	retval;
 
 	retval = wh_w8755_dev_get_new_device_info(pdev, buffer, 0, 32);
 	if (!retval)
@@ -550,7 +550,7 @@ int wh_w8755_dev_parse_new_dev_info(WDT_DEV* pdev, W8755_DEV_INFO_NEW *pdev_info
 		if (buffer[0x001E] == 0xB1)
 			pdev_info_new->boot_partition = W8755_BP_PRIMARY;
 		else if (buffer[0x001E] == 0xB2)
-            pdev_info_new->boot_partition = W8755_BP_SECONDARY;
+			pdev_info_new->boot_partition = W8755_BP_SECONDARY;
 	}	
 
 
@@ -868,8 +868,7 @@ int wh_w8755_dev_flash_read_data(WDT_DEV* pdev, BYTE* data, UINT32 address, int 
 
 int wh_w8755_dev_read_flash_map(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 {
-
-	BYTE	buffer[64];
+	BYTE	buffer[64] = {0};
 	int 	retval = 1;
 
 	if (!p_out_board_info) 
@@ -901,18 +900,15 @@ int wh_w8755_dev_read_flash_map(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 	psec_addr_type->secondary_image_address = (get_unaligned_le16(&buffer[14]) << 8);
 
 
-	if (p_out_board_info->dev_info.w8755_dev_info.boot_partition == W8755_BP_SECONDARY)
+	if (p_out_board_info->dev_info.w8755_dev_info.boot_partition == W8755_BP_SECONDARY && pdev->board_info.dev_info.w8755_dev_info.protocol_version >= 0x01010000)
 	{
 		memset(buffer, 0, sizeof(buffer));
-  
 		retval = wh_w8755_dev_flash_read_data(pdev, buffer, W8755_SEC_ADDR_TABLE_EXTENDED_OFFSET, 32);
 		if (!retval)
 			goto failed_exit;
 
 		psec_addr_type->secondary_param_addr = (get_unaligned_le16(&buffer[0]) << 8);
 		psec_addr_type->secondary_param_clone_addr = (get_unaligned_le16(&buffer[2]) << 8);
-
-
 	}
 
 
@@ -934,14 +930,13 @@ int wh_w8755_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp)
 		return 0;
 	}
 
-
-
-
         if (!wh_w8755_dev_parse_new_dev_info(pdev, &pboard_info->dev_info.w8755_dev_info)) {
                 wh_printf("Can't get new device info!\n");
 		wh_w8755_dev_set_device_mode(pdev, W8755_DM_SENSING);
                 return 0;
         }
+
+	memcpy(&pdev->board_info.dev_info.w8755_dev_info, &pboard_info->dev_info.w8755_dev_info, sizeof(W8755_DEV_INFO_NEW));
 
 	if (!wh_w8755_dev_read_flash_map(pdev, pboard_info)) {
                  wh_printf("Can't get address table!\n");

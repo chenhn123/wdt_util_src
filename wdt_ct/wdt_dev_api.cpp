@@ -487,41 +487,72 @@ int image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pparam)
                 goto exit_burn;
         }
 
-	if (pdev->board_info.dev_type & FW_WDT8755) {
-		if (pinfo->dev_info.w8755_dev_info.boot_partition == W8755_BP_SECONDARY) {
-			printf("Not support Secondary boot_partition FW update !\n");
-			goto exit_burn;
-		}
-
-	}
-
 	if (!load_wif(pdev, (char*)pparam->image_file)){
 		printf("Load WIF failed !\n");
 		goto exit_burn;
 	}
+
 	
 	memset(&chunk_info_fw, 0, sizeof(CHUNK_INFO_EX));
 	memset(&chunk_info_cfg, 0, sizeof(CHUNK_INFO_EX));
-
-	if (!pdev->func_wh_get_chunk_info(pdev->wif_access.wif_handle, CHUNK_ID_FRWR, &chunk_info_fw)) {
-		printf("Not found fw chunk !\n");
-		goto exit_burn;
-	}
-
-	if (!pdev->func_wh_get_chunk_info(pdev->wif_access.wif_handle, CHUNK_ID_CNFG, &chunk_info_cfg)) {
-		printf("Not found cfg chunk !\n");
-		goto exit_burn;
-	}
-
-	if (!chunk_info_fw.chuckInfo.versionNumber) {
-		printf("Wif fw version is null!\n");
-		goto exit_burn;
-	}
+	
+	if (pdev->board_info.dev_type & FW_WDT8755) {
+		if (pinfo->dev_info.w8755_dev_info.boot_partition == W8755_BP_SECONDARY) {
+			if (!pdev->func_wh_get_chunk_info(pdev->wif_access.wif_handle, CHUNK_ID_FRWD, &chunk_info_fw)) {
+				wh_printf("Not found sec fw chunk !\n");
+				goto exit_burn;
+			}
+			if (!pdev->func_wh_get_chunk_info(pdev->wif_access.wif_handle, CHUNK_ID_CNFD, &chunk_info_cfg)) {
+				wh_printf("Not found sec cfg chunk !\n");
+				goto exit_burn;
+			}
+			if (!chunk_info_fw.chuckInfo.versionNumber) {
+				wh_printf("Wif fw version is null!\n");
+				goto exit_burn;
+			}
+		}else{
+			if (!pdev->func_wh_get_chunk_info(pdev->wif_access.wif_handle, CHUNK_ID_FRWR, &chunk_info_fw)) {
+				wh_printf("Not found fw chunk !\n");
+				goto exit_burn;
+			}
+			if (!pdev->func_wh_get_chunk_info(pdev->wif_access.wif_handle, CHUNK_ID_CNFG, &chunk_info_cfg)) {
+				wh_printf("Not found cfg chunk !\n");
+				goto exit_burn;
+			}
+			if (!chunk_info_fw.chuckInfo.versionNumber) {
+				wh_printf("Wif fw version is null!\n");
+				goto exit_burn;
+			}
 		
-	err = fw_version_check(pparam, pinfo, &chunk_info_fw);
-	/* fw is not matching */
-	if (err == 0)	
-		goto exit_burn;
+			err = fw_version_check(pparam, pinfo, &chunk_info_fw);
+			/* fw is not matching */
+			if (err == 0)	
+				goto exit_burn;
+
+
+		}
+	}else{
+		
+		if (!pdev->func_wh_get_chunk_info(pdev->wif_access.wif_handle, CHUNK_ID_FRWR, &chunk_info_fw)) {
+			wh_printf("Not found fw chunk !\n");
+			goto exit_burn;
+		}
+		if (!pdev->func_wh_get_chunk_info(pdev->wif_access.wif_handle, CHUNK_ID_CNFG, &chunk_info_cfg)) {
+			wh_printf("Not found cfg chunk !\n");
+			goto exit_burn;
+		}
+		if (!chunk_info_fw.chuckInfo.versionNumber) {
+			wh_printf("Wif fw version is null!\n");
+			goto exit_burn;
+		}
+		
+		err = fw_version_check(pparam, pinfo, &chunk_info_fw);
+		/* fw is not matching */
+		if (err == 0)	
+			goto exit_burn;
+		
+	}
+
 
 	if (pdev->pparam->argus & OPTION_NO_FORCE) {
 		printf("Version checking ....\n");
@@ -550,10 +581,13 @@ int image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pparam)
 		 */
 		if (!(pdev->pparam->argus & OPTION_NO_RPARAM)) {
 			if (pdev->board_info.dev_type & FW_WDT8755) {
-			
-				chunk_info_cfg.chuckInfo.targetStartAddr = pdev->board_info.sec_header.w8755_sec_header.param_clone_addr;
-
-				err = program_one_chunk(pdev, "r_config", CHUNK_ID_CNFG, OPTION_4K_VERIFY, &chunk_info_cfg);
+				if (pinfo->dev_info.w8755_dev_info.boot_partition == W8755_BP_SECONDARY) {
+					chunk_info_cfg.chuckInfo.targetStartAddr = pdev->board_info.sec_header.w8755_sec_header.secondary_param_clone_addr;
+					err = program_one_chunk(pdev, "r_config", CHUNK_ID_CNFD, OPTION_4K_VERIFY, &chunk_info_cfg);
+				}else{
+					chunk_info_cfg.chuckInfo.targetStartAddr = pdev->board_info.sec_header.w8755_sec_header.param_clone_addr;
+					err = program_one_chunk(pdev, "r_config", CHUNK_ID_CNFG, OPTION_4K_VERIFY, &chunk_info_cfg);
+				}
 
 				if (!err)
 					goto exit_burn;
@@ -789,7 +823,7 @@ int show_wif_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 	if (!load_wif(pdev, (char*)pparam->image_file))
 		return 0;
 
-	CHUNK_INFO_EX           chunk_info_ex;
+	CHUNK_INFO_EX chunk_info_ex;
 	if (pdev->func_wh_get_chunk_info(pdev->wif_access.wif_handle, CHUNK_ID_FRWR, &chunk_info_ex)) 
 		printf("FW id: 0x%08x\n", chunk_info_ex.chuckInfo.versionNumber);
 
@@ -1006,7 +1040,11 @@ UINT32 get_chunk_fourcc(UINT32 chunk_index)
 		case	CHUNK_ID_TSTB:
 			return FOURCC_ID_TSTB;
 		case	CHUNK_ID_EXTB:
-			return FOURCC_ID_EXTB;			
+			return FOURCC_ID_EXTB;
+		case	CHUNK_ID_FRWD:
+			return FOURCC_ID_FRWD;
+		case 	CHUNK_ID_CNFD:
+			return FOURCC_ID_CNFD;
 		default:
 			return 0;
 	}

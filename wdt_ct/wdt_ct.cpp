@@ -59,15 +59,15 @@ void print_help(const char *prog_name)
 	
 	printf("\nUsage: %s [OPTIONS] [FW_FILE|SUB-ARGU]\n", prog_name);
 	printf("\t-h, --help\tPrint this message\n");
-	printf("\t-d, --device\ti2c device file associated with the device.\n");	
+	printf("\t-d, --device\ti2c device file associated with the device\n");	
 	printf("\t-u, --update\tUpdate firmware with verification\n");
 	printf("\t-f, --no_force\tNot to force updating firmware\n");
 	printf("\t-b, --no_bind\tNot to rebind driver after firmware updated\n");	
 	printf("\t-r, --no_rpara\tNo need to update the recovery parameter\n");
-	printf("\t-s, --info\tPrint the info associated with the devcie.\n");
+	printf("\t-s, --info\tPrint the info associated with the devcie\n");
 	printf("\t-w, --wif-info\tPrint the info associated with wif image file.\n");
-	printf("\t-v, --fw-ver\tRead the fw version from the device.\n");	
-	printf("\t-c, --cfg-cksum\tRead the cfg chksum from the device\n");		
+	printf("\t-v, --fw-ver\tRead the fw version from the device\n");	
+	printf("\t-c, --cfg-ver\tRead the cfg version from the device\n");		
 	printf("\t-i, --hw-id\tRead the hardware id from the device\n");			
 	printf("\t-x, --ext-info\tShow more information\n");
 	printf("\t-k, --block\tUpdate fw by block\n");

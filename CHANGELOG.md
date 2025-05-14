@@ -6,12 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-- Add initalize to *dir.
+## [0.9.17] - 2025-05-14
+### Added
+- Add initialize to *dir.
+- Add support for the secondary firmware update on W8752 dual-partition devices.
 
 ## [0.9.16] - 2024-12-30
 
 ### Added
-- Add message of open device failed.
+- Add a message for open device failed.
 
 ### Change
 - Fix misr_for_halfwords checksum if start not zero.

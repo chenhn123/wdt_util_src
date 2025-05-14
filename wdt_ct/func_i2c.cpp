@@ -567,7 +567,7 @@ int wh_i2c_xfer(WDT_DEV *pdev, BYTE slave_addr, BYTE* txbuf, UINT32 tx_len,
 	}
 	
 //	wh_udelay(I2C_OPERATION_DELAY_US);
-	return 2;
+	return 1;
 }
 
 

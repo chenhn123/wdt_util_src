@@ -30,10 +30,6 @@
 
 
 #define		OPTION_4K_VERIFY		0x2
-#define		OPTION_ERR_RTN			0x4
-#define		OPTION_ISP_MODE			0x8
-#define		OPTION_FASTBOOT			0x100
-#define		OPTION_FORCE_ACT		0x200
 #define		OPTION_ERASE_TEMP		0x400
 
 /* standard commands */

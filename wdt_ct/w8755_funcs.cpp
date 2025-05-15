@@ -581,10 +581,6 @@ int wh_w8755_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChu
 	if (!retval)
 		return retval;
 
-	if (option & OPTION_FASTBOOT)	{
-		printf("not supported !\n");
-		return 0;
-	} 
 
 	if (option & OPTION_ERASE_TEMP) {
 		retval = wh_w8755_dev_send_commands(pdev, WH_CMD_FLASH_ERASE4K, pInputChunk->chuckInfo.temp);

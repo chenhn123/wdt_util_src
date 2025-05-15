@@ -6,13 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.9.17] - 2025-05-14
+## [0.9.17] - 2025-05-15
 ### Added
 - Add initialize to *dir.
 - Add support for the secondary firmware update on W8752 dual-partition devices.
 
 ### Removed
-- Remove macro OPTION_DES.
+- Remove macro OPTION_DES, OPTION_ERR_RTN, OPTION_FASTBOOT and OPTION_FORCE_ACT
 
 ## [0.9.16] - 2024-12-30
 

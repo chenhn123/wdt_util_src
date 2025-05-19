@@ -20,7 +20,7 @@
 
 typedef		void*	WH_HANDLE;
 
-/* since long is 4bytes on Windows64, but is 8bytes Linux 64 */
+/* since long is 4bytes on Windows64, but is 8bytes on Linux 64 */
 typedef unsigned char 	BYTE; 
 typedef unsigned short 	UINT16;
 typedef unsigned int	UINT32;

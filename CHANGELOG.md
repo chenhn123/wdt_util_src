@@ -6,20 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.9.17] - 2025-05-15
+## [0.9.17] - 2025-05-19
 ### Added
 - Add initialize to *dir.
 - Add support for the secondary firmware update on W8752 dual-partition devices.
 
+### Changed
+- Modify FW_WDT8755_ISP Macro.
+
 ### Removed
-- Remove macro OPTION_DES, OPTION_ERR_RTN, OPTION_FASTBOOT and OPTION_FORCE_ACT
+- Remove Macros OPTION_DES, OPTION_ERR_RTN, OPTION_FASTBOOT and OPTION_FORCE_ACT.
 
 ## [0.9.16] - 2024-12-30
 
 ### Added
 - Add a message for open device failed.
 
-### Change
+### Changed
 - Fix misr_for_halfwords checksum if start not zero.
 - Fix indent.
 - Modify misr_16b declare type.
@@ -43,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Add definition hid_desc_reg_offset.
 - Add message hint when open wif2 file fail.
-### Change
+### Changed
 - Use 4k checksum to replace the checksum in wif2 when burning firmware.
 ### Removed
 - Remove the definition of bootloader mode.

@@ -470,7 +470,7 @@ int image_file_burn_data_verify(WDT_DEV *pdev, EXEC_PARAM *pparam)
 	if (!pdev || !pparam)
 		return 0;
 
-	if (pinfo->dev_type & (FW_MAYBE_ISP | FW_WDT8755_ISP | FW_WDT8760_2_ISP))
+	if (pinfo->dev_type & (FW_MAYBE_ISP | FW_WDT8760_2_ISP))
 		return 0;	
 
         if (!init_n_scan_device(pdev, pparam, 0)) {
@@ -660,7 +660,7 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 	if (!init_n_scan_device(pdev, pparam, 0))
 		return 0;
 
-	ret = !(pinfo->dev_type & (FW_MAYBE_ISP | FW_WDT8755_ISP | FW_WDT8760_2_ISP));
+	ret = !(pinfo->dev_type & (FW_MAYBE_ISP | FW_WDT8760_2_ISP));
 
 	if (!ret)
 		goto info_exit;

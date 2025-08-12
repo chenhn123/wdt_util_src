@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Remove duplicates related to the W8790 flash program mode setting.
+
 ## [0.9.17] - 2025-05-19
 ### Added
 - Add initialize to *dir.

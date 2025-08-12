@@ -200,14 +200,6 @@ int do_update_fw_by_wif2_chunk_fbin(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 			memcpy((BYTE *)pchunk_info_ex->BinaryData, (BYTE *)&pcur_wif->pdata[pdata_pos],
 			       pchunk_info_ex->Binary.Size);
 
-			ret = pdev->funcs_device_private.p_wh_send_commands(pdev, WH_CMD_FLASH_UNLOCK, 0);
-			if (!ret) {
-				if (pchunk_info_ex->BinaryData)
-					free(pchunk_info_ex->BinaryData);
-				printf("unlock fail");
-
-				goto finish;
-			}
 			// address and size align to 0x100
 			UINT32 protect_off_arg = (pchunk_info_ex->Binary.Address >> 8 << 16 & 0xffff0000) |
 						 (pchunk_info_ex->Binary.Size >> 8 & 0x0000ffff);
@@ -425,10 +417,6 @@ int do_update_fw_by_wif2_chunk_fera(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 			pchunk_info_ex.SpaceToErase.Size = get_unaligned_le32(&pcur_wif->pdata[pdata_pos]);
 			pdata_pos = pdata_pos + sizeof(UINT32);
 
-			ret = pdev->funcs_device_private.p_wh_send_commands(pdev, WH_CMD_FLASH_UNLOCK, 0);
-			if (!ret) {
-				goto finish;
-			}
 			// address and size align to 0x100
 			UINT32 protect_off_arg = (pchunk_info_ex.SpaceToErase.Address >> 8 << 16 & 0xffff0000) |
 						 (pchunk_info_ex.SpaceToErase.Size >> 8 & 0x0000ffff);
@@ -459,6 +447,11 @@ finish:
 
 int do_update_fw_by_wif2_flow(WDT_DEV *pdev, WIF_FILE2 *pcur_wif)
 {
+	int ret = pdev->funcs_device_private.p_wh_send_commands(pdev, WH_CMD_FLASH_UNLOCK, 0);
+	if (!ret) {
+		return 0;
+	}
+
 	if (!do_update_fw_by_wif2_chunk_fera(pdev, pcur_wif, FOURCC_ID_FERA))
 		return 0;
 

@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Remove duplicates related to the W8790 flash program mode setting.
+- Replace heap allocation with stack allocation in wif2 parser.
+- Remove magic number 8 in wif2 parser.
+- Adjust indentation for consistency.
 
 ## [0.9.17] - 2025-05-19
 ### Added

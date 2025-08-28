@@ -597,7 +597,7 @@ int wh_w8760_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
 			
 			if (addr < 128 * 1024 && addr + size <= 128 * 1024)
 				ret = wh_w8760_dev_protect_flash(pdev, W8760_UnprotectLower128k);
-					else if (addr < 256 * 1024 && addr + size <= 256 * 1024)
+			else if (addr < 256 * 1024 && addr + size <= 256 * 1024)
 				ret = wh_w8760_dev_protect_flash(pdev, W8760_UnprotectLower256k);
 			else if (addr < 384 * 1024 && addr + size <= 384 * 1024)
 				ret = wh_w8760_dev_protect_flash(pdev, W8760_UnprotectLower384k);

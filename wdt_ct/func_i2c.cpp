@@ -111,15 +111,19 @@ int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 			while ((dir = readdir(d)) != NULL) {
 				if (memcmp(dir->d_name, ACPI_NAME_HID, strlen(ACPI_NAME_HID)) == 0) {
 					char* reg_gen_hid  = strdup(&dir->d_name[4]);
+					if (!reg_gen_hid)
+						break;
 					wh_printf("current reg_gen_hid:%s \n", reg_gen_hid);
 					pdev->board_info.i2c_address = get_i2c_address_map(reg_gen_hid);
 					wh_printf("i2c_address %x\n", pdev->board_info.i2c_address);
 					found = 1;
+					free(reg_gen_hid);
 					break;	
-				}				
+				}		
 			}
+
+			closedir(d);
 		}
-		closedir(d);
 	
 		if (found)
 			break;
@@ -132,6 +136,59 @@ int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 	return found;
 }
 
+
+
+int find_wdt_hid_of_phys(WDT_DEV *pdev, int *adaptor_no)
+{
+    const char device_ids[] = "0018:2575";
+    DIR *dev_dir;
+    struct dirent *entry;
+    unsigned int addr;
+
+    if (!pdev || !adaptor_no) return 0; // sanity check
+
+    dev_dir = opendir("/sys/bus/hid/devices");
+    if (!dev_dir) {
+        perror("opendir");
+        return 0;
+    }
+
+    while ((entry = readdir(dev_dir)) != NULL) {
+        if (entry->d_name[0] == '.')
+            continue;
+
+        if (strncmp(entry->d_name, device_ids, strlen(device_ids)) == 0) {
+            char path[512];
+            snprintf(path, sizeof(path),
+                     "/sys/bus/hid/devices/%s/uevent",
+                     entry->d_name);
+
+            FILE *fp = fopen(path, "r");
+            if (!fp) {
+                perror("fopen uevent");
+                continue;
+            }
+
+            char line[256];
+            while (fgets(line, sizeof(line), fp)) {
+                if (strncmp(line, "HID_PHYS=", 9) == 0) {
+                    // Parse multi-digit bus and hex address
+                    if (sscanf(line + 9, "%d-%x", adaptor_no, &addr) == 2) {
+                        pdev->board_info.i2c_address = addr;
+                        fclose(fp);
+                        closedir(dev_dir);
+                        return 1; // success
+                    }
+                }
+            }
+
+            fclose(fp);
+        }
+    }
+
+    closedir(dev_dir);
+    return 0; // not found
+}
 
 int wh_i2c_scan_hid_of_path(WDT_DEV* pdev, int *adaptor_no)
 {
@@ -204,8 +261,13 @@ int wh_i2c_scan_device(WDT_DEV* pdev)
 	strcpy(g_dev_path, "/dev/i2c-2");
 
 	pdev->dev_state = DS_ENUM;
-
+        /* ACPI case */
 	found = wh_i2c_scan_adaptor_path(pdev, &adaptor_no);
+	
+	/*open firmware case*/
+	if(!found)
+		found = find_wdt_hid_of_phys(pdev, &adaptor_no);
+	
 
 	if(!found)
 		found = wh_i2c_scan_hid_of_path(pdev, &adaptor_no);

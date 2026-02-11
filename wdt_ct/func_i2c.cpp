@@ -110,14 +110,11 @@ int wh_i2c_scan_adaptor_path(WDT_DEV* pdev, int *adaptor_no)
 			wh_printf("scan %s\n", dev_path);
 			while ((dir = readdir(d)) != NULL) {
 				if (memcmp(dir->d_name, ACPI_NAME_HID, strlen(ACPI_NAME_HID)) == 0) {
-					char* reg_gen_hid  = strdup(&dir->d_name[4]);
-					if (!reg_gen_hid)
-						break;
+					const char* reg_gen_hid  = &dir->d_name[4];
 					wh_printf("current reg_gen_hid:%s \n", reg_gen_hid);
 					pdev->board_info.i2c_address = get_i2c_address_map(reg_gen_hid);
 					wh_printf("i2c_address %x\n", pdev->board_info.i2c_address);
 					found = 1;
-					free(reg_gen_hid);
 					break;	
 				}		
 			}
@@ -209,7 +206,7 @@ int wh_i2c_scan_hid_of_path(WDT_DEV* pdev, int *adaptor_no)
                         sscanf(dir->d_name, "%d-%x", adaptor_no, &dev_addr);
                         if (dev_addr == DEFAULT_I2C_ADDR) {
                                 found = 1;
-				pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
+                                pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
                                 break;
                         }
                 }
@@ -381,10 +378,10 @@ int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 {
 	BYTE				buf[80] ={0};
 	BOARD_INFO			board_info;	
-	int	ret_size;
-	int 	ret = 0;
-	int 	fw_id = 0;
-	int     retryF2 = 3;
+	int ret_size;
+	int ret = 0;
+	int fw_id = 0;
+	int retryF2 = 3;
 
 	if (!pdev || !pdev->dev_handle || !pboard_info) {
 		wh_printf("device ptr is null !\n");
@@ -775,16 +772,16 @@ retry:
 
 int wh_i2c_get_desc(WDT_DEV *pdev, BYTE desc_type, BYTE string_idx, BYTE* target_buf, UINT32 buf_size)
 {
-	int	retval;
-	int	ret_size = 0;
-	UINT16  cmd_reg = pdev->board_info.dev_hid_desc.wCommandRegister;
-        UINT16  data_reg = pdev->board_info.dev_hid_desc.wDataRegister;
-        char    str_txdata[10] = { (char)cmd_reg, (char)(cmd_reg>>8), 0x13, 0x0E, 0x00, (char)data_reg, (char)(data_reg>>8), 0x00, 0x00, 0x00 };
-        char    desc_txdata[10] = { (char)cmd_reg, (char)(cmd_reg>>8), 0x10, 0x0E, (char)data_reg, (char)(data_reg>>8), 0x00, 0x00, 0x00, 0x00 };
+	int retval;
+	int ret_size = 0;
+	UINT16 cmd_reg = pdev->board_info.dev_hid_desc.wCommandRegister;
+        UINT16 data_reg = pdev->board_info.dev_hid_desc.wDataRegister;
+        char str_txdata[10] = { (char)cmd_reg, (char)(cmd_reg>>8), 0x13, 0x0E, 0x00, (char)data_reg, (char)(data_reg>>8), 0x00, 0x00, 0x00 };
+        char desc_txdata[10] = { (char)cmd_reg, (char)(cmd_reg>>8), 0x10, 0x0E, (char)data_reg, (char)(data_reg>>8), 0x00, 0x00, 0x00, 0x00 };
 	
-	BYTE*	txbuf;
-	int 	txlen, rxlen;
-	BYTE	xfer_buffer[80] ={0}; 
+	BYTE* txbuf;
+	int txlen, rxlen;
+	BYTE xfer_buffer[80] ={0}; 
 
 	if (buf_size > 64)
 		buf_size = 64;

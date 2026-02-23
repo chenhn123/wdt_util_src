@@ -809,6 +809,8 @@ int w8790_dev_flash_write_4k(WDT_DEV* pdev, BYTE* data, UINT32 address, int size
 			calc_checksum = misr_for_bytes(0, pdata, 0, page_size);
 
 			retval = wh_w8790_dev_flash_get_checksum(pdev, &read_checksum, start_addr, page_size, 0);
+			if (!retval)
+				continue;
 			if (read_checksum == calc_checksum)
 				break;
 			else
@@ -913,7 +915,7 @@ int wh_w8790_dev_send_commands(WDT_DEV* pdev, int cmd, UINT32 value)
          	 * Hard reset doesn't make OSC back to default. So we need this workaround to set OSC to default.
          	 * If not, the OSC clock for ROM code is too high and might cause booting fails.
         	 */
-        	ret = wh_w8790_dev_write_register(pdev, 0x00801408, 0x47);
+        	wh_w8790_dev_write_register(pdev, 0x00801408, 0x47);
 
 		ret = wh_w8790_dev_reboot(pdev);
 		break;
@@ -1032,6 +1034,10 @@ int wh_w8790_flash_section_validate(BYTE* data, UINT32 datalength, int start = 0
 int wh_w8790_dev_read_parameters_get_checksum(WDT_DEV* pdev, W8790_PARAMETER_INFO parameter_info, UINT32* sum)
 {
 	int ret = 0;
+	if(sum == NULL)
+	{
+		wh_printf("sum pointer is NULL\n");
+	}
 
 	UINT32 primary_parameter_size;
 	ret = wh_w8790_dev_set_block_access(pdev, W8790_PrimaryParameter, 0, &primary_parameter_size);
@@ -1041,7 +1047,6 @@ int wh_w8790_dev_read_parameters_get_checksum(WDT_DEV* pdev, W8790_PARAMETER_INF
 
 	if (primary_parameter_size != parameter_info.PrimarySize) {
 		wh_printf("Invalid primary parameter. ({ %d }) \n", primary_parameter_size);
-		ret = 0;
 		return 0;
 
 	}
@@ -1070,13 +1075,18 @@ int wh_w8790_dev_read_parameters_get_checksum(WDT_DEV* pdev, W8790_PARAMETER_INF
 
 	*sum = misr_for_bytes(0, primary_bin, 0, primary_parameter_size);
 
+	if(sum == NULL)
+	{
+		wh_printf("sum pointer is NULL\n");
+	}
+
 	if (primary_header.Checksum == 0x0000 && primary_header.HeaderChecksum == 0x0000) // for the built-in parameter table in firmware
 	{
 		ret = wh_w8790_dev_set_block_access(pdev, W8790_PrimaryParameter, 0, &primary_parameter_size);
 		if (!ret) {
 			goto exit_fun;
 		}
-		UINT32 expected_sum;
+		UINT32 expected_sum = 0;
 		ret = wh_w8790_dev_block_checksum(pdev, &expected_sum, primary_parameter_size, 0);
 
 		if (*sum != expected_sum) {
@@ -1201,7 +1211,7 @@ int wh_w8790_prepare_data(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 
 		W8790_PARAMETER_INFO parameter_info;
 		wh_w8790_dev_read_parameter_table_info(pdev, &parameter_info);
-		UINT32 cksum;
+		UINT32 cksum = 0;
 		wh_w8790_dev_read_parameters_get_checksum(pdev, parameter_info, &cksum);
 		p_out_board_info->sys_param.xmls_id1 = cksum;
 

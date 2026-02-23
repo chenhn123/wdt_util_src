@@ -827,7 +827,8 @@ int wh_w8760_dev_program_4k_chunk_verify(WDT_DEV* pdev, CHUNK_INFO_EX* pInputChu
 			calc_checksum = misr_for_bytes(0, (BYTE*) pdata, 0, page_size);
 
 			retval = wh_w8760_dev_flash_get_checksum(pdev, &read_checksum, start_addr, page_size);
-
+			if (!retval)
+				continue;
 			if (read_checksum == calc_checksum)
 				break;
 			else

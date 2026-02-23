@@ -402,7 +402,7 @@ int do_update_fw_by_wif2_chunk_fera(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 			pchunk_info_ex.SpaceToErase.Address = get_unaligned_le32(&pcur_wif->pdata[pdata_pos]);
 			pdata_pos = pdata_pos + sizeof(UINT32);
 			pchunk_info_ex.SpaceToErase.Size = get_unaligned_le32(&pcur_wif->pdata[pdata_pos]);
-			pdata_pos = pdata_pos + sizeof(UINT32);
+			//pdata_pos = pdata_pos + sizeof(UINT32);
 
 			// address and size align to 0x100
 			UINT32 protect_off_arg = (pchunk_info_ex.SpaceToErase.Address >> 8 << 16 & 0xffff0000) |
@@ -508,7 +508,10 @@ finish:
 
 int show_wif2_info(char *path)
 {
-	WIF_FILE2 wif2;
+	WIF_FILE2 wif2 = {};          // all members zeroed
+        wif2.pdata = nullptr;         // explicitly safe
+        wif2.data_len = 0;
+
 	int ret;
 	ret = get_wif2(path, &wif2);
 	if (ret == 0)
@@ -522,7 +525,10 @@ finish:
 
 int update_fw_by_wif2(WDT_DEV *pdev, char *path)
 {
-	WIF_FILE2 wif2;
+	WIF_FILE2 wif2 = {};          // all members zeroed
+        wif2.pdata = nullptr;         // explicitly safe
+        wif2.data_len = 0;
+
 	int ret;
 	ret = get_wif2(path, &wif2);
 	if (ret == 0) {
@@ -539,7 +545,10 @@ finish:
 
 int check_fw_by_wif2(WDT_DEV *pdev, char *path)
 {
-	WIF_FILE2 wif2;
+	WIF_FILE2 wif2 = {};          // all members zeroed
+        wif2.pdata = nullptr;         // explicitly safe
+        wif2.data_len = 0;
+
 	int ret;
 	ret = get_wif2(path, &wif2);
 	if (ret == 0) {

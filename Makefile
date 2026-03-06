@@ -12,6 +12,14 @@
 
 AP	= wdt_util
 
+# cross compile prefix
+CROSS_COMPILE ?=
+
+CC      := $(CROSS_COMPILE)gcc
+CXX     := $(CROSS_COMPILE)g++
+AR      := $(CROSS_COMPILE)ar
+STRIP   := $(CROSS_COMPILE)strip
+
 all: $(AP)
 
 CXXFLAGS	?= -Wall -Os

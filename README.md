@@ -113,9 +113,6 @@ Example output:
 wdt_util: ELF 32-bit LSB executable, ARM
 ```
 
----
-
-```
 
 ---
 

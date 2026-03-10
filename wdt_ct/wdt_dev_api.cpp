@@ -149,11 +149,10 @@ int check_firmware_id(WDT_DEV *pdev, UINT32 fwid)
 	}
 
 	if ((fwid & 0xFF000000) == 0x51000000) {
-                if(pdev->pparam->argus & OPTION_INFO)
-                        printf("It is WDT8730 !\n");
-                return FW_NOT_SUPPORT;
-
-        }
+		if(pdev->pparam->argus & OPTION_INFO)
+			printf("It is WDT8730 !\n");
+		return FW_NOT_SUPPORT;
+	}
 
 	//TODO: We will add new devices here and should before FW_WDT8970 for compatibility.
 
@@ -321,12 +320,12 @@ int init_n_scan_device(WDT_DEV *pdev, EXEC_PARAM *pparam, unsigned int flag)
 		strcpy(pdev->dev_path, wdtDevInfo.path);
 	}else{
         	struct dirent *dir;
-        	pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
-        	wh_printf("%s\n", pparam->dev_path);
-        	char i2c_sysfs_path[64] = "/sys/bus/i2c/devices";	
+		pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
+		wh_printf("%s\n", pparam->dev_path);
+		char i2c_sysfs_path[64] = "/sys/bus/i2c/devices";	
 		strcat(i2c_sysfs_path, &pparam->dev_path[4]);
-        	DIR* d = opendir(i2c_sysfs_path);
-        	wh_printf("%s\n", i2c_sysfs_path);
+		DIR* d = opendir(i2c_sysfs_path);
+		wh_printf("%s\n", i2c_sysfs_path);
 		if (d) {	
 			while ((dir = readdir(d)) != NULL) {
 				if (memcmp(dir->d_name, ACPI_NAME_HID, strlen(ACPI_NAME_HID)) == 0) {

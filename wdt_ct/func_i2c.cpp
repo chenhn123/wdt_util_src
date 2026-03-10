@@ -775,9 +775,9 @@ int wh_i2c_get_desc(WDT_DEV *pdev, BYTE desc_type, BYTE string_idx, BYTE* target
 	int retval;
 	int ret_size = 0;
 	UINT16 cmd_reg = pdev->board_info.dev_hid_desc.wCommandRegister;
-        UINT16 data_reg = pdev->board_info.dev_hid_desc.wDataRegister;
-        char str_txdata[10] = { (char)cmd_reg, (char)(cmd_reg>>8), 0x13, 0x0E, 0x00, (char)data_reg, (char)(data_reg>>8), 0x00, 0x00, 0x00 };
-        char desc_txdata[10] = { (char)cmd_reg, (char)(cmd_reg>>8), 0x10, 0x0E, (char)data_reg, (char)(data_reg>>8), 0x00, 0x00, 0x00, 0x00 };
+	UINT16 data_reg = pdev->board_info.dev_hid_desc.wDataRegister;
+	char str_txdata[10] = { (char)cmd_reg, (char)(cmd_reg>>8), 0x13, 0x0E, 0x00, (char)data_reg, (char)(data_reg>>8), 0x00, 0x00, 0x00 };
+	char desc_txdata[10] = { (char)cmd_reg, (char)(cmd_reg>>8), 0x10, 0x0E, (char)data_reg, (char)(data_reg>>8), 0x00, 0x00, 0x00, 0x00 };
 	
 	BYTE* txbuf;
 	int txlen, rxlen;

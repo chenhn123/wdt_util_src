@@ -67,13 +67,18 @@ int get_wif2(char *path, WIF_FILE2 *out_pcur_wif)
 
 	/* set file ptr to the end */
 	fseek(pfile, 0, SEEK_END);
-	out_pcur_wif->data_len = ftell(pfile);
+	long file_size = ftell(pfile);
+	if (file_size < 0) {
+		ret = 0;
+	       	goto finish;
+	}
+
+	out_pcur_wif->data_len = (UINT32)file_size;
 
 	/* set the file ptr the beginning */
 	rewind(pfile);
-	UINT32 pdataSize = out_pcur_wif->data_len;
 
-	out_pcur_wif->pdata = (BYTE *)malloc(pdataSize);
+	out_pcur_wif->pdata = (BYTE *)malloc(out_pcur_wif->data_len);
 
 	if (!out_pcur_wif->pdata) {
 		ret = 0;
@@ -83,7 +88,6 @@ int get_wif2(char *path, WIF_FILE2 *out_pcur_wif)
 	if (fread(out_pcur_wif->pdata, 1, out_pcur_wif->data_len, pfile) == out_pcur_wif->data_len) {
 		ret = process_wif2(out_pcur_wif);
 		if (ret == 1) {
-			ret = 1;
 			goto finish;
 		} else {
 			ret = 0;
@@ -383,7 +387,7 @@ int do_update_fw_by_wif2_chunk_fera(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 	if (!chunk_four_cc)
 		return 0;
 
-	WIF2_FlashErase_Chunk pchunk_info_ex;
+	WIF2_FlashErase_Chunk pchunk_info_ex = {0};
 
 	UINT32 chunk_start_pos = 0 + sizeof(ChunkHeader);
 	WIF2_Chunk_Header *pchunk_data = NULL;
@@ -420,11 +424,11 @@ int do_update_fw_by_wif2_chunk_fera(WDT_DEV *pdev, WIF_FILE2 *pcur_wif, UINT32 c
 				goto finish;
 			}
 
-			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
+			chunk_start_pos = chunk_start_pos + pchunk_data->Size + sizeof(WIF2_Chunk_Header);
 
 		} else
 			/* 8 is the header size */
-			chunk_start_pos = chunk_start_pos + pchunk_data->Size + 8;
+			chunk_start_pos = chunk_start_pos + pchunk_data->Size + sizeof(WIF2_Chunk_Header);
 	}
 finish:
 	pdev->funcs_device_private.p_wh_send_commands(pdev, WH_CMD_FLASH_PROTECTION_ON, 0);
@@ -509,8 +513,8 @@ finish:
 int show_wif2_info(char *path)
 {
 	WIF_FILE2 wif2 = {};          // all members zeroed
-        wif2.pdata = nullptr;         // explicitly safe
-        wif2.data_len = 0;
+	wif2.pdata = nullptr;         // explicitly safe
+	wif2.data_len = 0;
 
 	int ret;
 	ret = get_wif2(path, &wif2);
@@ -526,8 +530,8 @@ finish:
 int update_fw_by_wif2(WDT_DEV *pdev, char *path)
 {
 	WIF_FILE2 wif2 = {};          // all members zeroed
-        wif2.pdata = nullptr;         // explicitly safe
-        wif2.data_len = 0;
+	wif2.pdata = nullptr;         // explicitly safe
+	wif2.data_len = 0;
 
 	int ret;
 	ret = get_wif2(path, &wif2);
@@ -546,8 +550,8 @@ finish:
 int check_fw_by_wif2(WDT_DEV *pdev, char *path)
 {
 	WIF_FILE2 wif2 = {};          // all members zeroed
-        wif2.pdata = nullptr;         // explicitly safe
-        wif2.data_len = 0;
+	wif2.pdata = nullptr;         // explicitly safe
+	wif2.data_len = 0;
 
 	int ret;
 	ret = get_wif2(path, &wif2);

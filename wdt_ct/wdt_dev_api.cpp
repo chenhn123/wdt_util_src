@@ -288,6 +288,57 @@ int close_wif(WDT_DEV *pdev)
 	return 1;
 }
 
+// Replace with your actual HID/PID prefix
+#define HID_PID_PREFIX "0018:2575"  
+
+/**
+ * Scan a specific I2C bus (e.g., /dev/i2c-4) and find the device matching HID_PID_PREFIX.
+ * Returns 1 on success, 0 if not found.
+ */
+int get_hid_slave_address_from_bus(WDT_DEV *pdev, const char *i2c_dev_path)
+{
+    if (!pdev || !i2c_dev_path) return 0;
+
+    // Extract bus number from /dev/i2c-X
+    int bus_no = 0;
+    if (sscanf(i2c_dev_path, "/dev/i2c-%d", &bus_no) != 1) {
+        fprintf(stderr, "Invalid I2C device path: %s\n", i2c_dev_path);
+        return 0;
+    }
+
+    char bus_sysfs_path[128];
+    snprintf(bus_sysfs_path, sizeof(bus_sysfs_path),
+             "/sys/bus/i2c/devices/i2c-%d", bus_no);
+
+    DIR *d = opendir(bus_sysfs_path);
+    if (!d) {
+        perror("opendir");
+        return 0;
+    }
+
+    struct dirent *entry;
+    while ((entry = readdir(d)) != NULL) {
+        if (entry->d_name[0] == '.') continue;
+
+        // Device directory format: <bus>-<hex_addr>, e.g., 4-0057
+        unsigned int addr = 0;
+        int entry_bus = 0;
+        if (sscanf(entry->d_name, "%d-%x", &entry_bus, &addr) == 2) {
+            if (entry_bus == bus_no) {
+                // Here you can check the HID/PID if needed by reading
+                // /sys/bus/i2c/devices/<entry>/uevent or hid info
+                // For now, if only one device exists on the bus, we pick it
+                pdev->board_info.i2c_address = addr;
+                closedir(d);
+                return 1;  // found the device
+            }
+        }
+    }
+
+    closedir(d);
+    return 0;  // no matching device
+}
+
 int init_n_scan_device(WDT_DEV *pdev, EXEC_PARAM *pparam, unsigned int flag)
 {
 	WDT_DEVICE_INFO	wdtDevInfo;
@@ -319,8 +370,16 @@ int init_n_scan_device(WDT_DEV *pdev, EXEC_PARAM *pparam, unsigned int flag)
 			
 		strcpy(pdev->dev_path, wdtDevInfo.path);
 	}else{
-        	struct dirent *dir;
+		
 		pdev->board_info.i2c_address = DEFAULT_I2C_ADDR;
+		/* for of case */
+		if (get_hid_slave_address_from_bus(pdev, pparam->dev_path)) {
+			wh_printf("I2C slave address: 0x%02X\n", pdev->board_info.i2c_address);
+		} else {
+			wh_printf("No device found on /dev/i2c-xx\n");
+		}
+		/* for acpi case */
+        	struct dirent *dir;
 		wh_printf("%s\n", pparam->dev_path);
 		char i2c_sysfs_path[64] = "/sys/bus/i2c/devices";	
 		strcat(i2c_sysfs_path, &pparam->dev_path[4]);

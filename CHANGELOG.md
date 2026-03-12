@@ -6,11 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.18] - 2026-03-12
+### Added
+- Add support for detecting HID I2C Weida devices in Open Firmware.
+- Add support for cross-compilation in the Makefile.
+
 ### Changed
 - Remove duplicates related to the W8790 flash program mode setting.
 - Replace heap allocation with stack allocation in wif2 parser.
 - Remove magic number 8 in wif2 parser.
 - Adjust indentation for consistency.
+
+### Fixed 
+- Fix a potential memory leak.
+
 
 ## [0.9.17] - 2025-05-19
 ### Added

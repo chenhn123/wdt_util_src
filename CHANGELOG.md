@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+
+### Changed
+- Update README.md for the new Makefile.
+- Reduce query time for W8790/W8760 devices.
+
 ## [0.9.18] - 2026-03-12
 ### Added
 - Add support for detecting HID I2C Weida devices in Open Firmware.

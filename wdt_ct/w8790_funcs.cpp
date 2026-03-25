@@ -1193,32 +1193,24 @@ int wh_w8790_prepare_data(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 
 	}
 
+	p_out_board_info->sys_param.Phy_Frmbuf_W = 0;
+	p_out_board_info->sys_param.Phy_X0 = 0;
+	p_out_board_info->sys_param.Phy_X1 = 0;
 
-	W8790_PCT pct_data;
+	p_out_board_info->sys_param.Phy_Frmbuf_H = 0;
+	p_out_board_info->sys_param.Phy_Y0 = 0;
+	p_out_board_info->sys_param.Phy_Y1 = 0;
+
+	p_out_board_info->sys_param.xmls_id2 = 0;
+
+	p_out_board_info->sys_param.xmls_id1 = 0;
 
 
-	if (wh_w8790_dev_get_context(pdev, &pct_data)) {
-		// set the default values
-		p_out_board_info->sys_param.Phy_Frmbuf_W = pct_data.n_cs;
-		p_out_board_info->sys_param.Phy_X0 = pct_data.x1;
-		p_out_board_info->sys_param.Phy_X1 = pct_data.xn;
+	return 1;
+	/*
+	 * We don’t need to retrieve the checksum or device PHY data when querying the device. Removing these will help speed up the query time.
+	*/
 
-		p_out_board_info->sys_param.Phy_Frmbuf_H = pct_data.n_cd;
-		p_out_board_info->sys_param.Phy_Y0 = pct_data.y1;
-		p_out_board_info->sys_param.Phy_Y1 = pct_data.yn;
-
-		p_out_board_info->sys_param.xmls_id2 = 0;
-
-		W8790_PARAMETER_INFO parameter_info;
-		wh_w8790_dev_read_parameter_table_info(pdev, &parameter_info);
-		UINT32 cksum = 0;
-		wh_w8790_dev_read_parameters_get_checksum(pdev, parameter_info, &cksum);
-		p_out_board_info->sys_param.xmls_id1 = cksum;
-
-		return 1;
-	}
-
-	return 0;
 }
 
 

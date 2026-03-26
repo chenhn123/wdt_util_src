@@ -714,8 +714,6 @@ int wh_w8760_prepare_data(WDT_DEV* pdev, BOARD_INFO* p_out_board_info)
 	if (!pdev || !p_out_board_info)
 		return 0;
 
-	W8760_PCT_DATA	pct_data;
-
 	/* initialize the basic function for handling the following operations */
 	wh_w8760_dev_set_basic_op(pdev);
 

@@ -258,7 +258,7 @@ int wh_i2c_scan_device(WDT_DEV* pdev)
 	strcpy(g_dev_path, "/dev/i2c-2");
 
 	pdev->dev_state = DS_ENUM;
-        /* ACPI case */
+	/* ACPI case */
 	found = wh_i2c_scan_adaptor_path(pdev, &adaptor_no);
 	
 	/*open firmware case*/
@@ -464,8 +464,7 @@ int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 			sizeof(W8790_DEV_INFO));
 		if (wh_w8790_prepare_data(pdev, &board_info)){
 			memcpy(pboard_info, &board_info, sizeof(BOARD_INFO));
-                        return 1;
-
+			return 1;
 		}
 	}
 
@@ -482,6 +481,15 @@ int wh_i2c_prepare_data(WDT_DEV *pdev, BOARD_INFO* pboard_info)
 			return 1;
 		}
 	}
+
+	if (board_info.dev_type & FW_WDT8755) {
+		if (wh_w8755_prepare_data(pdev, &board_info, 0)){
+			memcpy(pboard_info, &board_info, sizeof(BOARD_INFO));
+			return 1;
+		}
+	}
+	/* Use only f2 command is now used to reduce query latency. However, f4 support is preserved for backward compatibility.*/
+
 
 	buf[0] = 0xf4;
 	if (!wh_i2c_get_feature(pdev, buf, 56)) 

@@ -924,7 +924,7 @@ failed_exit:
 int wh_w8755_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp)
 {
 	 /* initialize the basic function for handling the following operations */
-        if(!wh_w8755_dev_set_basic_op(pdev)) {
+	if(!wh_w8755_dev_set_basic_op(pdev)) {
 		wh_printf("pdev is null \n");
 		return 0;
 	}
@@ -939,7 +939,7 @@ int wh_w8755_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp)
 	
 
         if (!wh_w8755_dev_parse_new_dev_info(pdev, &pboard_info->dev_info.w8755_dev_info)) {
-                wh_printf("Can't get new device info!\n");
+		wh_printf("Can't get new device info!\n");
 		wh_w8755_dev_set_device_mode(pdev, W8755_DM_SENSING);
                 return 0;
         }
@@ -947,9 +947,9 @@ int wh_w8755_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp)
 	memcpy(&pdev->board_info.dev_info.w8755_dev_info, &pboard_info->dev_info.w8755_dev_info, sizeof(W8755_DEV_INFO_NEW));
 
 	if (!wh_w8755_dev_read_flash_map(pdev, pboard_info)) {
-                 wh_printf("Can't get address table!\n");
-                 return 0;
-         }
+		wh_printf("Can't get address table!\n");
+		return 0;
+	}
 
 
         return 1;
@@ -981,7 +981,7 @@ int wh_w8755_i2c_delay(WDT_DEV* pdev, unsigned long delay)
                         /* polling interval => 10ms */
                         wh_sleep(delay_slot);
 
-                        retval = wh_i2c_rx(pdev, 0x2C, readByte, 3);
+                        retval = wh_i2c_rx(pdev, pdev->board_info.i2c_address, readByte, 3);
                         if (!retval)
                                 continue;
                         else

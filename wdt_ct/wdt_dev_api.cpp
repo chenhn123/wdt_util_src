@@ -83,7 +83,6 @@ int wh_get_device_private_access_func(WDT_DEV* pdev,  FUNC_PTR_STRUCT_DEV_OPERAT
 		pFuncs->p_wh_send_commands = (LPFUNC_wh_send_commands)wh_w8790_dev_send_commands;
 		pFuncs->p_wh_flash_erase = (LPFUNC_wh_flash_erase)wh_w8790_dev_flash_erase;
 
-
 		return wh_w8790_dev_set_basic_op(pdev);
 	}
 
@@ -97,12 +96,10 @@ int wh_get_device_basic_access_func(WDT_DEV* pdev,  FUNC_PTR_STRUCT_DEV_BASIC*  
 	if (!pFuncs || !pdev)
 		return 0;
 
-
 	if (pdev->board_info.dev_type & FW_WDT8755) {
 		pFuncs->p_wh_get_feature = (LPFUNC_wh_get_feature) wh_w8755_dev_get_feature;
 		pFuncs->p_wh_set_feature = (LPFUNC_wh_set_feature) wh_w8755_dev_set_feature;
 		pFuncs->p_wh_read_report = (LPFUNC_wh_read_report) wh_w8755_dev_read_report;
-
 		return 1;
 	}
 	
@@ -110,15 +107,13 @@ int wh_get_device_basic_access_func(WDT_DEV* pdev,  FUNC_PTR_STRUCT_DEV_BASIC*  
 		pFuncs->p_wh_get_feature = (LPFUNC_wh_get_feature) wh_w8760_dev_get_feature;
 		pFuncs->p_wh_set_feature = (LPFUNC_wh_set_feature) wh_w8760_dev_set_feature;
 		pFuncs->p_wh_read_report = (LPFUNC_wh_read_report) wh_w8760_dev_read_report;
-
 		return 1;
 	}
 
 	if (pdev->board_info.dev_type & FW_WDT8790) {
 		pFuncs->p_wh_get_feature = (LPFUNC_wh_get_feature) wh_w8790_dev_get_feature;
-                pFuncs->p_wh_set_feature = (LPFUNC_wh_set_feature) wh_w8790_dev_set_feature;
-                pFuncs->p_wh_read_report = (LPFUNC_wh_read_report) wh_w8790_dev_read_report;
-
+		pFuncs->p_wh_set_feature = (LPFUNC_wh_set_feature) wh_w8790_dev_set_feature;
+		pFuncs->p_wh_read_report = (LPFUNC_wh_read_report) wh_w8790_dev_read_report;
 		return 1;
 
         }
@@ -132,7 +127,7 @@ int check_firmware_id(WDT_DEV *pdev, UINT32 fwid)
 {
 	if ((fwid & 0xF0000000) == 0x30000000) {
 		if (pdev->pparam->argus & OPTION_INFO)		
-			printf("It is WDT8755 or WDT8752 !\n");	
+			printf("It is WDT8752 !\n");	
 		return FW_WDT8755;
 	}
 
@@ -740,17 +735,17 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 
 		if (pdev->board_info.dev_type & FW_WDT8755) {
 			printf("%04x", pinfo->firmware_id & 0xFFFF);
-        	} else if (pdev->board_info.dev_type & FW_WDT8760_2) {
-        		int fwrev = pinfo->dev_info.w8760_feature_devinfo.firmware_id & 0x0FFF;
-        		int fwrexext = pinfo->dev_info.w8760_feature_devinfo.firmware_rev_ext & 0x000F;
-        		int versionOuput = (fwrev << 4 | fwrexext);
+		} else if (pdev->board_info.dev_type & FW_WDT8760_2) {
+			int fwrev = pinfo->dev_info.w8760_feature_devinfo.firmware_id & 0x0FFF;
+			int fwrexext = pinfo->dev_info.w8760_feature_devinfo.firmware_rev_ext & 0x000F;
+			int versionOuput = (fwrev << 4 | fwrexext);
 			printf("%04x", versionOuput);
 		}
 		else if (pdev->board_info.dev_type & FW_WDT8790) {
 			int fwrev = pinfo->dev_info.w8790_feature_devinfo.firmware_version & 0x0FFF;
-                        int fwrexext = pinfo->dev_info.w8790_feature_devinfo.firmware_revision_ext & 0x000F;
-                        int versionOuput = (fwrev << 4 | fwrexext);
-                        printf("%04x", versionOuput);
+			int fwrexext = pinfo->dev_info.w8790_feature_devinfo.firmware_revision_ext & 0x000F;
+			int versionOuput = (fwrev << 4 | fwrexext);
+			printf("%04x", versionOuput);
 
 		}
 	}	
@@ -781,7 +776,6 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 		else
 			printf("Platform_ID: 0x%x\n", pinfo->platform_id[1]);
 		printf("XmlId1: %x   XmlId2: %x\n", pinfo->sys_param.xmls_id1, pinfo->sys_param.xmls_id2);
-		printf("Param: phy_x %d, phy_y %d\n", pinfo->sys_param.Phy_Frmbuf_W, pinfo->sys_param.Phy_Frmbuf_H);
 	} 
 
 	if (pparam->argus & OPTION_EXTRA_INFO) {
@@ -819,9 +813,6 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 				printf("recovery_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.recovery_addr);
 				printf("param_clone_addr: 0x%X\n", pinfo->sec_header.w8755_sec_header.param_clone_addr);
 			}
-
-
-
 		} else if (pinfo->dev_type & FW_WDT8760_2) {
 			char str[16];	
 			printf("\nMax_points 0x%X\n", pinfo->dev_info.w8760_feature_devinfo.n_touches_usb);

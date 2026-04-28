@@ -772,10 +772,10 @@ int show_info(WDT_DEV *pdev, EXEC_PARAM *pparam)
 		printf("Hardware_ID: 0x%x\n", pinfo->hardware_id);		
 		printf("Serial_No: 0x%x\n", pinfo->serial_no);
 		if ((pinfo->platform_id[1] & 0xF0) == 0x40)
-			printf("Platform_ID: 0x%x(TC)\n", pinfo->platform_id[1]);			
+			wh_printf("Platform_ID: 0x%x(TC)\n", pinfo->platform_id[1]);			
 		else
-			printf("Platform_ID: 0x%x\n", pinfo->platform_id[1]);
-		printf("XmlId1: %x   XmlId2: %x\n", pinfo->sys_param.xmls_id1, pinfo->sys_param.xmls_id2);
+			wh_printf("Platform_ID: 0x%x\n", pinfo->platform_id[1]);
+		wh_printf("XmlId1: %x   XmlId2: %x\n", pinfo->sys_param.xmls_id1, pinfo->sys_param.xmls_id2);
 	} 
 
 	if (pparam->argus & OPTION_EXTRA_INFO) {

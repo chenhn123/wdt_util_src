@@ -930,14 +930,6 @@ int wh_w8755_prepare_data(WDT_DEV* pdev, BOARD_INFO* pboard_info, int maybe_isp)
 	}
 	
 	
-	if(pdev->pparam->argus & OPTION_FW_VER)
-		return 1;
-	if(pdev->pparam->argus & OPTION_CFG_CHKSUM)
-		return 1;
-	if(pdev->pparam->argus & OPTION_HW_ID)
-		return 1;
-	
-
         if (!wh_w8755_dev_parse_new_dev_info(pdev, &pboard_info->dev_info.w8755_dev_info)) {
 		wh_printf("Can't get new device info!\n");
 		wh_w8755_dev_set_device_mode(pdev, W8755_DM_SENSING);

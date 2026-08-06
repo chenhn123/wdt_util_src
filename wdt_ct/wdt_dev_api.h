@@ -111,7 +111,7 @@ typedef struct	FuncPtrStructDevOperation {
 
 typedef struct 	FuncPtrStructDevBasic {
 	LPFUNC_wh_set_feature		p_wh_set_feature;
-	LPFUNC_wh_set_feature		p_wh_get_feature;
+	LPFUNC_wh_get_feature		p_wh_get_feature;
 	LPFUNC_wh_get_index_string	p_wh_get_index_string;
 	LPFUNC_wh_read_report		p_wh_read_report;
 } FUNC_PTR_STRUCT_DEV_BASIC; 

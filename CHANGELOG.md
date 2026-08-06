@@ -7,13 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 
-## [0.9.19] - 2026-04-27
-
 ### Added
 - Updated the W8755 delay function to support multiple I2C addresses instead of being restricted to 0x2c.
 
 ### Fixed 
 - Resolved missing line breaks in error reporting.
+- Correct GetFeature report function pointer
 
 ### Changed
 - Update README.md for the new Makefile.
